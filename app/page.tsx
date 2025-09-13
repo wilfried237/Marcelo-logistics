@@ -1,7 +1,6 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { ArrowRight, Truck, Globe, Clock, Shield, Users, Award } from "lucide-react"
 import { Contact2 } from "@/components/contact2"
 import { Testimonials } from "@/components/testimonials"
@@ -9,48 +8,41 @@ import { Footer2 } from "@/components/footer"
 import { AnimatedText } from "@/components/animated-text"
 import { AnimatedSection } from "@/components/animated-section"
 import { AnimatedCard } from "@/components/animated-card"
+import { Navigation } from "@/components/navigation"
 import { motion } from "framer-motion"
 
+export const navigationConfig = {
+  logo: {
+    icon: Truck,
+    text: "Marchelo Logistics"
+  },
+  navigationItems: [
+    { label: "About", href: "/#about" },
+    { 
+      label: "Services", 
+      children: [
+        { label: "Get Quote", href: "/quote" },
+        { label: "Track Shipment", href: "/track" },
+        { label: "Services", href: "/#services" },
+        { label: "Portal", href: "/portal" }
+      ]
+    },
+    { label: "Our Work", href: "/#work" },
+    { label: "Contact", href: "/#contact" }
+  ],
+  ctaButton: {
+    text: "Get Quote",
+    href: "/quote"
+  }
+}
+
 export default function LandingPage() {
+ 
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <motion.nav 
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="fixed mx-auto top-0 w-full bg-background/80 backdrop-blur-sm z-50"
-      >
-        <div className="container max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <motion.div 
-            initial={{ x: -50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex items-center space-x-2"
-          >
-            <Truck className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold">Marchelo Logistics</span>
-          </motion.div>
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="hidden md:flex items-center space-x-8"
-          >
-            <a href="#about" className="text-sm font-medium hover:text-primary transition-colors">About</a>
-            <a href="#services" className="text-sm font-medium hover:text-primary transition-colors">Services</a>
-            <a href="#work" className="text-sm font-medium hover:text-primary transition-colors">Our Work</a>
-            <a href="#contact" className="text-sm font-medium hover:text-primary transition-colors">Contact</a>
-          </motion.div>
-          <motion.div
-            initial={{ x: 50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-          >
-            <Button size="sm">Get Quote</Button>
-          </motion.div>
-        </div>
-      </motion.nav>
+      <Navigation {...navigationConfig} />
 
       {/* Hero Section */}
       <section className="pt-24 pb-16 px-4">
@@ -101,7 +93,7 @@ export default function LandingPage() {
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               {[
-                { number: "15+", label: "Years Experience" },
+                { number: "5+", label: "Years Experience" },
                 { number: "50+", label: "Countries Served" },
                 { number: "1000+", label: "Shipments Delivered" },
                 { number: "99%", label: "Client Satisfaction" }
