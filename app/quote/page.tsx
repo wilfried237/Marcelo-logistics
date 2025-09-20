@@ -8,10 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Navigation } from "@/components/navigation";
 import { QuoteCalculator, destinationZones } from "@/components/quote-calculator";
 import { Truck, Package, Ship, Plane, Car, MapPin, Weight, Ruler, User, Mail, Phone, FileText } from "lucide-react";
-import { navigationConfig } from "../page";
+import { Navbar1 } from "@/components/navbar1";
 
 export default function QuotePage() {
   const [formData, setFormData] = useState({
@@ -81,9 +80,7 @@ export default function QuotePage() {
   if (isSubmitted) {
     return (
       <div className="min-h-screen bg-background">
-        <Navigation 
-          {...navigationConfig}
-        />
+        <Navbar1/>
         
         <div className="pt-24 pb-16 px-4">
           <div className="container mx-auto max-w-2xl">
@@ -119,10 +116,7 @@ export default function QuotePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation 
-        {...navigationConfig}
-      />
-      
+      <Navbar1/>
       <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto max-w-4xl">
           <motion.div

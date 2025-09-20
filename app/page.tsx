@@ -8,41 +8,18 @@ import { Footer2 } from "@/components/footer"
 import { AnimatedText } from "@/components/animated-text"
 import { AnimatedSection } from "@/components/animated-section"
 import { AnimatedCard } from "@/components/animated-card"
-import { Navigation } from "@/components/navigation"
 import { motion } from "framer-motion"
-
-export const navigationConfig = {
-  logo: {
-    icon: Truck,
-    text: "Marchelo Logistics"
-  },
-  navigationItems: [
-    { label: "About", href: "/#about" },
-    { 
-      label: "Services", 
-      children: [
-        { label: "Get Quote", href: "/quote" },
-        { label: "Track Shipment", href: "/track" },
-        { label: "Services", href: "/#services" },
-        { label: "Portal", href: "/portal" }
-      ]
-    },
-    { label: "Our Work", href: "/#work" },
-    { label: "Contact", href: "/#contact" }
-  ],
-  ctaButton: {
-    text: "Get Quote",
-    href: "/quote"
-  }
-}
+import { Navbar1 } from "@/components/navbar1"
+import Work from "@/public/work1.jpeg";
+import Work2 from "@/public/work2.jpeg";
+import Image from "next/image"
 
 export default function LandingPage() {
- 
 
-  return (
+return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <Navigation {...navigationConfig} />
+      <Navbar1/>
 
       {/* Hero Section */}
       <section className="pt-24 pb-16 px-4">
@@ -145,13 +122,13 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
                 viewport={{ once: true }}
-                whileHover={{ scale: 1.05 }}
                 className="bg-muted/50 aspect-square rounded-2xl flex items-center justify-center cursor-pointer"
               >
-                <div className="text-center text-muted-foreground">
-                  <Globe className="h-16 w-16 mx-auto mb-4" />
-                  <p>Global Network Image</p>
-                </div>
+                <Image
+                  alt="Demo"
+                  src={Work}
+                  className="h-full w-full aspect-square rounded-2xl object-cover"
+                />
               </motion.div>
             </div>
           </div>
@@ -248,13 +225,13 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
                 viewport={{ once: true }}
-                whileHover={{ scale: 1.02 }}
                 className="bg-muted/50 aspect-video rounded-2xl flex items-center justify-center cursor-pointer"
               >
-                <div className="text-center text-muted-foreground">
-                  <Truck className="h-16 w-16 mx-auto mb-4" />
-                  <p>Project Case Study Image</p>
-                </div>
+                <Image
+                  alt="Demo"
+                  src={Work2}
+                  className="h-full w-full aspect-square rounded-2xl object-cover"
+                />
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, x: 50 }}

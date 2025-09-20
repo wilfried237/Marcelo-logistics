@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Navigation } from "@/components/navigation";
 import { 
   Package, 
   MapPin, 
@@ -22,8 +21,7 @@ import {
   FileText,
   Settings
 } from "lucide-react";
-import { navigationConfig } from "../page";
-
+import { Navbar1 } from "@/components/navbar1";
 interface Shipment {
   id: string;
   trackingNumber: string;
@@ -152,9 +150,7 @@ export default function PortalPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation 
-        {...navigationConfig}
-      />
+      <Navbar1/>
       
       <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto max-w-7xl">

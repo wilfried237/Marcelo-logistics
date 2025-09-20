@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Navigation } from "@/components/navigation";
 import { 
   Search, 
   Package, 
@@ -21,7 +20,7 @@ import {
   Eye,
   LucideIcon
 } from "lucide-react";
-import { navigationConfig } from "../page";
+import { Navbar1 } from "@/components/navbar1";
 
 interface TrackingEvent {
   id: string;
@@ -120,9 +119,7 @@ export default function TrackPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation 
-        {...navigationConfig}
-      />
+      <Navbar1/>
       
       <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto max-w-4xl">

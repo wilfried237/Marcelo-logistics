@@ -9,6 +9,7 @@ interface Contact2Props {
   title?: string;
   description?: string;
   phone?: string;
+  phone2?: string;
   email?: string;
   web?: { label: string; url: string };
 }
@@ -16,9 +17,10 @@ interface Contact2Props {
 const Contact2 = ({
   title = "Contact Us",
   description = "We are available for questions, feedback, or collaboration opportunities. Let us know how we can help!",
-  phone = "(123) 34567890",
-  email = "email@example.com",
-  web = { label: "shadcnblocks.com", url: "https://shadcnblocks.com" },
+  phone = "+353896160927",
+  phone2 = "+237695739033",
+  email = "marchelodis@gmail.com",
+  web = { label: "marchelo-logistics.com", url: "https://marchelo-logistics.com/" },
 }: Contact2Props) => {
   return (
     <section className="py-32">
@@ -37,8 +39,12 @@ const Contact2 = ({
               </h3>
               <ul className="ml-4 list-disc">
                 <li>
-                  <span className="font-bold">Phone: </span>
+                  <span className="font-bold">Ireland Tel: </span>
                   {phone}
+                </li>
+                <li>
+                  <span className="font-bold">Cameroon Tel: </span>
+                  {phone2}
                 </li>
                 <li>
                   <span className="font-bold">Email: </span>
