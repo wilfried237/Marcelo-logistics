@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,14 +14,12 @@ import {
   MapPin, 
   Clock, 
   Truck, 
-  Ship,  
   CheckCircle, 
   AlertCircle,
   Download,
   Eye,
   LucideIcon
 } from "lucide-react";
-import { Navbar1 } from "@/components/navbar1";
 
 interface TrackingEvent {
   id: string;
@@ -49,6 +48,7 @@ interface ShipmentData {
 }
 
 export default function TrackPage() {
+  const t = useTranslations("track");
   const [trackingNumber, setTrackingNumber] = useState("");
   const [shipment, setShipment] = useState<ShipmentData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,9 +66,9 @@ export default function TrackPage() {
       
       if (!response.ok) {
         if (response.status === 404) {
-          setError("Tracking number not found. Please check your number and try again.");
+          setError(t("form.errors.notFound"));
         } else {
-          setError("Error fetching tracking information. Please try again.");
+          setError(t("form.errors.generic"));
         }
         return;
       }
@@ -77,11 +77,11 @@ export default function TrackPage() {
       if (result.success) {
         setShipment(result.data);
       } else {
-        setError("Error fetching tracking information. Please try again.");
+        setError(t("form.errors.generic"));
       }
     } catch (error) {
       console.error("Tracking error:", error);
-      setError("Error fetching tracking information. Please try again.");
+      setError(t("form.errors.generic"));
     } finally {
       setIsLoading(false);
     }
@@ -119,19 +119,18 @@ export default function TrackPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar1/>
-      
       <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto max-w-4xl">
+          {/* Hero */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <h1 className="text-4xl font-bold mb-4">Track Your Shipment</h1>
+            <h1 className="text-4xl font-bold mb-4">{t("hero.title")}</h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Enter your tracking or booking number to get real-time updates on your shipment
+              {t("hero.subtitle")}
             </p>
           </motion.div>
 
@@ -146,21 +145,21 @@ export default function TrackPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Search className="h-5 w-5" />
-                  Track Shipment
+                  {t("form.title")}
                 </CardTitle>
                 <CardDescription>
-                  Enter your tracking number or booking reference
+                  {t("form.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSearch} className="flex gap-4">
                   <div className="flex-1">
                     <Label htmlFor="tracking" className="sr-only">
-                      Tracking Number
+                      {t("form.title")}
                     </Label>
                     <Input
                       id="tracking"
-                      placeholder="Enter tracking number (e.g., ML123456789)"
+                      placeholder={t("form.placeholder")}
                       value={trackingNumber}
                       onChange={(e) => setTrackingNumber(e.target.value.toUpperCase())}
                       className="text-lg"
@@ -170,12 +169,12 @@ export default function TrackPage() {
                     {isLoading ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Searching...
+                        {t("form.buttons.searching")}
                       </>
                     ) : (
                       <>
                         <Search className="h-4 w-4 mr-2" />
-                        Track
+                        {t("form.buttons.track")}
                       </>
                     )}
                   </Button>
@@ -202,10 +201,10 @@ export default function TrackPage() {
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         <Package className="h-5 w-5" />
-                        Shipment Status
+                        {t("shipment.status.title")}
                       </CardTitle>
                       <CardDescription>
-                        Tracking: {shipment.trackingNumber} | Booking: {shipment.bookingNumber}
+                        {t("shipment.status.tracking")} {shipment.trackingNumber} | {t("shipment.status.booking")} {shipment.bookingNumber}
                       </CardDescription>
                     </div>
                     <Badge className={`${getStatusColor(shipment.status)} text-sm font-medium`}>
@@ -218,28 +217,28 @@ export default function TrackPage() {
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <div>
-                        <p className="text-sm font-medium">Origin</p>
+                        <p className="text-sm font-medium">{t("shipment.details.origin")}</p>
                         <p className="text-xs text-muted-foreground">{shipment.origin}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <div>
-                        <p className="text-sm font-medium">Destination</p>
+                        <p className="text-sm font-medium">{t("shipment.details.destination")}</p>
                         <p className="text-xs text-muted-foreground">{shipment.destination}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-muted-foreground" />
                       <div>
-                        <p className="text-sm font-medium">Est. Delivery</p>
+                        <p className="text-sm font-medium">{t("shipment.details.estimatedDelivery")}</p>
                         <p className="text-xs text-muted-foreground">{shipment.estimatedDelivery}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Truck className="h-4 w-4 text-muted-foreground" />
                       <div>
-                        <p className="text-sm font-medium">Current Location</p>
+                        <p className="text-sm font-medium">{t("shipment.details.currentLocation")}</p>
                         <p className="text-xs text-muted-foreground">{shipment.currentLocation}</p>
                       </div>
                     </div>
@@ -250,9 +249,9 @@ export default function TrackPage() {
               {/* Tracking Timeline */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Tracking Timeline</CardTitle>
+                  <CardTitle>{t("shipment.timeline.title")}</CardTitle>
                   <CardDescription>
-                    Real-time updates on your shipment&apos;s journey
+                    {t("shipment.timeline.description")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -291,24 +290,24 @@ export default function TrackPage() {
               {/* Shipment Details */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Shipment Details</CardTitle>
+                  <CardTitle>{t("shipment.information.title")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Weight</Label>
+                      <Label className="text-sm font-medium">{t("shipment.information.weight")}</Label>
                       <p className="text-sm text-muted-foreground">{shipment.details.weight}</p>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Dimensions</Label>
+                      <Label className="text-sm font-medium">{t("shipment.information.dimensions")}</Label>
                       <p className="text-sm text-muted-foreground">{shipment.details.dimensions}</p>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Service</Label>
+                      <Label className="text-sm font-medium">{t("shipment.information.service")}</Label>
                       <p className="text-sm text-muted-foreground">{shipment.details.service}</p>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Carrier</Label>
+                      <Label className="text-sm font-medium">{t("shipment.information.carrier")}</Label>
                       <p className="text-sm text-muted-foreground">{shipment.details.carrier}</p>
                     </div>
                   </div>
@@ -321,15 +320,15 @@ export default function TrackPage() {
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Button variant="outline" className="flex items-center gap-2">
                       <Download className="h-4 w-4" />
-                      Download Invoice
+                      {t("shipment.actions.downloadInvoice")}
                     </Button>
                     <Button variant="outline" className="flex items-center gap-2">
                       <Eye className="h-4 w-4" />
-                      View Documents
+                      {t("shipment.actions.viewDocuments")}
                     </Button>
                     <Button className="flex items-center gap-2">
                       <Package className="h-4 w-4" />
-                      Track Another Shipment
+                      {t("shipment.actions.trackAnother")}
                     </Button>
                   </div>
                 </CardContent>

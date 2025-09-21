@@ -9,18 +9,16 @@ import { AnimatedText } from "@/components/animated-text"
 import { AnimatedSection } from "@/components/animated-section"
 import { AnimatedCard } from "@/components/animated-card"
 import { motion } from "framer-motion"
-import { Navbar1 } from "@/components/navbar1"
 import Work from "@/public/work1.jpeg";
 import Work2 from "@/public/work2.jpeg";
 import Image from "next/image"
+import { useTranslations } from 'next-intl'
 
 export default function LandingPage() {
+  const t = useTranslations()
 
 return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <Navbar1/>
-
       {/* Hero Section */}
       <section className="pt-24 pb-16 px-4">
         <div className="container mx-auto text-center">
@@ -32,7 +30,7 @@ return (
               className="text-5xl md:text-7xl font-bold tracking-tight mb-6"
             >
               <AnimatedText 
-                text="Your trusted partner for global logistics" 
+                text={t('hero.title')}
                 className="text-5xl md:text-7xl font-bold tracking-tight"
                 delay={1.2}
                 staggerDelay={0.1}
@@ -44,7 +42,7 @@ return (
               transition={{ duration: 0.8, delay: 1.5 }}
               className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto"
             >
-              Marchelo Logistics delivers expert shipping and logistics solutions, creating seamless supply chains with quality service and global reach.
+              {t('hero.subtitle')}
             </motion.p>
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -53,11 +51,11 @@ return (
               className="flex flex-col sm:flex-row gap-4 justify-center"
             >
               <Button size="lg" className="text-lg px-8 py-6">
-                Get Started
+                {t('hero.buttons.getStarted')}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button variant="outline" size="lg" className="text-lg px-8 py-6">
-                View Services
+                {t('hero.buttons.viewServices')}
               </Button>
             </motion.div>
           </div>
@@ -70,10 +68,10 @@ return (
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               {[
-                { number: "5+", label: "Years Experience" },
-                { number: "50+", label: "Countries Served" },
-                { number: "1000+", label: "Shipments Delivered" },
-                { number: "99%", label: "Client Satisfaction" }
+                { number: t('stats.experience.number'), label: t('stats.experience.label') },
+                { number: t('stats.countries.number'), label: t('stats.countries.label') },
+                { number: t('stats.shipments.number'), label: t('stats.shipments.label') },
+                { number: t('stats.satisfaction.number'), label: t('stats.satisfaction.label') }
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -104,16 +102,16 @@ return (
                 transition={{ duration: 0.8, delay: 0.2 }}
                 viewport={{ once: true }}
               >
-                <h2 className="text-3xl font-bold tracking-tight mb-4">About us</h2>
-                <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Global logistics specialists</h3>
+                <h2 className="text-3xl font-bold tracking-tight mb-4">{t('about.heading')}</h2>
+                <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">{t('about.subheading')}</h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                  Welcome to Marchelo Logistics, your trusted global logistics experts, dedicated to connecting businesses worldwide with precision and care. With years of experience in international shipping, customs clearance, and supply chain management, we take pride in delivering top-quality service and a seamless customer experience.
+                  {t('about.paragraph1')}
                 </p>
                 <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                  Our mission is to bring your cargo safely to its destination while ensuring clear communication and expert guidance at every step. Let&apos;s create a logistics solution you can trust!
+                  {t('about.paragraph2')}
                 </p>
                 <Button size="lg">
-                  Learn More
+                  {t('about.learnMoreButton')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </motion.div>
@@ -125,7 +123,7 @@ return (
                 className="bg-muted/50 aspect-square rounded-2xl flex items-center justify-center cursor-pointer"
               >
                 <Image
-                  alt="Demo"
+                  alt={t('common.imageAlt')}
                   src={Work}
                   className="h-full w-full aspect-square rounded-2xl object-cover"
                 />
@@ -146,10 +144,10 @@ return (
               viewport={{ once: true }}
               className="text-center mb-16"
             >
-              <h2 className="text-3xl font-bold tracking-tight mb-4">Services</h2>
-              <h3 className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">What we do</h3>
+              <h2 className="text-3xl font-bold tracking-tight mb-4">{t('services.heading')}</h2>
+              <h3 className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">{t('services.subheading')}</h3>
               <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                Find out which one of our services fits the needs of your shipment
+                {t('services.description')}
               </p>
             </motion.div>
             
@@ -157,33 +155,33 @@ return (
               {[
                 {
                   icon: Truck,
-                  title: "Freight Forwarding",
-                  description: "Comprehensive freight forwarding services for air, sea, and land transportation. We handle everything from documentation to customs clearance, ensuring your cargo reaches its destination efficiently and on time."
+                  title: t('services.items.freightForwarding.title'),
+                  description: t('services.items.freightForwarding.description')
                 },
                 {
                   icon: Shield,
-                  title: "Customs Clearance",
-                  description: "Expert customs clearance services to navigate complex international regulations. Our experienced team ensures smooth processing and compliance with all import/export requirements."
+                  title: t('services.items.customsClearance.title'),
+                  description: t('services.items.customsClearance.description')
                 },
                 {
                   icon: Clock,
-                  title: "Express Shipping",
-                  description: "Fast and reliable express shipping solutions for time-sensitive cargo. We offer guaranteed delivery times and real-time tracking for your peace of mind."
+                  title: t('services.items.expressShipping.title'),
+                  description: t('services.items.expressShipping.description')
                 },
                 {
                   icon: Users,
-                  title: "Supply Chain Management",
-                  description: "End-to-end supply chain management services to optimize your logistics operations. From warehousing to distribution, we streamline your entire process."
+                  title: t('services.items.supplyChainManagement.title'),
+                  description: t('services.items.supplyChainManagement.description')
                 },
                 {
                   icon: Award,
-                  title: "Project Cargo",
-                  description: "Specialized handling for oversized and heavy project cargo. Our expertise in complex logistics ensures safe and timely delivery of your most challenging shipments."
+                  title: t('services.items.projectCargo.title'),
+                  description: t('services.items.projectCargo.description')
                 },
                 {
                   icon: Globe,
-                  title: "International Trade",
-                  description: "Complete international trade solutions including documentation, compliance, and market access. We help you navigate global markets with confidence."
+                  title: t('services.items.internationalTrade.title'),
+                  description: t('services.items.internationalTrade.description')
                 }
               ].map((service, index) => (
                 <AnimatedCard key={index} index={index} delay={0.2}>
@@ -212,10 +210,10 @@ return (
               viewport={{ once: true }}
               className="text-center mb-16"
             >
-              <h2 className="text-3xl font-bold tracking-tight mb-4">Our work</h2>
-              <h3 className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Get inspired by our work</h3>
+              <h2 className="text-3xl font-bold tracking-tight mb-4">{t('work.heading')}</h2>
+              <h3 className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">{t('work.subheading')}</h3>
               <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                See how we&apos;ve connected businesses worldwide with our expert logistics and attention to detail.
+                {t('work.description')}
               </p>
             </motion.div>
             
@@ -228,7 +226,7 @@ return (
                 className="bg-muted/50 aspect-video rounded-2xl flex items-center justify-center cursor-pointer"
               >
                 <Image
-                  alt="Demo"
+                  alt={t('common.imageAlt')}
                   src={Work2}
                   className="h-full w-full aspect-square rounded-2xl object-cover"
                 />
@@ -240,18 +238,18 @@ return (
                 viewport={{ once: true }}
                 className="flex flex-col justify-center"
               >
-                <h4 className="text-2xl font-semibold mb-4">Global Supply Chain Optimization</h4>
+                <h4 className="text-2xl font-semibold mb-4">{t('work.caseStudy.title')}</h4>
                 <p className="text-muted-foreground mb-6">
-                  This logistics transformation brought seamless connectivity and enhanced efficiency to our client&apos;s global operations. We implemented custom routing, real-time tracking, and optimized customs processes, creating a reliable and cost-effective supply chain perfect for international trade.
+                  {t('work.caseStudy.description')}
                 </p>
                 <div className="flex items-center gap-4 mb-6">
-                  <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">Logistics</span>
-                  <span className="text-muted-foreground">6 months</span>
+                  <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">{t('work.caseStudy.category')}</span>
+                  <span className="text-muted-foreground">{t('work.caseStudy.duration')}</span>
                 </div>
                 <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground">
-                &quot;Marchelo Logistics completely transformed our supply chain, making it both efficient and highly reliable. The service was outstanding, and the team was professional and communicative throughout. We couldn&apos;t be happier with the result!&quot;
+                &quot;{t('work.caseStudy.testimonial.quote')}&quot;
                 </blockquote>
-                <p className="font-semibold mt-4">Sarah Johnson - Global Operations Manager</p>
+                <p className="font-semibold mt-4">{t('work.caseStudy.testimonial.author')}</p>
               </motion.div>
             </div>
           </div>

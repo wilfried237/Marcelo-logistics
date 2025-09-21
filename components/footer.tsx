@@ -1,4 +1,6 @@
-//import { Logo, LogoImage, LogoText } from "@/components/shadcnblocks/logo";
+"use client";
+
+import { useTranslations } from "next-intl";
 
 interface MenuItem {
   title: string;
@@ -8,76 +10,12 @@ interface MenuItem {
   }[];
 }
 
-interface Footer2Props {
-  logo?: {
-    url: string;
-    src: string;
-    alt: string;
-    title: string;
-  };
-  tagline?: string;
-  menuItems?: MenuItem[];
-  copyright?: string;
-  bottomLinks?: {
-    text: string;
-    url: string;
-  }[];
-}
+export function Footer2() {
+  const t = useTranslations("footer");
 
-const Footer2 = ({
-//   logo = {
-//     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/block-1.svg",
-//     alt: "blocks for shadcn/ui",
-//     title: "Shadcnblocks.com",
-//     url: "https://www.shadcnblocks.com",
-//   },
-  tagline = "Components made easy.",
-  menuItems = [
-    {
-      title: "Product",
-      links: [
-        { text: "Overview", url: "#" },
-        { text: "Pricing", url: "#" },
-        { text: "Marketplace", url: "#" },
-        { text: "Features", url: "#" },
-        { text: "Integrations", url: "#" },
-        { text: "Pricing", url: "#" },
-      ],
-    },
-    {
-      title: "Company",
-      links: [
-        { text: "About", url: "#" },
-        { text: "Team", url: "#" },
-        { text: "Blog", url: "#" },
-        { text: "Careers", url: "#" },
-        { text: "Contact", url: "#" },
-        { text: "Privacy", url: "#" },
-      ],
-    },
-    {
-      title: "Resources",
-      links: [
-        { text: "Help", url: "#" },
-        { text: "Sales", url: "#" },
-        { text: "Advertise", url: "#" },
-      ],
-    },
-    {
-      title: "Social",
-      links: [
-        { text: "Twitter", url: "#" },
-        { text: "Instagram", url: "#" },
-        { text: "LinkedIn", url: "#" },
-      ],
-    },
-  ],
-  copyright = "© 2024 Shadcnblocks.com. All rights reserved.",
-  bottomLinks = [
-    { text: "Terms and Conditions", url: "#" },
-    { text: "Privacy Policy", url: "#" },
-  ],
-}: Footer2Props) => {
+  const menuItems: MenuItem[] = t.raw("menuItems");
+  const bottomLinks: { text: string; url: string }[] = t.raw("bottomLinks");
+
   return (
     <section className="py-32">
       <div className="container">
@@ -87,8 +25,9 @@ const Footer2 = ({
               <div className="flex items-center gap-2 lg:justify-start">
                 <div className="h-10 w-32 bg-muted rounded animate-pulse" />
               </div>
-              <p className="mt-4 font-bold">{tagline}</p>
+              <p className="mt-4 font-bold">{t("tagline")}</p>
             </div>
+
             {menuItems.map((section, sectionIdx) => (
               <div key={sectionIdx}>
                 <h3 className="mb-4 font-bold">{section.title}</h3>
@@ -105,8 +44,9 @@ const Footer2 = ({
               </div>
             ))}
           </div>
+
           <div className="text-muted-foreground mt-24 flex flex-col justify-between gap-4 border-t pt-8 text-sm font-medium md:flex-row md:items-center">
-            <p>{copyright}</p>
+            <p>{t("copyright")}</p>
             <ul className="flex gap-4">
               {bottomLinks.map((link, linkIdx) => (
                 <li key={linkIdx} className="hover:text-primary underline">
@@ -119,6 +59,4 @@ const Footer2 = ({
       </div>
     </section>
   );
-};
-
-export { Footer2 };
+}

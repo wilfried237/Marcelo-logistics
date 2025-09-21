@@ -1,3 +1,5 @@
+"use client"
+
 import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
 
 import {
@@ -23,6 +25,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { motion } from "framer-motion";
+import {useTranslations} from 'next-intl';
+import { LanguageSwitcher } from '@/components/language-switcher';
+
 interface MenuItem {
   title: string;
   url: string;
@@ -52,63 +57,71 @@ interface Navbar1Props {
 }
 
 const Navbar1 = ({
-  logo = {
+  logo,
+  menu,
+  auth,
+}: Navbar1Props) => {
+  const t = useTranslations('navigation');
+  
+  // Use translations with fallbacks to original structure
+  const logoData = logo || {
     url: "/",
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
-    alt: "Machelo Logistics",
-    title: "Machelo Logistics",
-  },
-  menu = [
-    { title: "Home", url: "/" },
+    alt: t('logo.alt'),
+    title: t('logo.title'),
+  };
+
+  const menuData = menu || [
+    { title: t('menu.home'), url: "/" },
     {
-      title: "Services",
+      title: t('menu.services'),
       url: "/#services",
       items: [
         {
-          title: "Get Quote",
-          description: "Clean, brand-aligned, responsive design",
+          title: t('subMenu.getQuote.title'),
+          description: t('subMenu.getQuote.description'),
           icon: <Book className="size-5 shrink-0" />,
           url: "/quote",
         },
         {
-          title: "Track Shipment",
-          description: "Landing pages to full digital platforms",
+          title: t('subMenu.trackShipment.title'),
+          description: t('subMenu.trackShipment.description'),
           icon: <Trees className="size-5 shrink-0" />,
           url: "/track",
         },
         {
-          title: "Portal",
-          description: "Structure, content, and promotion guidance",
+          title: t('subMenu.portal.title'),
+          description: t('subMenu.portal.description'),
           icon: <Sunset className="size-5 shrink-0" />,
           url: "/portal",
         },
         {
-          title: "What we do",
-          description:
-            "Security, updates, and continuous improvements",
+          title: t('subMenu.whatWeDo.title'),
+          description: t('subMenu.whatWeDo.description'),
           icon: <Zap className="size-5 shrink-0" />,
           url: "/#services",
         },
       ],
     },
     {
-      title: "About",
+      title: t('menu.about'),
       url: "/#about",
     },
     {
-      title: "Our Work",
+      title: t('menu.ourWork'),
       url: "/#work",
     },
     {
-      title: "Contact",
+      title: t('menu.contact'),
       url: "/#contact",
     },
-  ],
-  auth = {
-    login: { title: "Login", url: "#" },
-    signup: { title: "Sign up", url: "#" },
-  },
-}: Navbar1Props) => {
+  ];
+
+  const authData = auth || {
+    login: { title: t('auth.login'), url: "#" },
+    signup: { title: t('auth.signup'), url: "#" },
+  };
+
   return (
     <motion.nav
       initial={{ y: -100, opacity: 0 }}
@@ -130,33 +143,34 @@ const Navbar1 = ({
                 className="flex items-center space-x-2"
               >
                 {/* Logo */}
-                <a href={logo.url} className="flex items-center gap-2">
+                <a href={logoData.url} className="flex items-center gap-2">
                   <img
-                    src={logo.src}
+                    src={logoData.src}
                     className="max-h-8 dark:invert"
-                    alt={logo.alt}
+                    alt={logoData.alt}
                   />
                   <span className="text-lg font-semibold tracking-tighter">
-                    {logo.title}
+                    {logoData.title}
                   </span>
                 </a>
               </motion.div>
               <div className="flex items-center">
                 <NavigationMenu>
                   <NavigationMenuList>
-                    {menu.map((item) => renderMenuItem(item))}
+                    {menuData.map((item) => renderMenuItem(item))}
                   </NavigationMenuList>
                 </NavigationMenu>
               </div>
             </div>
 
 
-            <div className="flex gap-2">
+            <div className="flex items-center gap-3">
+              <LanguageSwitcher />
               <Button asChild variant="outline" size="sm">
-                <a href={auth.login.url}>{auth.login.title}</a>
+                <a href={authData.login.url}>{authData.login.title}</a>
               </Button>
               <Button asChild size="sm">
-                <a href={auth.signup.url}>{auth.signup.title}</a>
+                <a href={authData.signup.url}>{authData.signup.title}</a>
               </Button>
             </div>
           </nav>
@@ -165,11 +179,11 @@ const Navbar1 = ({
           <div className="block lg:hidden">
             <div className="flex items-center justify-between">
               {/* Logo */}
-              <a href={logo.url} className="flex items-center gap-2">
+              <a href={logoData.url} className="flex items-center gap-2">
                 <img
-                  src={logo.src}
+                  src={logoData.src}
                   className="max-h-8 dark:invert"
-                  alt={logo.alt}
+                  alt={logoData.alt}
                 />
               </a>
               <Sheet>
@@ -181,11 +195,11 @@ const Navbar1 = ({
                 <SheetContent className="overflow-y-auto">
                   <SheetHeader>
                     <SheetTitle>
-                      <a href={logo.url} className="flex items-center gap-2">
+                      <a href={logoData.url} className="flex items-center gap-2">
                         <img
-                          src={logo.src}
+                          src={logoData.src}
                           className="max-h-8 dark:invert"
-                          alt={logo.alt}
+                          alt={logoData.alt}
                         />
                       </a>
                     </SheetTitle>
@@ -196,15 +210,16 @@ const Navbar1 = ({
                       collapsible
                       className="flex w-full flex-col gap-4"
                     >
-                      {menu.map((item) => renderMobileMenuItem(item))}
+                      {menuData.map((item) => renderMobileMenuItem(item))}
                     </Accordion>
 
                     <div className="flex flex-col gap-3">
+                      <LanguageSwitcher />
                       <Button asChild variant="outline">
-                        <a href={auth.login.url}>{auth.login.title}</a>
+                        <a href={authData.login.url}>{authData.login.title}</a>
                       </Button>
                       <Button asChild>
-                        <a href={auth.signup.url}>{auth.signup.title}</a>
+                        <a href={authData.signup.url}>{authData.signup.title}</a>
                       </Button>
                     </div>
                   </div>
@@ -288,4 +303,4 @@ const SubMenuLink = ({ item }: { item: MenuItem }) => {
   );
 };
 
-export { Navbar1 };
+export {Navbar1};

@@ -1,0 +1,427 @@
+{
+    "hero": {
+      "title": "Your trusted partner for global logistics",
+      "subtitle": "Marchelo Logistics delivers expert shipping and logistics solutions, creating seamless supply chains with quality service and global reach.",
+      "buttons": {
+        "getStarted": "Get Started",
+        "viewServices": "View Services"
+      }
+    },
+    "stats": {
+      "experience": {
+        "number": "5+",
+        "label": "Years Experience"
+      },
+      "countries": {
+        "number": "50+",
+        "label": "Countries Served"
+      },
+      "shipments": {
+        "number": "1000+",
+        "label": "Shipments Delivered"
+      },
+      "satisfaction": {
+        "number": "99%",
+        "label": "Client Satisfaction"
+      }
+    },
+    "about": {
+      "heading": "About us",
+      "subheading": "Global logistics specialists",
+      "paragraph1": "Welcome to Marchelo Logistics, your trusted global logistics experts, dedicated to connecting businesses worldwide with precision and care. With years of experience in international shipping, customs clearance, and supply chain management, we take pride in delivering top-quality service and a seamless customer experience.",
+      "paragraph2": "Our mission is to bring your cargo safely to its destination while ensuring clear communication and expert guidance at every step. Let's create a logistics solution you can trust!",
+      "learnMoreButton": "Learn More"
+    },
+    "services": {
+      "heading": "Services",
+      "subheading": "What we do",
+      "description": "Find out which one of our services fits the needs of your shipment",
+      "items": {
+        "freightForwarding": {
+          "title": "Freight Forwarding",
+          "description": "Comprehensive freight forwarding services for air, sea, and land transportation. We handle everything from documentation to customs clearance, ensuring your cargo reaches its destination efficiently and on time."
+        },
+        "customsClearance": {
+          "title": "Customs Clearance",
+          "description": "Expert customs clearance services to navigate complex international regulations. Our experienced team ensures smooth processing and compliance with all import/export requirements."
+        },
+        "expressShipping": {
+          "title": "Express Shipping",
+          "description": "Fast and reliable express shipping solutions for time-sensitive cargo. We offer guaranteed delivery times and real-time tracking for your peace of mind."
+        },
+        "supplyChainManagement": {
+          "title": "Supply Chain Management",
+          "description": "End-to-end supply chain management services to optimize your logistics operations. From warehousing to distribution, we streamline your entire process."
+        },
+        "projectCargo": {
+          "title": "Project Cargo",
+          "description": "Specialized handling for oversized and heavy project cargo. Our expertise in complex logistics ensures safe and timely delivery of your most challenging shipments."
+        },
+        "internationalTrade": {
+          "title": "International Trade",
+          "description": "Complete international trade solutions including documentation, compliance, and market access. We help you navigate global markets with confidence."
+        }
+      }
+    },
+    "work": {
+      "heading": "Our work",
+      "subheading": "Get inspired by our work",
+      "description": "See how we've connected businesses worldwide with our expert logistics and attention to detail.",
+      "caseStudy": {
+        "title": "Global Supply Chain Optimization",
+        "description": "This logistics transformation brought seamless connectivity and enhanced efficiency to our client's global operations. We implemented custom routing, real-time tracking, and optimized customs processes, creating a reliable and cost-effective supply chain perfect for international trade.",
+        "category": "Logistics",
+        "duration": "6 months",
+        "testimonial": {
+          "quote": "Marchelo Logistics completely transformed our supply chain, making it both efficient and highly reliable. The service was outstanding, and the team was professional and communicative throughout. We couldn't be happier with the result!",
+          "author": "Sarah Johnson - Global Operations Manager"
+        }
+      }
+    },
+    "navigation": {
+      "logo": {
+        "alt": "Machelo Logistics",
+        "title": "Machelo Logistics"
+      },
+      "menu": {
+        "home": "Home",
+        "services": "Services",
+        "about": "About",
+        "ourWork": "Our Work",
+        "contact": "Contact"
+      },
+      "subMenu": {
+        "getQuote": {
+          "title": "Get Quote",
+          "description": "Clean, brand-aligned, responsive design"
+        },
+        "trackShipment": {
+          "title": "Track Shipment",
+          "description": "Landing pages to full digital platforms"
+        },
+        "portal": {
+          "title": "Portal",
+          "description": "Structure, content, and promotion guidance"
+        },
+        "whatWeDo": {
+          "title": "What we do",
+          "description": "Security, updates, and continuous improvements"
+        }
+      },
+      "auth": {
+        "login": "Login",
+        "signup": "Sign up"
+      }
+    },
+    "quote": {
+      "hero": {
+        "title": "Get Your Shipping Quote",
+        "subtitle": "Tell us about your shipment and we'll provide you with a competitive quote within 24 hours."
+      },
+      "shipmentTypes": {
+        "title": "Shipment Type",
+        "description": "Choose the type of shipment you need",
+        "options": {
+          "car": {
+            "label": "Car Shipping",
+            "description": "Vehicle transportation"
+          },
+          "parcel": {
+            "label": "Parcel Delivery",
+            "description": "Small package shipping"
+          },
+          "container": {
+            "label": "Container Shipping",
+            "description": "Full container loads"
+          },
+          "airExpress": {
+            "label": "Air Express",
+            "description": "Fast air freight"
+          },
+          "freight": {
+            "label": "Freight Forwarding",
+            "description": "General cargo shipping"
+          }
+        }
+      },
+      "form": {
+        "title": "Shipment Details",
+        "description": "Provide details about your shipment",
+        "fields": {
+          "origin": "Origin",
+          "destination": "Destination Country",
+          "destinationPlaceholder": "Select destination country",
+          "weight": "Weight (kg)",
+          "weightPlaceholder": "Enter weight in kg",
+          "dimensions": "Dimensions (L×W×H cm)",
+          "dimensionsPlaceholder": "e.g., 100×50×30",
+          "description": "Shipment Description",
+          "descriptionPlaceholder": "Describe your shipment (optional)",
+          "contactInfo": "Contact Information",
+          "fullName": "Full Name",
+          "fullNamePlaceholder": "Enter your full name",
+          "email": "Email",
+          "emailPlaceholder": "Enter your email",
+          "phone": "Phone Number",
+          "phonePlaceholder": "Enter your phone number"
+        },
+        "buttons": {
+          "submit": "Request Quote",
+          "processing": "Processing..."
+        }
+      },
+      "selectedSummary": {
+        "prefix": "Selected:"
+      },
+      "success": {
+        "title": "Quote Request Submitted!",
+        "message": "Thank you for your quote request. Our team will review your requirements and get back to you within 24 hours with a detailed quote.",
+        "buttons": {
+          "backToHome": "Back to Home",
+          "submitAnother": "Submit Another Quote"
+        }
+      }
+    },
+    "portal": {
+      "hero": {
+        "title": "Client Portal",
+        "subtitle": "Manage your shipments, quotes, and documents"
+      },
+      "buttons": {
+        "settings": "Settings",
+        "newQuote": "New Quote"
+      },
+      "tabs": {
+        "shipments": "Shipments",
+        "quotes": "Quotes",
+        "documents": "Documents"
+      },
+      "search": {
+        "placeholder": "Search {tab}...",
+        "filter": "Filter"
+      },
+      "shipments": {
+        "totalCost": "Total Cost",
+        "buttons": {
+          "track": "Track",
+          "invoice": "Invoice"
+        }
+      },
+      "quotes": {
+        "quotePrefix": "Quote #",
+        "estimatedCost": "Estimated Cost",
+        "to": "To:",
+        "weight": "Weight:",
+        "buttons": {
+          "view": "View",
+          "book": "Book"
+        }
+      },
+      "documents": {
+        "empty": {
+          "title": "No Documents Available",
+          "description": "Documents will appear here once you have active shipments",
+          "button": "Create New Shipment"
+        }
+      }
+    },
+    "track": {
+      "hero": {
+        "title": "Track Your Shipment",
+        "subtitle": "Enter your tracking or booking number to get real-time updates on your shipment"
+      },
+      "form": {
+        "title": "Track Shipment",
+        "description": "Enter your tracking number or booking reference",
+        "placeholder": "Enter tracking number (e.g., ML123456789)",
+        "buttons": {
+          "track": "Track",
+          "searching": "Searching..."
+        },
+        "errors": {
+          "notFound": "Tracking number not found. Please check your number and try again.",
+          "generic": "Error fetching tracking information. Please try again."
+        }
+      },
+      "shipment": {
+        "status": {
+          "title": "Shipment Status",
+          "tracking": "Tracking:",
+          "booking": "Booking:"
+        },
+        "details": {
+          "origin": "Origin",
+          "destination": "Destination",
+          "estimatedDelivery": "Est. Delivery",
+          "currentLocation": "Current Location"
+        },
+        "timeline": {
+          "title": "Tracking Timeline",
+          "description": "Real-time updates on your shipment's journey"
+        },
+        "information": {
+          "title": "Shipment Details",
+          "weight": "Weight",
+          "dimensions": "Dimensions",
+          "service": "Service",
+          "carrier": "Carrier"
+        },
+        "actions": {
+          "downloadInvoice": "Download Invoice",
+          "viewDocuments": "View Documents",
+          "trackAnother": "Track Another Shipment"
+        }
+      }
+    },
+    "login": {
+      "company": "Your Company",
+      "testimonial": {
+        "quote": "This library has saved me countless hours of work and helped me deliver stunning designs to my clients faster than ever before.",
+        "author": "Sofia Davis"
+      },
+      "form": {
+        "title": "Create an account",
+        "subtitle": "Enter your email below to create your account"
+      }
+    },
+    "common": {
+      "imageAlt": "Demo"
+    },
+    "contact": {
+      "title": "Contact Us",
+      "description": "We are available for questions, feedback, or collaboration opportunities. Let us know how we can help!",
+      "details": {
+        "heading": "Contact Details",
+        "irelandTel": "Ireland Tel:",
+        "cameroonTel": "Cameroon Tel:",
+        "email": "Email:",
+        "web": "Web:"
+      },
+      "form": {
+        "firstName": {
+          "label": "First Name",
+          "placeholder": "First Name"
+        },
+        "lastName": {
+          "label": "Last Name",
+          "placeholder": "Last Name"
+        },
+        "email": {
+          "label": "Email",
+          "placeholder": "Email"
+        },
+        "subject": {
+          "label": "Subject",
+          "placeholder": "Subject"
+        },
+        "message": {
+          "label": "Message",
+          "placeholder": "Type your message here."
+        },
+        "button": "Send Message"
+      }
+    },
+    "testimonials": {
+      "heading": "Loved by teams worldwide",
+      "subheading": "See what our customers have to say about their experience with our platform.",
+      "badge": "Verified Customer",
+      "items": [
+        {
+          "name": "Sarah Chen",
+          "role": "Product Manager",
+          "company": "TechCorp",
+          "image": "/avatars/sarah.jpg",
+          "content": "This product has completely transformed how we handle our daily operations. The efficiency gains are remarkable, and the user interface is intuitive. Highly recommended for any team looking to streamline their workflow.",
+          "rating": 5
+        },
+        {
+          "name": "Michael Rodriguez",
+          "role": "Senior Developer",
+          "company": "DevStudio",
+          "image": "/avatars/michael.jpg",
+          "content": "The integration was seamless and the support team was incredibly helpful throughout the process. The features are exactly what we needed to scale our development workflow.",
+          "rating": 5
+        },
+        {
+          "name": "Emily Watson",
+          "role": "Marketing Director",
+          "company": "GrowthCo",
+          "image": "/avatars/emily.jpg",
+          "content": "We've seen a 40% increase in productivity since implementing this solution. The analytics and reporting features provide valuable insights that help us make data-driven decisions.",
+          "rating": 5
+        },
+        {
+          "name": "David Kim",
+          "role": "CTO",
+          "company": "StartupXYZ",
+          "image": "/avatars/david.jpg",
+          "content": "As a growing startup, we needed a solution that could scale with us. This platform has exceeded our expectations and continues to deliver value as we expand.",
+          "rating": 5
+        },
+        {
+          "name": "Lisa Thompson",
+          "role": "Operations Manager",
+          "company": "Enterprise Inc",
+          "image": "/avatars/lisa.jpg",
+          "content": "The automation features have saved us countless hours. The team was responsive to our custom requirements and delivered a solution that perfectly fits our needs.",
+          "rating": 5
+        },
+        {
+          "name": "James Wilson",
+          "role": "Project Lead",
+          "company": "Innovation Labs",
+          "image": "/avatars/james.jpg",
+          "content": "Outstanding performance and reliability. The platform has become an essential part of our project management toolkit. The customer service is exceptional.",
+          "rating": 5
+        }
+      ]
+    },
+    "footer": {
+      "tagline": "Components made easy.",
+      "menuItems": [
+        {
+          "title": "Product",
+          "links": [
+            { "text": "Overview", "url": "#" },
+            { "text": "Pricing", "url": "#" },
+            { "text": "Marketplace", "url": "#" },
+            { "text": "Features", "url": "#" },
+            { "text": "Integrations", "url": "#" },
+            { "text": "Pricing", "url": "#" }
+          ]
+        },
+        {
+          "title": "Company",
+          "links": [
+            { "text": "About", "url": "#" },
+            { "text": "Team", "url": "#" },
+            { "text": "Blog", "url": "#" },
+            { "text": "Careers", "url": "#" },
+            { "text": "Contact", "url": "#" },
+            { "text": "Privacy", "url": "#" }
+          ]
+        },
+        {
+          "title": "Resources",
+          "links": [
+            { "text": "Help", "url": "#" },
+            { "text": "Sales", "url": "#" },
+            { "text": "Advertise", "url": "#" }
+          ]
+        },
+        {
+          "title": "Social",
+          "links": [
+            { "text": "Twitter", "url": "#" },
+            { "text": "Instagram", "url": "#" },
+            { "text": "LinkedIn", "url": "#" }
+          ]
+        }
+      ],
+      "copyright": "© 2024 Shadcnblocks.com. All rights reserved.",
+      "bottomLinks": [
+        { "text": "Terms and Conditions", "url": "#" },
+        { "text": "Privacy Policy", "url": "#" }
+      ]
+    }
+  }

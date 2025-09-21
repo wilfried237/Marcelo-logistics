@@ -21,7 +21,6 @@ import {
   FileText,
   Settings
 } from "lucide-react";
-import { Navbar1 } from "@/components/navbar1";
 interface Shipment {
   id: string;
   trackingNumber: string;
@@ -149,9 +148,7 @@ export default function PortalPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar1/>
-      
+    <div className="min-h-screen bg-background">      
       <div className="pt-24 pb-16 px-4">
         <div className="container mx-auto max-w-7xl">
           {/* Header */}
