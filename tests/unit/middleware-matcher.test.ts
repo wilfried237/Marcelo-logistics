@@ -6,7 +6,10 @@ import { readFileSync } from "node:fs";
 // verified against a production build (see docs/TESTING.md, "routing probes").
 const source = readFileSync("middleware.ts", "utf8");
 const literal = /matcher:\s*\["(.+?)"\]/.exec(source)?.[1];
-const matcher = new RegExp(`^${literal!.replace(/\\\\/g, "\\")}$`);
+// Interpret the source literal exactly as JavaScript does (escape sequences included),
+// because Next.js uses the string VALUE, not the raw source text.
+const value = JSON.parse(`"${literal}"`) as string;
+const matcher = new RegExp(`^${value}$`);
 
 describe("middleware matcher", () => {
   it("is defined", () => expect(literal).toBeTruthy());

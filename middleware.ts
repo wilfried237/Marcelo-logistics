@@ -1,7 +1,14 @@
+import type { NextRequest } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
+import { refreshSupabaseSession } from "./lib/supabase/middleware";
 
-export default createMiddleware(routing);
+const handleI18nRouting = createMiddleware(routing);
+
+export default async function middleware(request: NextRequest) {
+  const response = handleI18nRouting(request);
+  return refreshSupabaseSession(request, response);
+}
 
 export const config = {
   // Locale handling for pages only. Excluded:

@@ -1,23 +1,35 @@
-import type { Metadata } from "next";
-import { useTranslations } from "next-intl";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
+import { isEnabled } from "@/lib/config/flags";
+import { isAccountSystemAvailable } from "@/lib/auth/session";
+import { AccountsUnavailable, AuthCard } from "@/components/app/auth-card";
+import { Alert } from "@/components/app/alert";
+import { RegisterForm } from "../auth-forms";
 
-export const metadata: Metadata = { robots: { index: false, follow: false } };
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return { title: (await getTranslations({ locale, namespace: "auth" }))("registerTitle") };
+}
 
-/** Honest placeholder until Supabase Auth is configured (see docs/IMPLEMENTATION-STATUS.md). */
-export default function Page() {
-  const t = useTranslations("auth");
+export default async function RegisterPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("auth");
+
+  let body: React.ReactNode;
+  if (!isAccountSystemAvailable()) body = <AccountsUnavailable />;
+  else if (!isEnabled("ENABLE_CUSTOMER_REGISTRATION")) body = <Alert title={t("registrationClosedTitle")}>{t("registrationClosedBody")}</Alert>;
+  else body = <RegisterForm />;
+
   return (
-    <div className="mx-auto max-w-md px-4 py-16">
-      <h1 className="text-3xl font-bold tracking-tight">{t("registerTitle")}</h1>
-      <div role="status" className="mt-6 rounded-lg border bg-secondary/40 p-5">
-        <p className="font-semibold">{t("unavailableTitle")}</p>
-        <p className="mt-2 text-sm text-muted-foreground">{t("unavailableBody")}</p>
-      </div>
-      <Button asChild variant="outline" className="mt-6">
-        <Link href="/">{t("backHome")}</Link>
-      </Button>
-    </div>
+    <AuthCard title={t("registerTitle")}>
+      {body}
+      <p className="mt-6 border-t pt-6 text-center text-sm">
+        {t("haveAccount")}{" "}
+        <Link href="/login" className="font-medium text-primary underline-offset-4 hover:underline">
+          {t("signIn")}
+        </Link>
+      </p>
+    </AuthCard>
   );
 }
