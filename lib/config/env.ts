@@ -82,3 +82,8 @@ export function quoteSubmissionStatus(env: Env = process.env): { available: true
   if (getEmailTransport(env).kind === "disabled") return { available: false, reason: "email_not_configured" };
   return { available: true };
 }
+
+/** Document uploads need Storage (service role) and the explicit flag (retention policy L-03). */
+export function documentUploadsAvailable(env: Env = process.env): boolean {
+  return isEnabled("ENABLE_DOCUMENT_UPLOADS", env) && isStorageConfigured(env) && isDatabaseConfigured(env);
+}

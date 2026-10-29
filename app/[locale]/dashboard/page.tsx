@@ -1,11 +1,7 @@
-import { useTranslations } from "next-intl";
+import { redirect } from "@/i18n/navigation";
 
-/** Placeholder until the role-protected staff area (/admin) replaces it. Reachable only as a preview. */
-export default function DashboardPreviewPage() {
-  const t = useTranslations("preview");
-  return (
-    <div className="mx-auto max-w-3xl px-4 py-16">
-      <p className="text-muted-foreground">{t("banner")}</p>
-    </div>
-  );
+/** The former demo dashboard is replaced by the role-protected staff area. */
+export default async function DashboardRedirect({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  redirect({ href: "/admin", locale });
 }

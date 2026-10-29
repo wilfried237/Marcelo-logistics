@@ -10,6 +10,7 @@ export const FLAG_NAMES = [
   "ENABLE_PREVIEW_AREAS",
   "ENABLE_TRANSACTIONAL_EMAIL",
   "ENABLE_CUSTOMER_REGISTRATION",
+  "ENABLE_DOCUMENT_UPLOADS",
 ] as const;
 
 export type FlagName = (typeof FLAG_NAMES)[number];
