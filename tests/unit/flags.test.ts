@@ -24,3 +24,12 @@ describe("feature flags", () => {
     for (const name of FLAG_NAMES) expect(example).toMatch(new RegExp(`^${name}=false$`, "m"));
   });
 });
+
+describe("preview areas", () => {
+  it("are off by default and never on in production", async () => {
+    const { isPreviewAreasEnabled } = await import("@/lib/config/flags");
+    expect(isPreviewAreasEnabled({})).toBe(false);
+    expect(isPreviewAreasEnabled({ ENABLE_PREVIEW_AREAS: "true", NODE_ENV: "production" })).toBe(false);
+    expect(isPreviewAreasEnabled({ ENABLE_PREVIEW_AREAS: "true", NODE_ENV: "development" })).toBe(true);
+  });
+});

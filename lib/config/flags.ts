@@ -24,3 +24,11 @@ export function isEnabled(name: FlagName, env: Env = process.env): boolean {
 export function isDemoDataEnabled(env: Env = process.env): boolean {
   return isEnabled("ENABLE_DEMO_DATA", env) && env.NODE_ENV !== "production";
 }
+
+/**
+ * Preview areas expose placeholder UI that is not connected to real data.
+ * Like demo data, they are never reachable in a production build.
+ */
+export function isPreviewAreasEnabled(env: Env = process.env): boolean {
+  return isEnabled("ENABLE_PREVIEW_AREAS", env) && env.NODE_ENV !== "production";
+}

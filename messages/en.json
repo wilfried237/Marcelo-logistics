@@ -490,5 +490,8 @@
         "url": "#"
       }
     ]
+  },
+  "preview": {
+    "banner": "Preview only: this area is not connected to real data and is not available to customers."
   }
 }

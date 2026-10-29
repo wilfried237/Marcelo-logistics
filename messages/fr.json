@@ -490,5 +490,8 @@
         "url": "#"
       }
     ]
+  },
+  "preview": {
+    "banner": "Aperçu uniquement : cet espace n’est pas relié à des données réelles et n’est pas accessible aux clients."
   }
 }
