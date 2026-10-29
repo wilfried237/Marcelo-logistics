@@ -11,6 +11,8 @@ export default defineConfig({
       { find: /^server-only$/, replacement: `${root}tests/stubs/server-only.ts` },
     ],
   },
+  // tsconfig keeps JSX as-is for Next.js; tests compile it with the automatic runtime.
+  oxc: { jsx: { runtime: "automatic" } },
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
