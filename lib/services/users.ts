@@ -1,7 +1,7 @@
-import { asc, eq, sql } from "drizzle-orm";
+import { asc, desc, eq, sql } from "drizzle-orm";
 import { withSystem, withUser } from "@/lib/db/context";
 import { domainErrorCode } from "@/lib/db/errors";
-import { customers, profiles } from "@/lib/db/schema";
+import { auditLog, customers, profiles } from "@/lib/db/schema";
 import type { Database } from "@/lib/db/types";
 import { assertAdmin, assertStaff, type AppUser } from "@/lib/auth/types";
 import { USER_ROLES, type UserRole } from "@/lib/domain/enums";
@@ -82,4 +82,16 @@ export async function setUserRole(db: Database, user: AppUser, targetUserId: str
   } catch (error) {
     return { ok: false, code: domainErrorCode(error) };
   }
+}
+
+/** Most recent audit entries (staff and admin; RLS also restricts this table). */
+export async function listAuditEntries(db: Database, user: AppUser, limit = 200) {
+  assertStaff(user);
+  return withUser(db, user.id, (tx) =>
+    tx
+      .select({ id: auditLog.id, actor: auditLog.actor, action: auditLog.action, entity: auditLog.entity, entityId: auditLog.entityId, at: auditLog.at })
+      .from(auditLog)
+      .orderBy(desc(auditLog.at))
+      .limit(limit),
+  );
 }

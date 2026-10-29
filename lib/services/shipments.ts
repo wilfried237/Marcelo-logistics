@@ -85,7 +85,7 @@ export async function getShipmentForStaff(db: Database, user: AppUser, rawRefere
   if (!SHIPMENT_REFERENCE_PATTERN.test(reference)) return null;
   return withUser(db, user.id, async (tx) => {
     const [shipment] = await tx
-      .select({ ...shipmentColumns, customerName: customers.name, customerEmail: customers.email, quoteReference: quoteRequests.reference })
+      .select({ ...shipmentColumns, customerName: customers.name, customerEmail: customers.email, customerLocale: customers.preferredLocale, quoteReference: quoteRequests.reference })
       .from(shipments)
       .innerJoin(customers, eq(customers.id, shipments.customerId))
       .innerJoin(quotes, eq(quotes.id, shipments.quoteId))
