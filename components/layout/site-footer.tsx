@@ -18,8 +18,11 @@ export function SiteFooter() {
           <Link href="/quote" className="hover:underline">{t("nav.quote")}</Link>
           <Link href="/track" className="hover:underline">{t("nav.track")}</Link>
         </nav>
-        <nav aria-label={t("nav.contact")} className="flex flex-col gap-2 text-sm">
+        <nav aria-label={t("nav2.company")} className="flex flex-col gap-2 text-sm">
+          <Link href="/about" className="hover:underline">{t("nav2.about")}</Link>
+          <Link href="/faq" className="hover:underline">{t("nav2.faq")}</Link>
           <Link href="/contact" className="hover:underline">{t("nav.contact")}</Link>
+          <Link href="/privacy" className="hover:underline">{t("nav2.privacy")}</Link>
         </nav>
       </div>
       <div className="border-t">

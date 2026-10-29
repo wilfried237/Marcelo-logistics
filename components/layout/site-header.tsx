@@ -38,8 +38,9 @@ function LocaleSwitch({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-export function SiteHeader() {
+export function SiteHeader({ showAccount = false }: { showAccount?: boolean }) {
   const t = useTranslations("nav");
+  const t2 = useTranslations("nav2");
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -63,6 +64,11 @@ export function SiteHeader() {
             ))}
           </nav>
           <LocaleSwitch />
+          {showAccount && (
+            <Link href="/login" className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
+              {t2("account")}
+            </Link>
+          )}
           <Button asChild size="sm" className="ml-2">
             <Link href="/quote">{t("quote")}</Link>
           </Button>
@@ -96,6 +102,11 @@ export function SiteHeader() {
                 <Link href="/quote" onClick={close} className="rounded-md px-3 py-3 font-medium hover:bg-secondary">
                   {t("quote")}
                 </Link>
+                {showAccount && (
+                  <Link href="/login" onClick={close} className="rounded-md px-3 py-3 font-medium hover:bg-secondary">
+                    {t2("account")}
+                  </Link>
+                )}
               </nav>
               <div className="px-4 pt-2">
                 <LocaleSwitch onNavigate={close} />

@@ -5,26 +5,34 @@ import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ServiceGrid } from "@/components/services/service-grid";
 import { ContactChannels } from "@/components/contact/contact-channels";
+import { TrackSearch } from "@/components/tracking/track-search";
 
 export default function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
   setRequestLocale(locale);
   const t = useTranslations("home");
+  const tn = useTranslations("nav");
   const steps = [1, 2, 3, 4] as const;
 
   return (
     <>
       <section className="border-b bg-secondary/40">
-        <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
-          <h1 className="max-w-3xl text-4xl font-bold tracking-tight md:text-5xl">{t("hero.title")}</h1>
-          <p className="mt-4 max-w-2xl text-lg text-muted-foreground">{t("hero.subtitle")}</p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href="/quote">{t("hero.quoteCta")}</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link href="/track">{t("hero.trackCta")}</Link>
-            </Button>
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:px-6 md:py-20 lg:grid-cols-[3fr_2fr] lg:items-center">
+          <div>
+            <h1 className="max-w-3xl text-4xl font-bold tracking-tight md:text-5xl">{t("hero.title")}</h1>
+            <p className="mt-4 max-w-2xl text-lg text-muted-foreground">{t("hero.subtitle")}</p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg">
+                <Link href="/quote">{t("hero.quoteCta")}</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link href="/services">{tn("services")}</Link>
+              </Button>
+            </div>
+          </div>
+          <div className="rounded-xl border bg-card p-5 shadow-sm md:p-6">
+            <h2 className="mb-4 text-lg font-semibold">{t("hero.trackCta")}</h2>
+            <TrackSearch locale={locale} />
           </div>
         </div>
       </section>
