@@ -1,5 +1,8 @@
 # Phase 1 — Redesign Specification (all routes)
 
+> **Historical planning document (2026-10-29).** Current status is in [IMPLEMENTATION-STATUS.md](./IMPLEMENTATION-STATUS.md); open owner questions are in [DECISIONS-REQUIRED.md](./DECISIONS-REQUIRED.md). Decision IDs of the form D-nn used below were renumbered there.
+
+
 _Last updated: 2026-10-29 · Status: **specification for review.** Implementation starts only after Phase 0 is merged._
 
 Related: [UI-UX-AUDIT.md](./UI-UX-AUDIT.md) · [PHASE-0-PLAN.md](./PHASE-0-PLAN.md) · [ARCHITECTURE.md](./ARCHITECTURE.md) · [DECISIONS-REQUIRED.md](./DECISIONS-REQUIRED.md)

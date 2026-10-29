@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Logistics platform (Ireland ⇄ Cameroon)
 
-## Getting Started
+Bilingual (EN/FR) website and MVP platform for a logistics and freight-forwarding business: public site, staff-reviewed quote requests, public shipment tracking, customer portal and staff area.
 
-First, run the development server:
+The business name is pending owner confirmation (see `docs/DECISIONS-REQUIRED.md`, B-01).
 
+## Quick start
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
+cp .env.example .env.local
+npm run dev            # http://localhost:3000/en
 ```
+Without Supabase and database settings, the site runs with honest "not available yet" states. For the full stack see [docs/LOCAL-SETUP.md](docs/LOCAL-SETUP.md).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
+| Script | Purpose |
+|---|---|
+| `dev`, `build`, `start` | Next.js (build runs the owner-placeholder and i18n gates first) |
+| `typecheck`, `lint` | Static checks |
+| `test`, `test:db`, `test:e2e` | Vitest (unit, PostgreSQL, integration) and Playwright |
+| `check` | typecheck + lint + i18n + security + tests |
+| `check:i18n`, `check:owner`, `check:security` | Quality gates |
+| `db:generate`, `db:migrate`, `db:seed` | Drizzle migrations (guarded) and local-only seed |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Documentation
+- [Implementation status](docs/IMPLEMENTATION-STATUS.md): what is done, tested and pending
+- [Decisions required](docs/DECISIONS-REQUIRED.md): open owner decisions (answer here)
+- [Architecture](docs/ARCHITECTURE.md) · [Database](docs/DATABASE.md) · [Security](docs/SECURITY.md) · [Testing](docs/TESTING.md) · [Deployment](docs/DEPLOYMENT.md)
+- Earlier audit and planning documents: `docs/UI-UX-AUDIT.md`, `docs/IMPLEMENTATION-ROADMAP.md`, `docs/PHASE-0-PLAN.md`, `docs/PHASE-1-REDESIGN-SPEC.md`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Rules for contributors
+- Never invent business facts, prices, delivery times, reviews or legal text. Use `{{NEEDS_OWNER}}` in `config/owner.ts` or `messages/*.json`.
+- Every user-facing string goes in both `messages/en.json` and `messages/fr.json`.
+- Feature flags default to off. A flag never replaces authorisation.
+- Never use `drizzle-kit push`; never apply migrations to shared databases without approval.

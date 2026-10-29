@@ -1,5 +1,8 @@
 # Marcel Logistics — Implementation Roadmap
 
+> **Historical planning document (2026-10-29).** Current status is in [IMPLEMENTATION-STATUS.md](./IMPLEMENTATION-STATUS.md); open owner questions are in [DECISIONS-REQUIRED.md](./DECISIONS-REQUIRED.md). Decision IDs of the form D-nn used below were renumbered there.
+
+
 _Audit date: 2026-10-29 · Branch audited: `master` @ `dff3ca7` plus uncommitted working-tree changes_
 
 Companion documents:
