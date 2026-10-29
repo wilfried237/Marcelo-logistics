@@ -23,9 +23,9 @@ export const ownerConfig = {
   brand: {
     /**
      * Existing logo file. It reads "MARCHELO LOGISTICS CARGO", so showing it would
-     * choose the business name. Hidden until the owner approves it (B-01, B-03).
+     * choose the business name. Hidden until the owner approves it (B-01, A-01).
      */
-    logo: { src: "/LOGO.png", width: 500, height: 500, approved: false }, // {{NEEDS_OWNER}} B-03
+    logo: { src: "/LOGO.png", width: 500, height: 500, approved: false }, // {{NEEDS_OWNER}} A-01
   },
 
   contact: {
