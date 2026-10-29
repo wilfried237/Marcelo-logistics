@@ -25,6 +25,7 @@ export function findPlaceholders(files = OWNER_CONTENT) {
   return hits;
 }
 
+/** @param {Record<string, string | undefined>} [env] */
 export function isReleaseBuild(env = process.env) {
   return env.RELEASE_BUILD === "true" || env.VERCEL_ENV === "production";
 }

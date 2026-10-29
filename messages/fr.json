@@ -1,275 +1,180 @@
 {
-  "navigation": {
-    "logo": {
-      "alt": "Machelo Logistics",
-      "title": "Machelo Logistics"
-    },
-    "menu": {
-      "home": "Accueil",
-      "services": "Services",
-      "about": "À propos",
-      "ourWork": "Nos Réalisations",
-      "contact": "Contact"
-    },
-    "subMenu": {
-      "getQuote": {
-        "title": "Obtenir un Devis",
-        "description": "Design propre, aligné à la marque et responsive"
-      },
-      "trackShipment": {
-        "title": "Suivre un Envoi",
-        "description": "Pages d'accueil aux plateformes numériques complètes"
-      },
-      "portal": {
-        "title": "Portail",
-        "description": "Structure, contenu et conseils de promotion"
-      },
-      "whatWeDo": {
-        "title": "Ce que nous faisons",
-        "description": "Sécurité, mises à jour et améliorations continues"
-      }
-    },
-    "auth": {
-      "login": "Connexion",
-      "signup": "S'inscrire"
-    }
+  "brand": {
+    "name": "{{NEEDS_OWNER}}",
+    "pending": "Nom de l’entreprise en attente de confirmation",
+    "tagline": "Logistique entre l’Irlande et le Cameroun"
   },
-  "hero": {
-    "title": "Votre partenaire de confiance pour la logistique mondiale",
-    "subtitle": "Marchelo Logistics offre des solutions expertes d'expédition et de logistique, créant des chaînes d'approvisionnement fluides avec un service de qualité et une portée mondiale.",
-    "buttons": {
-      "getStarted": "Commencer",
-      "viewServices": "Voir les Services"
-    }
+  "metadata": {
+    "title": "Logistique entre l’Irlande et le Cameroun",
+    "description": "Demandez un devis et suivez vos envois entre l’Irlande et le Cameroun. Chaque devis est vérifié par notre équipe."
   },
-  "stats": {
-    "experience": {
-      "number": "5+",
-      "label": "Années d'Expérience"
-    },
-    "countries": {
-      "number": "50+",
-      "label": "Pays Desservis"
-    },
-    "shipments": {
-      "number": "1000+",
-      "label": "Expéditions Livrées"
-    },
-    "satisfaction": {
-      "number": "99%",
-      "label": "Satisfaction Client"
-    }
+  "nav": {
+    "home": "Accueil",
+    "services": "Services",
+    "quote": "Demander un devis",
+    "track": "Suivre",
+    "contact": "Contact",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "language": "Langue",
+    "skipToContent": "Aller au contenu principal"
   },
-  "about": {
-    "heading": "À propos de nous",
-    "subheading": "Spécialistes de la logistique mondiale",
-    "paragraph1": "Bienvenue chez Marchelo Logistics, vos experts logistiques mondiaux de confiance, dédiés à connecter les entreprises du monde entier avec précision et soin. Avec des années d'expérience en expédition internationale, dédouanement et gestion de la chaîne d'approvisionnement, nous sommes fiers d'offrir un service de haute qualité et une expérience client fluide.",
-    "paragraph2": "Notre mission est d'acheminer votre cargo en toute sécurité à destination tout en garantissant une communication claire et des conseils d'experts à chaque étape. Créons ensemble une solution logistique en laquelle vous pouvez avoir confiance !",
-    "learnMoreButton": "En Savoir Plus"
+  "home": {
+    "hero": {
+      "title": "Logistique et transit entre l’Irlande et le Cameroun",
+      "subtitle": "Dites-nous ce que vous souhaitez envoyer. Notre équipe examine chaque demande et vous contacte avec un devis.",
+      "quoteCta": "Demander un devis",
+      "trackCta": "Suivre un envoi"
+    },
+    "services": {
+      "heading": "Ce que nous pouvons faire pour vous",
+      "intro": "Les catégories de services ci-dessous sont en cours de confirmation. Parlez-nous de votre envoi et nous vous dirons ce qui est disponible.",
+      "availability": "Disponibilité à confirmer"
+    },
+    "process": {
+      "heading": "Comment ça marche",
+      "step1Title": "Envoyez une demande",
+      "step1Body": "Décrivez ce que vous voulez expédier et sa destination.",
+      "step2Title": "Nous l’examinons",
+      "step2Body": "Un membre de notre équipe vérifie votre demande et peut vous demander des précisions.",
+      "step3Title": "Vous recevez un devis",
+      "step3Body": "Nous vous envoyons un prix établi pour votre envoi. Rien n’est facturé automatiquement.",
+      "step4Title": "Suivez votre envoi",
+      "step4Body": "Une fois votre envoi réservé, utilisez votre référence pour suivre son avancement enregistré."
+    },
+    "about": {
+      "heading": "Qui sommes-nous",
+      "body": "Nous sommes une entreprise bilingue (anglais et français) de logistique et de transit, spécialisée dans les envois entre l’Irlande et le Cameroun."
+    }
   },
   "services": {
-    "heading": "Services",
-    "subheading": "Ce que nous faisons",
-    "description": "Découvrez lequel de nos services correspond aux besoins de votre expédition",
-    "items": {
-      "freightForwarding": {
-        "title": "Transit de Marchandises",
-        "description": "Services complets de transit pour le transport aérien, maritime et terrestre. Nous gérons tout, de la documentation au dédouanement, garantissant que votre cargo arrive à destination efficacement et à temps."
-      },
-      "customsClearance": {
-        "title": "Dédouanement",
-        "description": "Services experts de dédouanement pour naviguer dans les réglementations internationales complexes. Notre équipe expérimentée assure un traitement fluide et la conformité avec toutes les exigences d'import/export."
-      },
-      "expressShipping": {
-        "title": "Expédition Express",
-        "description": "Solutions d'expédition express rapides et fiables pour les cargaisons urgentes. Nous offrons des délais de livraison garantis et un suivi en temps réel pour votre tranquillité d'esprit."
-      },
-      "supplyChainManagement": {
-        "title": "Gestion de la Chaîne d'Approvisionnement",
-        "description": "Services de gestion complète de la chaîne d'approvisionnement pour optimiser vos opérations logistiques. De l'entreposage à la distribution, nous rationalisons l'ensemble de votre processus."
-      },
-      "projectCargo": {
-        "title": "Cargo de Projet",
-        "description": "Manipulation spécialisée pour les cargaisons surdimensionnées et lourdes. Notre expertise en logistique complexe garantit une livraison sûre et ponctuelle de vos expéditions les plus difficiles."
-      },
-      "internationalTrade": {
-        "title": "Commerce International",
-        "description": "Solutions complètes de commerce international incluant la documentation, la conformité et l'accès au marché. Nous vous aidons à naviguer dans les marchés mondiaux avec confiance."
-      }
+    "parcels": {
+      "title": "Colis et effets personnels",
+      "description": "Objets personnels et colis envoyés à vos proches ou à vous-même."
+    },
+    "barrels": {
+      "title": "Fûts et cartons",
+      "description": "Fûts et cartons remplis d’articles ménagers et d’effets personnels."
+    },
+    "air_freight": {
+      "title": "Fret aérien",
+      "description": "Envois par avion lorsque la rapidité compte plus que le coût."
+    },
+    "sea_freight": {
+      "title": "Fret maritime et conteneurs",
+      "description": "Volumes plus importants expédiés par mer, en conteneur partagé ou complet."
+    },
+    "vehicle": {
+      "title": "Transport de véhicules",
+      "description": "Voitures et autres véhicules expédiés jusqu’à destination."
+    },
+    "commercial_cargo": {
+      "title": "Marchandises commerciales",
+      "description": "Marchandises expédiées pour des entreprises et des commerçants."
     }
   },
-  "work": {
-    "heading": "Nos réalisations",
-    "subheading": "Inspirez-vous de notre travail",
-    "description": "Voyez comment nous avons connecté les entreprises du monde entier grâce à notre expertise logistique et notre attention aux détails.",
-    "caseStudy": {
-      "title": "Optimisation de la Chaîne d'Approvisionnement Mondiale",
-      "description": "Cette transformation logistique a apporté une connectivité fluide et une efficacité améliorée aux opérations mondiales de notre client. Nous avons mis en place un routage personnalisé, un suivi en temps réel et des processus douaniers optimisés, créant une chaîne d'approvisionnement fiable et rentable parfaite pour le commerce international.",
-      "category": "Logistique",
-      "duration": "6 mois",
-      "testimonial": {
-        "quote": "Marchelo Logistics a complètement transformé notre chaîne d'approvisionnement, la rendant à la fois efficace et hautement fiable. Le service était exceptionnel, et l'équipe était professionnelle et communicative tout au long du processus. Nous ne pourrions pas être plus satisfaits du résultat !",
-        "author": "Sarah Johnson - Responsable des Opérations Mondiales"
-      }
-    }
+  "contact": {
+    "title": "Contactez-nous",
+    "description": "Une question sur un envoi ou un devis ? Contactez-nous.",
+    "pending": "Nos coordonnées sont en cours de confirmation et seront publiées ici prochainement.",
+    "phoneIreland": "Irlande",
+    "phoneCameroon": "Cameroun",
+    "email": "E-mail",
+    "whatsapp": "WhatsApp"
   },
   "quote": {
     "hero": {
-      "title": "Obtenez Votre Devis d'Expédition",
-      "subtitle": "Parlez-nous de votre expédition et nous vous fournirons un devis compétitif dans les 24 heures."
+      "title": "Demander un devis",
+      "subtitle": "Parlez-nous de votre envoi. Notre équipe examine chaque demande et vous contacte avec un devis."
+    },
+    "unavailable": {
+      "title": "Les demandes en ligne sont temporairement indisponibles",
+      "body": "Nous ne pouvons pas encore recevoir de demandes de devis via ce site. Rien de ce que vous saisissez ici n’est envoyé ni enregistré."
     },
     "shipmentTypes": {
-      "title": "Type d'Expédition",
-      "description": "Choisissez le type d'expédition dont vous avez besoin",
+      "title": "Type d’envoi",
+      "description": "Choisissez le type d’envoi dont vous avez besoin",
       "options": {
         "car": {
-          "label": "Expédition de Voiture",
-          "description": "Transport de véhicules"
+          "label": "Véhicule",
+          "description": "Voiture ou autre véhicule"
         },
         "parcel": {
-          "label": "Livraison de Colis",
-          "description": "Expédition de petits paquets"
+          "label": "Colis",
+          "description": "Colis et effets personnels"
         },
         "container": {
-          "label": "Expédition de Conteneur",
-          "description": "Chargements complets de conteneur"
+          "label": "Conteneur",
+          "description": "Fret maritime et conteneurs"
         },
         "airExpress": {
-          "label": "Express Aérien",
-          "description": "Fret aérien rapide"
+          "label": "Fret aérien",
+          "description": "Envois par avion"
         },
         "freight": {
-          "label": "Transit de Marchandises",
-          "description": "Expédition de cargo général"
+          "label": "Marchandises commerciales",
+          "description": "Marchandises pour les entreprises"
         }
       }
     },
     "form": {
-      "title": "Détails de l'Expédition",
-      "description": "Fournissez les détails de votre expédition",
+      "title": "Détails de l’envoi",
+      "description": "Donnez-nous les détails de votre envoi",
       "fields": {
         "origin": "Origine",
-        "destination": "Pays de Destination",
-        "destinationPlaceholder": "Sélectionnez le pays de destination",
-        "weight": "Poids (kg)",
-        "weightPlaceholder": "Entrez le poids en kg",
-        "dimensions": "Dimensions (L×l×H cm)",
-        "dimensionsPlaceholder": "ex: 100×50×30",
-        "description": "Description de l'Expédition",
-        "descriptionPlaceholder": "Décrivez votre expédition (optionnel)",
-        "contactInfo": "Informations de Contact",
-        "fullName": "Nom Complet",
-        "fullNamePlaceholder": "Entrez votre nom complet",
-        "email": "Email",
-        "emailPlaceholder": "Entrez votre email",
-        "phone": "Numéro de Téléphone",
-        "phonePlaceholder": "Entrez votre numéro de téléphone"
+        "destination": "Pays de destination",
+        "destinationPlaceholder": "Choisissez le pays de destination",
+        "weight": "Poids approximatif (kg)",
+        "weightPlaceholder": "Poids en kg",
+        "dimensions": "Dimensions approximatives (L×l×H cm)",
+        "dimensionsPlaceholder": "ex. 100×50×30",
+        "description": "Description de l’envoi",
+        "descriptionPlaceholder": "Décrivez votre envoi (facultatif)",
+        "contactInfo": "Coordonnées",
+        "fullName": "Nom complet",
+        "fullNamePlaceholder": "Votre nom complet",
+        "email": "E-mail",
+        "emailPlaceholder": "vous@exemple.com",
+        "phone": "Numéro de téléphone",
+        "phonePlaceholder": "Avec l’indicatif du pays"
       },
       "buttons": {
-        "submit": "Demander un Devis",
-        "processing": "Traitement en cours..."
+        "submit": "Envoyer la demande de devis",
+        "processing": "Envoi…"
+      },
+      "errors": {
+        "unavailable": "Votre demande n’a pas été envoyée : les demandes en ligne ne sont pas encore disponibles. Vos informations sont toujours sur cette page.",
+        "generic": "Votre demande n’a pas été envoyée à cause d’un problème technique. Vos informations sont toujours sur cette page ; veuillez réessayer plus tard."
       }
     },
     "selectedSummary": {
-      "prefix": "Sélectionné :"
-    },
-    "success": {
-      "title": "Demande de Devis Envoyée !",
-      "message": "Merci pour votre demande de devis. Notre équipe examinera vos besoins et vous répondra dans les 24 heures avec un devis détaillé.",
-      "buttons": {
-        "backToHome": "Retour à l'Accueil",
-        "submitAnother": "Soumettre un Autre Devis"
-      }
-    }
-  },
-  "portal": {
-    "hero": {
-      "title": "Portail Client",
-      "subtitle": "Gérez vos expéditions, devis et documents"
-    },
-    "buttons": {
-      "settings": "Paramètres",
-      "newQuote": "Nouveau Devis"
-    },
-    "tabs": {
-      "shipments": "Expéditions",
-      "quotes": "Devis",
-      "documents": "Documents"
-    },
-    "search": {
-      "placeholder": "Rechercher {tab}...",
-      "filter": "Filtrer"
-    },
-    "shipments": {
-      "totalCost": "Coût Total",
-      "buttons": {
-        "track": "Suivre",
-        "invoice": "Facture"
-      }
-    },
-    "quotes": {
-      "quotePrefix": "Devis #",
-      "estimatedCost": "Coût Estimé",
-      "to": "Vers :",
-      "weight": "Poids :",
-      "buttons": {
-        "view": "Voir",
-        "book": "Réserver"
-      }
-    },
-    "documents": {
-      "empty": {
-        "title": "Aucun Document Disponible",
-        "description": "Les documents apparaîtront ici une fois que vous aurez des expéditions actives",
-        "button": "Créer une Nouvelle Expédition"
-      }
+      "prefix": "Sélection :"
     }
   },
   "track": {
     "hero": {
-      "title": "Suivez Votre Expédition",
-      "subtitle": "Entrez votre numéro de suivi ou de réservation pour obtenir des mises à jour en temps réel sur votre expédition"
+      "title": "Suivre votre envoi",
+      "subtitle": "Saisissez la référence de votre envoi pour voir le dernier avancement enregistré par notre équipe."
     },
     "form": {
-      "title": "Suivre l'Expédition",
-      "description": "Entrez votre numéro de suivi ou votre référence de réservation",
-      "placeholder": "Entrez le numéro de suivi (ex: ML123456789)",
+      "title": "Référence de l’envoi",
+      "description": "Votre référence figure sur votre confirmation de réservation.",
+      "placeholder": "ex. MLAB12CD34EF",
       "buttons": {
         "track": "Suivre",
-        "searching": "Recherche en cours..."
+        "searching": "Recherche…"
       },
       "errors": {
-        "notFound": "Numéro de suivi introuvable. Veuillez vérifier votre numéro et réessayer.",
-        "generic": "Erreur lors de la récupération des informations de suivi. Veuillez réessayer."
+        "notFound": "Nous n’avons trouvé aucun envoi avec cette référence. Vérifiez la référence et réessayez.",
+        "generic": "Nous n’avons pas pu vérifier cette référence à cause d’un problème technique. Veuillez réessayer plus tard."
       }
     },
     "shipment": {
       "status": {
-        "title": "Statut de l'Expédition",
-        "tracking": "Suivi :",
-        "booking": "Réservation :"
-      },
-      "details": {
-        "origin": "Origine",
-        "destination": "Destination",
-        "estimatedDelivery": "Livraison Est.",
-        "currentLocation": "Emplacement Actuel"
+        "tracking": "Référence :"
       },
       "timeline": {
-        "title": "Chronologie de Suivi",
-        "description": "Mises à jour en temps réel sur le parcours de votre expédition"
-      },
-      "information": {
-        "title": "Détails de l'Expédition",
-        "weight": "Poids",
-        "dimensions": "Dimensions",
-        "service": "Service",
-        "carrier": "Transporteur"
-      },
-      "actions": {
-        "downloadInvoice": "Télécharger la Facture",
-        "viewDocuments": "Voir les Documents",
-        "trackAnother": "Suivre une Autre Expédition"
+        "title": "Avancement"
       }
     },
     "milestones": {
@@ -280,216 +185,16 @@
       "DELIVERED": "Livré"
     }
   },
-  "login": {
-    "company": "Votre Entreprise",
-    "testimonial": {
-      "quote": "Cette bibliothèque m'a fait économiser d'innombrables heures de travail et m'a aidé à livrer des designs époustouflants à mes clients plus rapidement que jamais.",
-      "author": "Sofia Davis"
-    },
-    "form": {
-      "title": "Créer un compte",
-      "subtitle": "Entrez votre email ci-dessous pour créer votre compte"
-    }
-  },
-  "common": {
-    "imageAlt": "Démo"
-  },
-  "contact": {
-    "title": "Contactez-nous",
-    "description": "Nous sommes disponibles pour vos questions, retours ou opportunités de collaboration. Dites-nous comment nous pouvons vous aider !",
-    "details": {
-      "heading": "Coordonnées",
-      "irelandTel": "Tél. Irlande :",
-      "cameroonTel": "Tél. Cameroun :",
-      "email": "Email :",
-      "web": "Site web :"
-    },
-    "form": {
-      "firstName": {
-        "label": "Prénom",
-        "placeholder": "Prénom"
-      },
-      "lastName": {
-        "label": "Nom",
-        "placeholder": "Nom"
-      },
-      "email": {
-        "label": "Email",
-        "placeholder": "Email"
-      },
-      "subject": {
-        "label": "Sujet",
-        "placeholder": "Sujet"
-      },
-      "message": {
-        "label": "Message",
-        "placeholder": "Tapez votre message ici."
-      },
-      "button": "Envoyer le message"
-    }
-  },
-  "testimonials": {
-    "heading": "Apprécié par des équipes dans le monde entier",
-    "subheading": "Découvrez ce que nos clients disent de leur expérience avec notre plateforme.",
-    "badge": "Client vérifié",
-    "items": [
-      {
-        "name": "Sarah Chen",
-        "role": "Chef de produit",
-        "company": "TechCorp",
-        "image": "/avatars/sarah.jpg",
-        "content": "Ce produit a complètement transformé notre manière de gérer nos opérations quotidiennes. Les gains d’efficacité sont remarquables et l’interface utilisateur est intuitive. Fortement recommandé pour toute équipe cherchant à optimiser son flux de travail.",
-        "rating": 5
-      },
-      {
-        "name": "Michael Rodriguez",
-        "role": "Développeur senior",
-        "company": "DevStudio",
-        "image": "/avatars/michael.jpg",
-        "content": "L’intégration a été fluide et l’équipe de support a été incroyablement utile tout au long du processus. Les fonctionnalités sont exactement ce qu’il nous fallait pour faire évoluer notre flux de développement.",
-        "rating": 5
-      },
-      {
-        "name": "Emily Watson",
-        "role": "Directrice marketing",
-        "company": "GrowthCo",
-        "image": "/avatars/emily.jpg",
-        "content": "Nous avons constaté une augmentation de 40 % de la productivité depuis la mise en place de cette solution. Les fonctionnalités d’analyse et de reporting offrent des insights précieux pour prendre des décisions basées sur les données.",
-        "rating": 5
-      },
-      {
-        "name": "David Kim",
-        "role": "CTO",
-        "company": "StartupXYZ",
-        "image": "/avatars/david.jpg",
-        "content": "En tant que startup en croissance, nous avions besoin d’une solution capable de s’adapter à notre évolution. Cette plateforme a dépassé nos attentes et continue d’apporter de la valeur à mesure que nous grandissons.",
-        "rating": 5
-      },
-      {
-        "name": "Lisa Thompson",
-        "role": "Responsable des opérations",
-        "company": "Enterprise Inc",
-        "image": "/avatars/lisa.jpg",
-        "content": "Les fonctionnalités d’automatisation nous ont fait gagner un temps considérable. L’équipe a su répondre à nos besoins spécifiques et a livré une solution parfaitement adaptée.",
-        "rating": 5
-      },
-      {
-        "name": "James Wilson",
-        "role": "Chef de projet",
-        "company": "Innovation Labs",
-        "image": "/avatars/james.jpg",
-        "content": "Des performances et une fiabilité exceptionnelles. La plateforme est devenue un outil essentiel de notre gestion de projet. Le service client est exemplaire.",
-        "rating": 5
-      }
-    ]
+  "auth": {
+    "unavailableTitle": "Les comptes ne sont pas encore disponibles",
+    "unavailableBody": "Les comptes clients et du personnel sont en préparation. Vous pouvez déjà demander un devis ou suivre un envoi sans compte.",
+    "loginTitle": "Se connecter",
+    "registerTitle": "Créer un compte",
+    "backHome": "Retour à l’accueil"
   },
   "footer": {
-    "tagline": "Des composants simples à utiliser.",
-    "menuItems": [
-      {
-        "title": "Produit",
-        "links": [
-          {
-            "text": "Aperçu",
-            "url": "#"
-          },
-          {
-            "text": "Tarifs",
-            "url": "#"
-          },
-          {
-            "text": "Marketplace",
-            "url": "#"
-          },
-          {
-            "text": "Fonctionnalités",
-            "url": "#"
-          },
-          {
-            "text": "Intégrations",
-            "url": "#"
-          },
-          {
-            "text": "Tarifs",
-            "url": "#"
-          }
-        ]
-      },
-      {
-        "title": "Entreprise",
-        "links": [
-          {
-            "text": "À propos",
-            "url": "#"
-          },
-          {
-            "text": "Équipe",
-            "url": "#"
-          },
-          {
-            "text": "Blog",
-            "url": "#"
-          },
-          {
-            "text": "Carrières",
-            "url": "#"
-          },
-          {
-            "text": "Contact",
-            "url": "#"
-          },
-          {
-            "text": "Confidentialité",
-            "url": "#"
-          }
-        ]
-      },
-      {
-        "title": "Ressources",
-        "links": [
-          {
-            "text": "Aide",
-            "url": "#"
-          },
-          {
-            "text": "Ventes",
-            "url": "#"
-          },
-          {
-            "text": "Publicité",
-            "url": "#"
-          }
-        ]
-      },
-      {
-        "title": "Réseaux sociaux",
-        "links": [
-          {
-            "text": "Twitter",
-            "url": "#"
-          },
-          {
-            "text": "Instagram",
-            "url": "#"
-          },
-          {
-            "text": "LinkedIn",
-            "url": "#"
-          }
-        ]
-      }
-    ],
-    "copyright": "© 2024 Shadcnblocks.com. Tous droits réservés.",
-    "bottomLinks": [
-      {
-        "text": "Conditions générales",
-        "url": "#"
-      },
-      {
-        "text": "Politique de confidentialité",
-        "url": "#"
-      }
-    ]
+    "rights": "Tous droits réservés.",
+    "pendingDetails": "Les informations sur l’entreprise et les mentions légales seront publiées une fois confirmées."
   },
   "preview": {
     "banner": "Aperçu uniquement : cet espace n’est pas relié à des données réelles et n’est pas accessible aux clients."

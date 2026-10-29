@@ -1,0 +1,6 @@
+{
+  "version": "0.2",
+  "language": "en-GB",
+  "ignorePaths": ["node_modules", ".next", "drizzle/**", "messages/fr.json", "**/*.fr.*", "package-lock.json"],
+  "words": ["Drizzle", "drizzle", "Supabase", "supabase", "PGlite", "pglite", "Resend", "shadcn", "lucide", "Lucide", "Marchelo", "Machelo", "Hostinger", "oklch", "noindex", "RLS", "authorisation", "colour", "colours", "behaviour", "organisation", "licence", "stabilisation", "MLAB", "MLDEMO", "Douala", "Yaoundé", "Cameroun", "Irlande"]
+}

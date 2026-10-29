@@ -1,275 +1,180 @@
 {
-  "hero": {
-    "title": "Your trusted partner for global logistics",
-    "subtitle": "Marchelo Logistics delivers expert shipping and logistics solutions, creating seamless supply chains with quality service and global reach.",
-    "buttons": {
-      "getStarted": "Get Started",
-      "viewServices": "View Services"
-    }
+  "brand": {
+    "name": "{{NEEDS_OWNER}}",
+    "pending": "Business name pending confirmation",
+    "tagline": "Logistics between Ireland and Cameroon"
   },
-  "stats": {
-    "experience": {
-      "number": "5+",
-      "label": "Years Experience"
-    },
-    "countries": {
-      "number": "50+",
-      "label": "Countries Served"
-    },
-    "shipments": {
-      "number": "1000+",
-      "label": "Shipments Delivered"
-    },
-    "satisfaction": {
-      "number": "99%",
-      "label": "Client Satisfaction"
-    }
+  "metadata": {
+    "title": "Logistics between Ireland and Cameroon",
+    "description": "Request a quote and track shipments between Ireland and Cameroon. Every quote is reviewed by our team."
   },
-  "about": {
-    "heading": "About us",
-    "subheading": "Global logistics specialists",
-    "paragraph1": "Welcome to Marchelo Logistics, your trusted global logistics experts, dedicated to connecting businesses worldwide with precision and care. With years of experience in international shipping, customs clearance, and supply chain management, we take pride in delivering top-quality service and a seamless customer experience.",
-    "paragraph2": "Our mission is to bring your cargo safely to its destination while ensuring clear communication and expert guidance at every step. Let's create a logistics solution you can trust!",
-    "learnMoreButton": "Learn More"
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "quote": "Get a quote",
+    "track": "Track",
+    "contact": "Contact",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "language": "Language",
+    "skipToContent": "Skip to main content"
+  },
+  "home": {
+    "hero": {
+      "title": "Logistics and freight forwarding between Ireland and Cameroon",
+      "subtitle": "Tell us what you need to send. Our team reviews every request and contacts you with a quote.",
+      "quoteCta": "Request a quote",
+      "trackCta": "Track a shipment"
+    },
+    "services": {
+      "heading": "What we can help with",
+      "intro": "The service categories below are being confirmed. Ask us about your shipment and we will tell you what is available.",
+      "availability": "Availability to be confirmed"
+    },
+    "process": {
+      "heading": "How it works",
+      "step1Title": "Send a request",
+      "step1Body": "Describe what you want to ship and where it is going.",
+      "step2Title": "We review it",
+      "step2Body": "A member of our team checks your request and may ask for more details.",
+      "step3Title": "You receive a quote",
+      "step3Body": "We send you a price prepared for your shipment. Nothing is charged automatically.",
+      "step4Title": "Track your shipment",
+      "step4Body": "Once your shipment is booked, use your reference to follow its recorded progress."
+    },
+    "about": {
+      "heading": "About us",
+      "body": "We are a bilingual (English and French) logistics and freight-forwarding business focused on shipments between Ireland and Cameroon."
+    }
   },
   "services": {
-    "heading": "Services",
-    "subheading": "What we do",
-    "description": "Find out which one of our services fits the needs of your shipment",
-    "items": {
-      "freightForwarding": {
-        "title": "Freight Forwarding",
-        "description": "Comprehensive freight forwarding services for air, sea, and land transportation. We handle everything from documentation to customs clearance, ensuring your cargo reaches its destination efficiently and on time."
-      },
-      "customsClearance": {
-        "title": "Customs Clearance",
-        "description": "Expert customs clearance services to navigate complex international regulations. Our experienced team ensures smooth processing and compliance with all import/export requirements."
-      },
-      "expressShipping": {
-        "title": "Express Shipping",
-        "description": "Fast and reliable express shipping solutions for time-sensitive cargo. We offer guaranteed delivery times and real-time tracking for your peace of mind."
-      },
-      "supplyChainManagement": {
-        "title": "Supply Chain Management",
-        "description": "End-to-end supply chain management services to optimize your logistics operations. From warehousing to distribution, we streamline your entire process."
-      },
-      "projectCargo": {
-        "title": "Project Cargo",
-        "description": "Specialized handling for oversized and heavy project cargo. Our expertise in complex logistics ensures safe and timely delivery of your most challenging shipments."
-      },
-      "internationalTrade": {
-        "title": "International Trade",
-        "description": "Complete international trade solutions including documentation, compliance, and market access. We help you navigate global markets with confidence."
-      }
+    "parcels": {
+      "title": "Parcels and personal effects",
+      "description": "Personal items and parcels sent to family, friends or yourself."
+    },
+    "barrels": {
+      "title": "Barrels and boxes",
+      "description": "Barrels and boxes packed with household goods and personal belongings."
+    },
+    "air_freight": {
+      "title": "Air freight",
+      "description": "Shipments sent by air when speed matters more than cost."
+    },
+    "sea_freight": {
+      "title": "Sea freight and containers",
+      "description": "Larger volumes shipped by sea, shared or full containers."
+    },
+    "vehicle": {
+      "title": "Vehicle transport",
+      "description": "Cars and other vehicles shipped to their destination."
+    },
+    "commercial_cargo": {
+      "title": "Commercial cargo",
+      "description": "Goods shipped for businesses and traders."
     }
   },
-  "work": {
-    "heading": "Our work",
-    "subheading": "Get inspired by our work",
-    "description": "See how we've connected businesses worldwide with our expert logistics and attention to detail.",
-    "caseStudy": {
-      "title": "Global Supply Chain Optimization",
-      "description": "This logistics transformation brought seamless connectivity and enhanced efficiency to our client's global operations. We implemented custom routing, real-time tracking, and optimized customs processes, creating a reliable and cost-effective supply chain perfect for international trade.",
-      "category": "Logistics",
-      "duration": "6 months",
-      "testimonial": {
-        "quote": "Marchelo Logistics completely transformed our supply chain, making it both efficient and highly reliable. The service was outstanding, and the team was professional and communicative throughout. We couldn't be happier with the result!",
-        "author": "Sarah Johnson - Global Operations Manager"
-      }
-    }
-  },
-  "navigation": {
-    "logo": {
-      "alt": "Machelo Logistics",
-      "title": "Machelo Logistics"
-    },
-    "menu": {
-      "home": "Home",
-      "services": "Services",
-      "about": "About",
-      "ourWork": "Our Work",
-      "contact": "Contact"
-    },
-    "subMenu": {
-      "getQuote": {
-        "title": "Get Quote",
-        "description": "Clean, brand-aligned, responsive design"
-      },
-      "trackShipment": {
-        "title": "Track Shipment",
-        "description": "Landing pages to full digital platforms"
-      },
-      "portal": {
-        "title": "Portal",
-        "description": "Structure, content, and promotion guidance"
-      },
-      "whatWeDo": {
-        "title": "What we do",
-        "description": "Security, updates, and continuous improvements"
-      }
-    },
-    "auth": {
-      "login": "Login",
-      "signup": "Sign up"
-    }
+  "contact": {
+    "title": "Contact us",
+    "description": "Questions about a shipment or a quote? Get in touch.",
+    "pending": "Our contact details are being confirmed and will be published here shortly.",
+    "phoneIreland": "Ireland",
+    "phoneCameroon": "Cameroon",
+    "email": "Email",
+    "whatsapp": "WhatsApp"
   },
   "quote": {
     "hero": {
-      "title": "Get Your Shipping Quote",
-      "subtitle": "Tell us about your shipment and we'll provide you with a competitive quote within 24 hours."
+      "title": "Request a quote",
+      "subtitle": "Tell us about your shipment. Our team reviews every request and contacts you with a quote."
+    },
+    "unavailable": {
+      "title": "Online requests are temporarily unavailable",
+      "body": "We cannot receive quote requests through this website yet. Nothing you enter here is sent or stored."
     },
     "shipmentTypes": {
-      "title": "Shipment Type",
+      "title": "Shipment type",
       "description": "Choose the type of shipment you need",
       "options": {
         "car": {
-          "label": "Car Shipping",
-          "description": "Vehicle transportation"
+          "label": "Vehicle",
+          "description": "Car or other vehicle"
         },
         "parcel": {
-          "label": "Parcel Delivery",
-          "description": "Small package shipping"
+          "label": "Parcel",
+          "description": "Parcels and personal effects"
         },
         "container": {
-          "label": "Container Shipping",
-          "description": "Full container loads"
+          "label": "Container",
+          "description": "Sea freight and containers"
         },
         "airExpress": {
-          "label": "Air Express",
-          "description": "Fast air freight"
+          "label": "Air freight",
+          "description": "Shipments sent by air"
         },
         "freight": {
-          "label": "Freight Forwarding",
-          "description": "General cargo shipping"
+          "label": "Commercial cargo",
+          "description": "Goods for businesses"
         }
       }
     },
     "form": {
-      "title": "Shipment Details",
+      "title": "Shipment details",
       "description": "Provide details about your shipment",
       "fields": {
         "origin": "Origin",
-        "destination": "Destination Country",
+        "destination": "Destination country",
         "destinationPlaceholder": "Select destination country",
-        "weight": "Weight (kg)",
-        "weightPlaceholder": "Enter weight in kg",
-        "dimensions": "Dimensions (L×W×H cm)",
-        "dimensionsPlaceholder": "e.g., 100×50×30",
-        "description": "Shipment Description",
+        "weight": "Approximate weight (kg)",
+        "weightPlaceholder": "Weight in kg",
+        "dimensions": "Approximate dimensions (L×W×H cm)",
+        "dimensionsPlaceholder": "e.g. 100×50×30",
+        "description": "Shipment description",
         "descriptionPlaceholder": "Describe your shipment (optional)",
-        "contactInfo": "Contact Information",
-        "fullName": "Full Name",
-        "fullNamePlaceholder": "Enter your full name",
+        "contactInfo": "Contact information",
+        "fullName": "Full name",
+        "fullNamePlaceholder": "Your full name",
         "email": "Email",
-        "emailPlaceholder": "Enter your email",
-        "phone": "Phone Number",
-        "phonePlaceholder": "Enter your phone number"
+        "emailPlaceholder": "you@example.com",
+        "phone": "Phone number",
+        "phonePlaceholder": "Including country code"
       },
       "buttons": {
-        "submit": "Request Quote",
-        "processing": "Processing..."
+        "submit": "Send quote request",
+        "processing": "Sending…"
+      },
+      "errors": {
+        "unavailable": "Your request was not sent: online requests are not available yet. Your details are still on this page.",
+        "generic": "Your request was not sent because of a technical problem. Your details are still on this page; please try again later."
       }
     },
     "selectedSummary": {
       "prefix": "Selected:"
-    },
-    "success": {
-      "title": "Quote Request Submitted!",
-      "message": "Thank you for your quote request. Our team will review your requirements and get back to you within 24 hours with a detailed quote.",
-      "buttons": {
-        "backToHome": "Back to Home",
-        "submitAnother": "Submit Another Quote"
-      }
-    }
-  },
-  "portal": {
-    "hero": {
-      "title": "Client Portal",
-      "subtitle": "Manage your shipments, quotes, and documents"
-    },
-    "buttons": {
-      "settings": "Settings",
-      "newQuote": "New Quote"
-    },
-    "tabs": {
-      "shipments": "Shipments",
-      "quotes": "Quotes",
-      "documents": "Documents"
-    },
-    "search": {
-      "placeholder": "Search {tab}...",
-      "filter": "Filter"
-    },
-    "shipments": {
-      "totalCost": "Total Cost",
-      "buttons": {
-        "track": "Track",
-        "invoice": "Invoice"
-      }
-    },
-    "quotes": {
-      "quotePrefix": "Quote #",
-      "estimatedCost": "Estimated Cost",
-      "to": "To:",
-      "weight": "Weight:",
-      "buttons": {
-        "view": "View",
-        "book": "Book"
-      }
-    },
-    "documents": {
-      "empty": {
-        "title": "No Documents Available",
-        "description": "Documents will appear here once you have active shipments",
-        "button": "Create New Shipment"
-      }
     }
   },
   "track": {
     "hero": {
-      "title": "Track Your Shipment",
-      "subtitle": "Enter your tracking or booking number to get real-time updates on your shipment"
+      "title": "Track your shipment",
+      "subtitle": "Enter your shipment reference to see the latest progress recorded by our team."
     },
     "form": {
-      "title": "Track Shipment",
-      "description": "Enter your tracking number or booking reference",
-      "placeholder": "Enter tracking number (e.g., ML123456789)",
+      "title": "Shipment reference",
+      "description": "Your reference is on your booking confirmation.",
+      "placeholder": "e.g. MLAB12CD34EF",
       "buttons": {
         "track": "Track",
-        "searching": "Searching..."
+        "searching": "Searching…"
       },
       "errors": {
-        "notFound": "Tracking number not found. Please check your number and try again.",
-        "generic": "Error fetching tracking information. Please try again."
+        "notFound": "We could not find a shipment with this reference. Check the reference and try again.",
+        "generic": "We could not check this reference because of a technical problem. Please try again later."
       }
     },
     "shipment": {
       "status": {
-        "title": "Shipment Status",
-        "tracking": "Tracking:",
-        "booking": "Booking:"
-      },
-      "details": {
-        "origin": "Origin",
-        "destination": "Destination",
-        "estimatedDelivery": "Est. Delivery",
-        "currentLocation": "Current Location"
+        "tracking": "Reference:"
       },
       "timeline": {
-        "title": "Tracking Timeline",
-        "description": "Real-time updates on your shipment's journey"
-      },
-      "information": {
-        "title": "Shipment Details",
-        "weight": "Weight",
-        "dimensions": "Dimensions",
-        "service": "Service",
-        "carrier": "Carrier"
-      },
-      "actions": {
-        "downloadInvoice": "Download Invoice",
-        "viewDocuments": "View Documents",
-        "trackAnother": "Track Another Shipment"
+        "title": "Progress"
       }
     },
     "milestones": {
@@ -280,216 +185,16 @@
       "DELIVERED": "Delivered"
     }
   },
-  "login": {
-    "company": "Your Company",
-    "testimonial": {
-      "quote": "This library has saved me countless hours of work and helped me deliver stunning designs to my clients faster than ever before.",
-      "author": "Sofia Davis"
-    },
-    "form": {
-      "title": "Create an account",
-      "subtitle": "Enter your email below to create your account"
-    }
-  },
-  "common": {
-    "imageAlt": "Demo"
-  },
-  "contact": {
-    "title": "Contact Us",
-    "description": "We are available for questions, feedback, or collaboration opportunities. Let us know how we can help!",
-    "details": {
-      "heading": "Contact Details",
-      "irelandTel": "Ireland Tel:",
-      "cameroonTel": "Cameroon Tel:",
-      "email": "Email:",
-      "web": "Web:"
-    },
-    "form": {
-      "firstName": {
-        "label": "First Name",
-        "placeholder": "First Name"
-      },
-      "lastName": {
-        "label": "Last Name",
-        "placeholder": "Last Name"
-      },
-      "email": {
-        "label": "Email",
-        "placeholder": "Email"
-      },
-      "subject": {
-        "label": "Subject",
-        "placeholder": "Subject"
-      },
-      "message": {
-        "label": "Message",
-        "placeholder": "Type your message here."
-      },
-      "button": "Send Message"
-    }
-  },
-  "testimonials": {
-    "heading": "Loved by teams worldwide",
-    "subheading": "See what our customers have to say about their experience with our platform.",
-    "badge": "Verified Customer",
-    "items": [
-      {
-        "name": "Sarah Chen",
-        "role": "Product Manager",
-        "company": "TechCorp",
-        "image": "/avatars/sarah.jpg",
-        "content": "This product has completely transformed how we handle our daily operations. The efficiency gains are remarkable, and the user interface is intuitive. Highly recommended for any team looking to streamline their workflow.",
-        "rating": 5
-      },
-      {
-        "name": "Michael Rodriguez",
-        "role": "Senior Developer",
-        "company": "DevStudio",
-        "image": "/avatars/michael.jpg",
-        "content": "The integration was seamless and the support team was incredibly helpful throughout the process. The features are exactly what we needed to scale our development workflow.",
-        "rating": 5
-      },
-      {
-        "name": "Emily Watson",
-        "role": "Marketing Director",
-        "company": "GrowthCo",
-        "image": "/avatars/emily.jpg",
-        "content": "We've seen a 40% increase in productivity since implementing this solution. The analytics and reporting features provide valuable insights that help us make data-driven decisions.",
-        "rating": 5
-      },
-      {
-        "name": "David Kim",
-        "role": "CTO",
-        "company": "StartupXYZ",
-        "image": "/avatars/david.jpg",
-        "content": "As a growing startup, we needed a solution that could scale with us. This platform has exceeded our expectations and continues to deliver value as we expand.",
-        "rating": 5
-      },
-      {
-        "name": "Lisa Thompson",
-        "role": "Operations Manager",
-        "company": "Enterprise Inc",
-        "image": "/avatars/lisa.jpg",
-        "content": "The automation features have saved us countless hours. The team was responsive to our custom requirements and delivered a solution that perfectly fits our needs.",
-        "rating": 5
-      },
-      {
-        "name": "James Wilson",
-        "role": "Project Lead",
-        "company": "Innovation Labs",
-        "image": "/avatars/james.jpg",
-        "content": "Outstanding performance and reliability. The platform has become an essential part of our project management toolkit. The customer service is exceptional.",
-        "rating": 5
-      }
-    ]
+  "auth": {
+    "unavailableTitle": "Accounts are not available yet",
+    "unavailableBody": "Customer and staff accounts are being prepared. You can still request a quote or track a shipment without an account.",
+    "loginTitle": "Sign in",
+    "registerTitle": "Create an account",
+    "backHome": "Back to home"
   },
   "footer": {
-    "tagline": "Components made easy.",
-    "menuItems": [
-      {
-        "title": "Product",
-        "links": [
-          {
-            "text": "Overview",
-            "url": "#"
-          },
-          {
-            "text": "Pricing",
-            "url": "#"
-          },
-          {
-            "text": "Marketplace",
-            "url": "#"
-          },
-          {
-            "text": "Features",
-            "url": "#"
-          },
-          {
-            "text": "Integrations",
-            "url": "#"
-          },
-          {
-            "text": "Pricing",
-            "url": "#"
-          }
-        ]
-      },
-      {
-        "title": "Company",
-        "links": [
-          {
-            "text": "About",
-            "url": "#"
-          },
-          {
-            "text": "Team",
-            "url": "#"
-          },
-          {
-            "text": "Blog",
-            "url": "#"
-          },
-          {
-            "text": "Careers",
-            "url": "#"
-          },
-          {
-            "text": "Contact",
-            "url": "#"
-          },
-          {
-            "text": "Privacy",
-            "url": "#"
-          }
-        ]
-      },
-      {
-        "title": "Resources",
-        "links": [
-          {
-            "text": "Help",
-            "url": "#"
-          },
-          {
-            "text": "Sales",
-            "url": "#"
-          },
-          {
-            "text": "Advertise",
-            "url": "#"
-          }
-        ]
-      },
-      {
-        "title": "Social",
-        "links": [
-          {
-            "text": "Twitter",
-            "url": "#"
-          },
-          {
-            "text": "Instagram",
-            "url": "#"
-          },
-          {
-            "text": "LinkedIn",
-            "url": "#"
-          }
-        ]
-      }
-    ],
-    "copyright": "© 2024 Shadcnblocks.com. All rights reserved.",
-    "bottomLinks": [
-      {
-        "text": "Terms and Conditions",
-        "url": "#"
-      },
-      {
-        "text": "Privacy Policy",
-        "url": "#"
-      }
-    ]
+    "rights": "All rights reserved.",
+    "pendingDetails": "Business and legal details will be published once confirmed."
   },
   "preview": {
     "banner": "Preview only: this area is not connected to real data and is not available to customers."
