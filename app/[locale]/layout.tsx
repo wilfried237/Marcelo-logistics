@@ -1,11 +1,14 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin", "latin-ext"], display: "swap", variable: "--font-inter" });
+
+export const viewport: Viewport = { themeColor: "#1f3a68", colorScheme: "light" };
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -28,14 +31,10 @@ export default async function LocaleLayout({ children, params }: { children: Rea
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
-      <body className="flex min-h-screen flex-col bg-background text-foreground antialiased">
+    <html lang={locale} className={inter.variable}>
+      <body className="flex min-h-screen flex-col font-sans">
         <NextIntlClientProvider messages={messages}>
-          <SiteHeader />
-          <main id="main" className="flex-1">
-            {children}
-          </main>
-          <SiteFooter />
+          {children}
         </NextIntlClientProvider>
       </body>
     </html>
