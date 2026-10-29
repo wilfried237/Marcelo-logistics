@@ -63,6 +63,10 @@
     "authed",
     "Turnstile",
     "QRAAAAAA",
-    "QRBBBBBB"
+    "QRBBBBBB",
+    "msdownload"
+  ],
+  "ignoreRegExpList": [
+    "/\b(QR|ML)[A-Za-z0-9]{6,12}\b/gi"
   ]
 }

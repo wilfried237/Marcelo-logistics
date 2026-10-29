@@ -201,6 +201,8 @@ begin
     if auth.uid() is not null and new.created_by <> auth.uid() then
       raise exception 'created_by_mismatch' using errcode = 'P0001';
     end if;
+    new.created_at := now();
+    new.updated_at := now();
     return new;
   end if;
 
@@ -233,6 +235,8 @@ begin
     end if;
     new.customer_id := v_request.customer_id;
     new.service_code := v_request.service_code;
+    new.created_at := now();
+    new.updated_at := now();
     return new;
   end if;
 
@@ -253,6 +257,7 @@ begin
     if auth.uid() is not null and new.created_by <> auth.uid() then
       raise exception 'created_by_mismatch' using errcode = 'P0001';
     end if;
+    new.created_at := now();
     return new;
   end if;
   if new.shipment_id <> old.shipment_id or new.milestone_code <> old.milestone_code or new.occurred_at <> old.occurred_at
@@ -283,6 +288,11 @@ begin
       raise exception 'created_by_mismatch' using errcode = 'P0001';
     end if;
     new.customer_id := v_customer;
+    new.created_at := now();
+    -- Retention is set by staff/policy later, never by the uploader.
+    if auth.uid() is not null then
+      new.retention_until := null;
+    end if;
     return new;
   end if;
   if row(new.owner_type, new.owner_id, new.customer_id, new.storage_key, new.original_name, new.mime, new.size_bytes, new.uploaded_by, new.created_at)
@@ -671,28 +681,30 @@ grant update (status, cancellation_reason) on public.quote_requests to authentic
 grant select (id, quote_request_id, amount_minor, currency, inclusions, exclusions, valid_until, sent_at, created_at, updated_at)
   on public.quotes to authenticated;
 --> statement-breakpoint
-grant insert (quote_request_id, amount_minor, currency, inclusions, exclusions, valid_until, created_by, sent_at) on public.quotes to authenticated;
+-- Drizzle lists every column (DEFAULT for omitted ones), which needs INSERT
+-- privilege; triggers overwrite the server-controlled values (timestamps).
+grant insert (id, quote_request_id, amount_minor, currency, inclusions, exclusions, valid_until, created_by, sent_at, created_at, updated_at) on public.quotes to authenticated;
 --> statement-breakpoint
 grant update (amount_minor, currency, inclusions, exclusions, valid_until, sent_at) on public.quotes to authenticated;
 --> statement-breakpoint
 grant select (id, reference, quote_id, customer_id, service_code, status, eta_from, eta_to, eta_visible, created_at, updated_at)
   on public.shipments to authenticated;
 --> statement-breakpoint
-grant insert (reference, quote_id, customer_id, service_code, status, eta_from, eta_to, eta_visible, created_by) on public.shipments to authenticated;
+grant insert (id, reference, quote_id, customer_id, service_code, status, eta_from, eta_to, eta_visible, created_by, created_at, updated_at) on public.shipments to authenticated;
 --> statement-breakpoint
 grant update (status, eta_from, eta_to, eta_visible) on public.shipments to authenticated;
 --> statement-breakpoint
 grant select (id, shipment_id, milestone_code, location, occurred_at, note_en, note_fr, public, created_at)
   on public.shipment_events to authenticated;
 --> statement-breakpoint
-grant insert (shipment_id, milestone_code, location, occurred_at, note_en, note_fr, public, created_by) on public.shipment_events to authenticated;
+grant insert (id, shipment_id, milestone_code, location, occurred_at, note_en, note_fr, public, created_by, created_at) on public.shipment_events to authenticated;
 --> statement-breakpoint
 grant update (location, note_en, note_fr, public) on public.shipment_events to authenticated;
 --> statement-breakpoint
 grant select (id, owner_type, owner_id, customer_id, original_name, mime, size_bytes, retention_until, created_at)
   on public.documents to authenticated;
 --> statement-breakpoint
-grant insert (owner_type, owner_id, customer_id, storage_key, original_name, mime, size_bytes, uploaded_by) on public.documents to authenticated;
+grant insert (id, owner_type, owner_id, customer_id, storage_key, original_name, mime, size_bytes, uploaded_by, retention_until, created_at) on public.documents to authenticated;
 --> statement-breakpoint
 grant update (retention_until) on public.documents to authenticated;
 --> statement-breakpoint

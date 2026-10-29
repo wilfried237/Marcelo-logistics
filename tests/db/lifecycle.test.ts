@@ -120,6 +120,25 @@ describe("quote lifecycle (database-enforced)", () => {
     expect(shipment.customer_id).toBe(customer.customerId);
   });
 
+  it("overwrites client-supplied timestamps and retention on insert", async () => {
+    const id = await insertRequest(t.client, customer.customerId, nextRef());
+    await setStatus(id, "UNDER_REVIEW");
+    const [quote] = await asUser<{ created_at: string }>(
+      t.client,
+      staff.id,
+      "insert into public.quotes (quote_request_id, amount_minor, currency, valid_until, created_by, created_at) values ($1, 100, 'EUR', now() + interval '1 day', $2, '2000-01-01') returning created_at",
+      [id, staff.id],
+    );
+    expect(new Date(quote.created_at).getFullYear()).toBeGreaterThan(2020);
+    const [doc] = await asUser<{ retention_until: string | null }>(
+      t.client,
+      customer.id,
+      "insert into public.documents (owner_type, owner_id, storage_key, original_name, mime, size_bytes, uploaded_by, retention_until) values ('quote_request', $1, 'k/retention', 'f.pdf', 'application/pdf', 5, $2, now() + interval '1 day') returning retention_until",
+      [id, customer.id],
+    );
+    expect(doc.retention_until).toBeNull();
+  });
+
   it("rejects a created_by that does not match the session user", async () => {
     const id = await insertRequest(t.client, customer.customerId, nextRef());
     await setStatus(id, "UNDER_REVIEW");
