@@ -2,7 +2,7 @@ import type { QuoteStatus, UserRole } from "./enums";
 
 /**
  * Permitted quote-request transitions. The database enforces the same table in
- * the trigger app_enforce_quote_request_rules (drizzle/0001_*.sql); a unit test
+ * the trigger app_enforce_quote_request_rules (prisma/migrations/*_security_model); a test
  * keeps both in sync.
  *
  * SUBMITTED -> UNDER_REVIEW -> (AWAITING_CUSTOMER <-> UNDER_REVIEW) -> QUOTED

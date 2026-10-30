@@ -45,7 +45,7 @@ beforeAll(async () => {
   requestA = await insertRequest(t.client, ua.customerId, "QRDOCAAA");
   requestB = await insertRequest(t.client, ub.customerId, "QRDOCBBB");
 });
-afterAll(async () => t?.client.close());
+afterAll(async () => t?.close());
 
 describe("document type detection", () => {
   it("uses file content, not the declared type", () => {

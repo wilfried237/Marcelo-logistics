@@ -13,7 +13,7 @@ beforeAll(async () => {
   staff = await createUser(t.client, "ops@example.test", "staff");
   customer = await createUser(t.client, "lifecycle@example.test");
 });
-afterAll(async () => t?.client.close());
+afterAll(async () => t?.close());
 
 const status = async (id: string) => (await t.client.query<{ status: string }>("select status from public.quote_requests where id = $1", [id])).rows[0].status;
 const setStatus = (id: string, to: string, reason?: string) =>

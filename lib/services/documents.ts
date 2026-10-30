@@ -1,8 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { and, desc, eq } from "drizzle-orm";
 import { withSystem, withUser } from "@/lib/db/context";
 import { domainErrorCode } from "@/lib/db/errors";
-import { documents, quoteRequests, shipments } from "@/lib/db/schema";
 import type { Database } from "@/lib/db/types";
 import type { AppUser } from "@/lib/auth/types";
 import { MAX_DOCUMENT_BYTES, type DocumentMimeType, type DocumentOwnerType } from "@/lib/domain/enums";
@@ -27,6 +25,7 @@ export function sniffMime(bytes: Uint8Array): DocumentMimeType | null {
 }
 
 const EXTENSION: Record<DocumentMimeType, string> = { "application/pdf": "pdf", "image/jpeg": "jpg", "image/png": "png" };
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type UploadResult = { ok: true; id: string } | { ok: false; code: "too_large" | "type" | "not_found" | "generic" };
 
@@ -46,18 +45,17 @@ export async function uploadDocument(
   if (input.bytes.byteLength === 0 || input.bytes.byteLength > MAX_DOCUMENT_BYTES) return { ok: false, code: "too_large" };
   const mime = sniffMime(input.bytes);
   if (!mime) return { ok: false, code: "type" };
+  if (!UUID.test(input.ownerId)) return { ok: false, code: "not_found" };
 
   // Ownership check through RLS: the owner record must be visible to this user.
-  const owner = await withUser(db, user.id, async (tx) => {
-    if (input.ownerType === "quote_request") {
-      const [row] = await tx.select({ customerId: quoteRequests.customerId }).from(quoteRequests).where(eq(quoteRequests.id, input.ownerId));
-      return row;
-    }
-    const [row] = await tx.select({ customerId: shipments.customerId }).from(shipments).where(eq(shipments.id, input.ownerId));
-    return row;
-  });
+  const owner = await withUser(db, user.id, (tx) =>
+    input.ownerType === "quote_request"
+      ? tx.quoteRequest.findUnique({ where: { id: input.ownerId }, select: { customerId: true } })
+      : tx.shipment.findUnique({ where: { id: input.ownerId }, select: { customerId: true } }),
+  );
   if (!owner) return { ok: false, code: "not_found" };
 
+  // Server-generated key: no user input reaches the storage path.
   const key = `${owner.customerId}/${input.ownerType}/${randomUUID()}.${EXTENSION[mime]}`;
   try {
     await storage.upload(key, input.bytes, mime);
@@ -65,19 +63,21 @@ export async function uploadDocument(
     return { ok: false, code: "generic" };
   }
   try {
-    const [row] = await withUser(db, user.id, (tx) =>
-      tx
-        .insert(documents)
-        .values({
+    const row = await withUser(db, user.id, (tx) =>
+      tx.document.create({
+        data: {
           ownerType: input.ownerType,
           ownerId: input.ownerId,
+          // customer_id is overwritten by the trigger from the owner record.
+          customerId: owner.customerId,
           storageKey: key,
           originalName: safeFileName(input.fileName),
           mime,
           sizeBytes: input.bytes.byteLength,
           uploadedBy: user.id,
-        } as typeof documents.$inferInsert)
-        .returning({ id: documents.id }),
+        },
+        select: { id: true },
+      }),
     );
     return { ok: true, id: row.id };
   } catch (error) {
@@ -90,11 +90,11 @@ export async function uploadDocument(
 
 export async function listDocuments(db: Database, user: AppUser) {
   return withUser(db, user.id, (tx) =>
-    tx
-      .select({ id: documents.id, ownerType: documents.ownerType, ownerId: documents.ownerId, originalName: documents.originalName, mime: documents.mime, sizeBytes: documents.sizeBytes, createdAt: documents.createdAt })
-      .from(documents)
-      .orderBy(desc(documents.createdAt))
-      .limit(200),
+    tx.document.findMany({
+      select: { id: true, ownerType: true, ownerId: true, originalName: true, mime: true, sizeBytes: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    }),
   );
 }
 
@@ -104,10 +104,10 @@ export async function listDocuments(db: Database, user: AppUser) {
  * because API roles are not granted the storage_key column.
  */
 export async function documentDownloadUrl(db: Database, storage: DocumentStorage, user: AppUser, documentId: string): Promise<string | null> {
-  if (!/^[0-9a-f-]{36}$/i.test(documentId)) return null;
-  const visible = await withUser(db, user.id, (tx) => tx.select({ id: documents.id }).from(documents).where(eq(documents.id, documentId)));
-  if (!visible[0]) return null;
-  const [row] = await withSystem(db, user.id, (tx) => tx.select({ key: documents.storageKey }).from(documents).where(and(eq(documents.id, documentId))));
+  if (!UUID.test(documentId)) return null;
+  const visible = await withUser(db, user.id, (tx) => tx.document.findUnique({ where: { id: documentId }, select: { id: true } }));
+  if (!visible) return null;
+  const row = await withSystem(db, user.id, (tx) => tx.document.findUnique({ where: { id: documentId }, select: { storageKey: true } }));
   if (!row) return null;
-  return storage.signedUrl(row.key, 60);
+  return storage.signedUrl(row.storageKey, 60);
 }

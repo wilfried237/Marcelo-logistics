@@ -1,10 +1,9 @@
-import { and, asc, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import { ownerConfig } from "@/config/owner";
 import { quoteSubmissionStatus } from "@/lib/config/env";
 import { withSystem, withUser } from "@/lib/db/context";
 import { domainErrorCode, isUniqueViolation, type DomainErrorCode } from "@/lib/db/errors";
-import { auditLog, customers, quoteRequests, quotes, shipments } from "@/lib/db/schema";
 import type { Database } from "@/lib/db/types";
+import type { Prisma } from "@/lib/generated/prisma/client";
 import { assertStaff, type AppUser } from "@/lib/auth/types";
 import type { QuoteStatus } from "@/lib/domain/enums";
 import { actorMayTransition } from "@/lib/domain/quote-lifecycle";
@@ -54,17 +53,12 @@ export async function submitQuoteRequest(
   if (!origins.includes(input.originCountry) || !destinations.includes(input.destinationCountry)) {
     return { ok: false, code: "route_not_offered", fieldErrors: { destinationCountry: "not_offered" } };
   }
+  const fallbackNotify = { email: input.contact.email, name: input.contact.name, locale: input.locale };
 
   try {
     // Idempotent retry: the same client key returns the original request.
-    const existing = await db
-      .select({ id: quoteRequests.id, reference: quoteRequests.reference })
-      .from(quoteRequests)
-      .where(eq(quoteRequests.idempotencyKey, input.idempotencyKey))
-      .limit(1);
-    if (existing[0]) {
-      return { ok: true, duplicate: true, reference: existing[0].reference, requestId: existing[0].id, notify: { email: input.contact.email, name: input.contact.name, locale: input.locale } };
-    }
+    const existing = await db.quoteRequest.findUnique({ where: { idempotencyKey: input.idempotencyKey }, select: { id: true, reference: true } });
+    if (existing) return { ok: true, duplicate: true, reference: existing.reference, requestId: existing.id, notify: fallbackNotify };
 
     const allowedClient = await rateLimitHit(db, hashKey("quote:client", ctx.clientId), 3600, QUOTE_LIMITS.perClientPerHour);
     const allowedEmail = await rateLimitHit(db, hashKey("quote:email", input.contact.email), 86400, QUOTE_LIMITS.perEmailPerDay);
@@ -76,41 +70,41 @@ export async function submitQuoteRequest(
       try {
         const created = await withSystem(db, actor, async (tx) => {
           let customerId = ctx.user?.customerId ?? null;
-          let notify = { email: input.contact.email, name: input.contact.name, locale: input.locale };
+          let notify = fallbackNotify;
           if (customerId) {
-            const [own] = await tx.select({ email: customers.email, name: customers.name }).from(customers).where(eq(customers.id, customerId));
+            const own = await tx.customer.findUnique({ where: { id: customerId }, select: { email: true, name: true } });
             if (own) notify = { ...notify, email: own.email, name: own.name };
           } else {
-            const [customer] = await tx
-              .insert(customers)
-              .values({ name: input.contact.name, email: input.contact.email, phone: input.contact.phone ?? null, preferredLocale: input.locale })
-              .returning({ id: customers.id });
+            const customer = await tx.customer.create({
+              data: { name: input.contact.name, email: input.contact.email, phone: input.contact.phone ?? null, preferredLocale: input.locale },
+              select: { id: true },
+            });
             customerId = customer.id;
           }
-          const [request] = await tx
-            .insert(quoteRequests)
-            .values({
+          const request = await tx.quoteRequest.create({
+            data: {
               reference,
               customerId,
               serviceCode: input.service,
               originCountry: input.originCountry,
               destinationCountry: input.destinationCountry,
               destinationCity: input.destinationCity ?? null,
-              items: input.items,
+              items: input.items as Prisma.InputJsonValue,
               notes: input.notes ?? null,
               locale: input.locale,
               idempotencyKey: input.idempotencyKey,
               submittedBy: ctx.user?.id ?? null,
-            })
-            .returning({ id: quoteRequests.id, reference: quoteRequests.reference });
+            },
+            select: { id: true, reference: true },
+          });
           return { ...request, notify };
         });
         return { ok: true, duplicate: false, reference: created.reference, requestId: created.id, notify: created.notify };
       } catch (error) {
-        if (isUniqueViolation(error, "quote_requests_reference_key")) continue; // collision: new reference
-        if (isUniqueViolation(error, "quote_requests_idempotency_key_key")) {
-          const [dup] = await db.select({ id: quoteRequests.id, reference: quoteRequests.reference }).from(quoteRequests).where(eq(quoteRequests.idempotencyKey, input.idempotencyKey));
-          if (dup) return { ok: true, duplicate: true, reference: dup.reference, requestId: dup.id, notify: { email: input.contact.email, name: input.contact.name, locale: input.locale } };
+        if (isUniqueViolation(error, "reference")) continue; // collision: new reference
+        if (isUniqueViolation(error, "idempotency")) {
+          const dup = await db.quoteRequest.findUnique({ where: { idempotencyKey: input.idempotencyKey }, select: { id: true, reference: true } });
+          if (dup) return { ok: true, duplicate: true, reference: dup.reference, requestId: dup.id, notify: fallbackNotify };
         }
         throw error;
       }
@@ -126,50 +120,51 @@ export async function submitQuoteRequest(
 // Customer views (RLS-enforced plus explicit ownership filter)
 // ---------------------------------------------------------------------------
 
-const customerRequestColumns = {
-  id: quoteRequests.id,
-  reference: quoteRequests.reference,
-  serviceCode: quoteRequests.serviceCode,
-  originCountry: quoteRequests.originCountry,
-  destinationCountry: quoteRequests.destinationCountry,
-  destinationCity: quoteRequests.destinationCity,
-  status: quoteRequests.status,
-  createdAt: quoteRequests.createdAt,
-  updatedAt: quoteRequests.updatedAt,
-};
+const requestSummary = {
+  id: true,
+  reference: true,
+  serviceCode: true,
+  originCountry: true,
+  destinationCountry: true,
+  destinationCity: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.QuoteRequestSelect;
+
+const sentQuoteSelect = {
+  id: true,
+  amountMinor: true,
+  currency: true,
+  inclusions: true,
+  exclusions: true,
+  validUntil: true,
+  sentAt: true,
+} satisfies Prisma.QuoteSelect;
+
+type RawQuote = Prisma.QuoteGetPayload<{ select: typeof sentQuoteSelect }>;
+/** BigInt minor units -> number (amounts are bounded below 1e12 by a CHECK constraint). */
+const toQuoteView = (q: RawQuote) => ({ ...q, amountMinor: Number(q.amountMinor) });
 
 export async function listCustomerQuoteRequests(db: Database, user: AppUser) {
   if (!user.customerId) return [];
   return withUser(db, user.id, (tx) =>
-    tx.select(customerRequestColumns).from(quoteRequests).where(eq(quoteRequests.customerId, user.customerId!)).orderBy(desc(quoteRequests.createdAt)),
+    tx.quoteRequest.findMany({ where: { customerId: user.customerId! }, select: requestSummary, orderBy: { createdAt: "desc" }, take: 200 }),
   );
 }
-
-const sentQuoteColumns = {
-  id: quotes.id,
-  amountMinor: quotes.amountMinor,
-  currency: quotes.currency,
-  inclusions: quotes.inclusions,
-  exclusions: quotes.exclusions,
-  validUntil: quotes.validUntil,
-  sentAt: quotes.sentAt,
-};
 
 export async function getCustomerQuoteRequest(db: Database, user: AppUser, rawReference: string) {
   const reference = normaliseReference(rawReference);
   if (!user.customerId || !QUOTE_REFERENCE_PATTERN.test(reference)) return null;
   return withUser(db, user.id, async (tx) => {
-    const [request] = await tx
-      .select({ ...customerRequestColumns, items: quoteRequests.items, notes: quoteRequests.notes, cancellationReason: quoteRequests.cancellationReason })
-      .from(quoteRequests)
-      .where(and(eq(quoteRequests.reference, reference), eq(quoteRequests.customerId, user.customerId!)));
+    const request = await tx.quoteRequest.findFirst({
+      where: { reference, customerId: user.customerId! },
+      select: { ...requestSummary, items: true, notes: true, cancellationReason: true },
+    });
     if (!request) return null;
-    const sent = await tx.select(sentQuoteColumns).from(quotes).where(and(eq(quotes.quoteRequestId, request.id), isNotNull(quotes.sentAt))).orderBy(desc(quotes.sentAt));
-    const [shipment] = await tx
-      .select({ reference: shipments.reference })
-      .from(shipments)
-      .where(inArray(shipments.quoteId, sent.length ? sent.map((q) => q.id) : ["00000000-0000-0000-0000-000000000000"]));
-    return { ...request, quotes: sent, shipmentReference: shipment?.reference ?? null };
+    const sent = await tx.quote.findMany({ where: { quoteRequestId: request.id, sentAt: { not: null } }, select: sentQuoteSelect, orderBy: { sentAt: "desc" } });
+    const shipment = sent.length ? await tx.shipment.findFirst({ where: { quoteId: { in: sent.map((q) => q.id) } }, select: { reference: true } }) : null;
+    return { ...request, quotes: sent.map(toQuoteView), shipmentReference: shipment?.reference ?? null };
   });
 }
 
@@ -180,9 +175,8 @@ export async function respondToQuote(db: Database, user: AppUser, rawReference: 
   if (!request) return { ok: false, code: "not_found" };
   try {
     const status = await withUser(db, user.id, async (tx) => {
-      const rows = await tx.execute<{ status: QuoteStatus }>(sql`select public.customer_respond_to_quote(${request.id}::uuid, ${accept}) as status`);
-      const list = (Array.isArray(rows) ? rows : (rows as { rows: { status: QuoteStatus }[] }).rows) as { status: QuoteStatus }[];
-      return list[0].status;
+      const rows = await tx.$queryRaw<{ status: QuoteStatus }[]>`select public.customer_respond_to_quote(${request.id}::uuid, ${accept}) as status`;
+      return rows[0].status;
     });
     return { ok: true, status };
   } catch (error) {
@@ -196,22 +190,21 @@ export async function respondToQuote(db: Database, user: AppUser, rawReference: 
 
 export async function listQuoteRequestsForStaff(db: Database, user: AppUser, filter: { status?: QuoteStatus } = {}) {
   assertStaff(user);
-  return withUser(db, user.id, (tx) =>
-    tx
-      .select({ ...customerRequestColumns, customerName: customers.name, customerEmail: customers.email })
-      .from(quoteRequests)
-      .innerJoin(customers, eq(customers.id, quoteRequests.customerId))
-      .where(filter.status ? eq(quoteRequests.status, filter.status) : undefined)
-      .orderBy(desc(quoteRequests.createdAt))
-      .limit(200),
+  const rows = await withUser(db, user.id, (tx) =>
+    tx.quoteRequest.findMany({
+      where: filter.status ? { status: filter.status } : undefined,
+      select: { ...requestSummary, customer: { select: { name: true, email: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    }),
   );
+  return rows.map(({ customer, ...r }) => ({ ...r, customerName: customer.name, customerEmail: customer.email }));
 }
 
 export async function countQuoteRequestsByStatus(db: Database, user: AppUser) {
   assertStaff(user);
-  return withUser(db, user.id, (tx) =>
-    tx.select({ status: quoteRequests.status, count: sql<number>`count(*)::int` }).from(quoteRequests).groupBy(quoteRequests.status),
-  );
+  const groups = await withUser(db, user.id, (tx) => tx.quoteRequest.groupBy({ by: ["status"], _count: { _all: true } }));
+  return groups.map((g) => ({ status: g.status, count: g._count._all }));
 }
 
 export async function getQuoteRequestForStaff(db: Database, user: AppUser, rawReference: string) {
@@ -219,34 +212,40 @@ export async function getQuoteRequestForStaff(db: Database, user: AppUser, rawRe
   const reference = normaliseReference(rawReference);
   if (!QUOTE_REFERENCE_PATTERN.test(reference)) return null;
   return withUser(db, user.id, async (tx) => {
-    const [request] = await tx
-      .select({
-        ...customerRequestColumns,
-        items: quoteRequests.items,
-        notes: quoteRequests.notes,
-        locale: quoteRequests.locale,
-        cancellationReason: quoteRequests.cancellationReason,
-        customerId: customers.id,
-        customerName: customers.name,
-        customerEmail: customers.email,
-        customerPhone: customers.phone,
-        customerLocale: customers.preferredLocale,
-        customerHasAccount: sql<boolean>`${customers.userId} is not null`,
-      })
-      .from(quoteRequests)
-      .innerJoin(customers, eq(customers.id, quoteRequests.customerId))
-      .where(eq(quoteRequests.reference, reference));
+    const request = await tx.quoteRequest.findUnique({
+      where: { reference },
+      select: {
+        ...requestSummary,
+        items: true,
+        notes: true,
+        locale: true,
+        cancellationReason: true,
+        customer: { select: { id: true, name: true, email: true, phone: true, preferredLocale: true, userId: true } },
+      },
+    });
     if (!request) return null;
-    const requestQuotes = await tx.select(sentQuoteColumns).from(quotes).where(eq(quotes.quoteRequestId, request.id)).orderBy(desc(quotes.createdAt));
-    const [shipment] = requestQuotes.length
-      ? await tx.select({ reference: shipments.reference }).from(shipments).where(inArray(shipments.quoteId, requestQuotes.map((q) => q.id)))
-      : [];
-    const history = await tx
-      .select({ action: auditLog.action, actor: auditLog.actor, before: auditLog.before, after: auditLog.after, at: auditLog.at })
-      .from(auditLog)
-      .where(and(eq(auditLog.entity, "quote_requests"), eq(auditLog.entityId, request.id)))
-      .orderBy(asc(auditLog.at));
-    return { ...request, quotes: requestQuotes, shipmentReference: shipment?.reference ?? null, history };
+    const requestQuotes = await tx.quote.findMany({ where: { quoteRequestId: request.id }, select: sentQuoteSelect, orderBy: { createdAt: "desc" } });
+    const shipment = requestQuotes.length
+      ? await tx.shipment.findFirst({ where: { quoteId: { in: requestQuotes.map((q) => q.id) } }, select: { reference: true } })
+      : null;
+    const history = await tx.auditLog.findMany({
+      where: { entity: "quote_requests", entityId: request.id },
+      select: { action: true, actor: true, before: true, after: true, at: true },
+      orderBy: { at: "asc" },
+    });
+    const { customer, ...rest } = request;
+    return {
+      ...rest,
+      customerId: customer.id,
+      customerName: customer.name,
+      customerEmail: customer.email,
+      customerPhone: customer.phone,
+      customerLocale: customer.preferredLocale,
+      customerHasAccount: customer.userId !== null,
+      quotes: requestQuotes.map(toQuoteView),
+      shipmentReference: shipment?.reference ?? null,
+      history,
+    };
   });
 }
 
@@ -259,15 +258,16 @@ export async function transitionQuoteRequest(db: Database, user: AppUser, raw: u
   const { requestId, to, reason } = parsed.data;
   try {
     return await withUser(db, user.id, async (tx) => {
-      const [current] = await tx.select({ status: quoteRequests.status }).from(quoteRequests).where(eq(quoteRequests.id, requestId));
+      const current = await tx.quoteRequest.findUnique({ where: { id: requestId }, select: { status: true } });
       if (!current) return { ok: false, code: "not_found" } as const;
       if (!actorMayTransition(user.role, current.status, to)) return { ok: false, code: "invalid_quote_transition" } as const;
-      const [updated] = await tx
-        .update(quoteRequests)
-        .set({ status: to, cancellationReason: to === "CANCELLED" ? reason! : null })
-        .where(eq(quoteRequests.id, requestId))
-        .returning({ status: quoteRequests.status });
-      return updated ? ({ ok: true, data: { status: updated.status } } as const) : ({ ok: false, code: "not_found" } as const);
+      // The status we checked is part of the WHERE clause: a concurrent change makes this a no-op
+      // instead of overwriting it. The database trigger re-validates the transition as well.
+      const updated = await tx.quoteRequest.updateMany({
+        where: { id: requestId, status: current.status },
+        data: { status: to, cancellationReason: to === "CANCELLED" ? reason! : null },
+      });
+      return updated.count === 1 ? ({ ok: true, data: { status: to } } as const) : ({ ok: false, code: "invalid_quote_transition" } as const);
     });
   } catch (error) {
     return { ok: false, code: domainErrorCode(error) };
@@ -291,27 +291,30 @@ export async function sendQuote(
 
   try {
     return await withUser(db, user.id, async (tx) => {
-      const [request] = await tx
-        .select({ id: quoteRequests.id, reference: quoteRequests.reference, status: quoteRequests.status, email: customers.email, name: customers.name, locale: customers.preferredLocale })
-        .from(quoteRequests)
-        .innerJoin(customers, eq(customers.id, quoteRequests.customerId))
-        .where(eq(quoteRequests.id, input.requestId));
+      const request = await tx.quoteRequest.findUnique({
+        where: { id: input.requestId },
+        select: { id: true, reference: true, status: true, customer: { select: { email: true, name: true, preferredLocale: true } } },
+      });
       if (!request) return { ok: false, code: "not_found" } as const;
-      const [quote] = await tx
-        .insert(quotes)
-        .values({
+      const quote = await tx.quote.create({
+        data: {
           quoteRequestId: request.id,
-          amountMinor,
+          amountMinor: BigInt(amountMinor),
           currency: input.currency,
           inclusions: input.inclusions,
           exclusions: input.exclusions,
           validUntil,
           createdBy: user.id,
-          sentAt: sql`now()`,
-        })
-        .returning({ id: quotes.id });
-      await tx.update(quoteRequests).set({ status: "QUOTED" }).where(eq(quoteRequests.id, request.id));
-      return { ok: true, data: { quoteId: quote.id, reference: request.reference, notify: { email: request.email, name: request.name, locale: request.locale } } } as const;
+          sentAt: new Date(),
+        },
+        select: { id: true },
+      });
+      const moved = await tx.quoteRequest.updateMany({ where: { id: request.id, status: request.status }, data: { status: "QUOTED" } });
+      if (moved.count !== 1) throw new Error("invalid_quote_transition");
+      return {
+        ok: true,
+        data: { quoteId: quote.id, reference: request.reference, notify: { email: request.customer.email, name: request.customer.name, locale: request.customer.preferredLocale } },
+      } as const;
     });
   } catch (error) {
     return { ok: false, code: domainErrorCode(error) };

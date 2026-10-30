@@ -10,7 +10,7 @@
  * The local password comes from SEED_USER_PASSWORD (default documented in
  * docs/LOCAL-SETUP.md); it is only valid on your own machine.
  */
-import postgres from "postgres";
+import pg from "pg";
 import { createClient } from "@supabase/supabase-js";
 import { seedDemoData } from "./seed-data";
 
@@ -40,11 +40,12 @@ async function main() {
   const password = process.env.SEED_USER_PASSWORD ?? "local-only-demo-password";
 
   const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
-  const sql = postgres(databaseUrl, { max: 1, prepare: false, onnotice: () => {} });
+  const sql = new pg.Client({ connectionString: databaseUrl });
+  await sql.connect();
 
   const ensureUser = async (email: string, fullName: string) => {
-    const existing = await sql<{ id: string }[]>`select id from auth.users where email = ${email}`;
-    if (existing[0]) return existing[0].id;
+    const existing = await sql.query<{ id: string }>("select id from auth.users where email = $1", [email]);
+    if (existing.rows[0]) return existing.rows[0].id;
     const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { full_name: fullName, locale: "en" } });
     if (error || !data.user) throw new Error(`seed: could not create ${email}: ${error?.message}`);
     return data.user.id;
@@ -61,17 +62,24 @@ async function main() {
       [users.adminId, "admin"],
       [users.staffId, "staff"],
     ] as const) {
-      await sql.begin(async (tx) => {
-        await tx`select set_config('app.role_change', 'allowed', true)`;
-        await tx`update public.profiles set role = ${role} where id = ${id}`;
-      });
+      await sql.query("begin");
+      await sql.query("select set_config('app.role_change', 'allowed', true)");
+      await sql.query("update public.profiles set role = $1 where id = $2", [role, id]);
+      await sql.query("commit");
     }
-    const query = async (text: string, params: unknown[] = []) => (await sql.unsafe(text, params as never[])) as unknown as Record<string, unknown>[];
-    const queryAs = (actor: string, text: string, params: unknown[] = []) =>
-      sql.begin(async (tx) => {
-        await tx`select set_config('request.jwt.claims', ${JSON.stringify({ sub: actor })}, true)`;
-        return (await tx.unsafe(text, params as never[])) as unknown as Record<string, unknown>[];
-      }) as Promise<Record<string, unknown>[]>;
+    const query = async (text: string, params: unknown[] = []) => (await sql.query(text, params)).rows as Record<string, unknown>[];
+    const queryAs = async (actor: string, text: string, params: unknown[] = []) => {
+      await sql.query("begin");
+      try {
+        await sql.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ sub: actor })]);
+        const rows = (await sql.query(text, params)).rows as Record<string, unknown>[];
+        await sql.query("commit");
+        return rows;
+      } catch (error) {
+        await sql.query("rollback");
+        throw error;
+      }
+    };
 
     const result = await seedDemoData(query, queryAs, users);
     console.log("seed: done", result);

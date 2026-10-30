@@ -1,18 +1,59 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { PGlite } from "@electric-sql/pglite";
-import { drizzle } from "drizzle-orm/pglite";
-import { migrate } from "drizzle-orm/pglite/migrator";
-import * as schema from "@/lib/db/schema";
+import { PGLiteSocketServer } from "@electric-sql/pglite-socket";
+import { createPrismaClient } from "@/lib/db/client";
+import type { Database } from "@/lib/db/types";
+
+/*
+ * PGlite test database: PostgreSQL 17 compiled to WebAssembly, in-process.
+ * - Raw SQL tests talk to the PGlite instance directly (`client`).
+ * - Application code talks to it through real Prisma Client + @prisma/adapter-pg
+ *   over the PostgreSQL wire protocol (pglite-socket), exactly like production.
+ * This is NOT a Supabase stack: tests/supabase covers that separately.
+ */
+
+export const MIGRATIONS_DIR = "prisma/migrations";
+
+/** Migration directories in the order Prisma Migrate applies them. */
+export function migrationFiles(): { name: string; sql: string }[] {
+  return readdirSync(MIGRATIONS_DIR, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name)
+    .sort()
+    .map((name) => ({ name, sql: readFileSync(join(MIGRATIONS_DIR, name, "migration.sql"), "utf8") }));
+}
 
 export type TestDb = Awaited<ReturnType<typeof createTestDb>>;
 
-/** Fresh in-process PostgreSQL with the Supabase stub and all migrations applied. */
+let nextPort = 55_000 + Math.floor(Math.random() * 5_000);
+
+/** Fresh database with the Supabase stub and all migrations, plus a Prisma client on top. */
 export async function createTestDb() {
   const client = await PGlite.create();
   await client.exec(readFileSync("tests/db/supabase-stub.sql", "utf8"));
-  const db = drizzle(client, { schema });
-  await migrate(db, { migrationsFolder: "drizzle" });
-  return { client, db };
+  for (const migration of migrationFiles()) await client.exec(migration.sql);
+
+  let server: PGLiteSocketServer | undefined;
+  let port = 0;
+  for (let attempt = 0; attempt < 20 && !server; attempt++) {
+    port = nextPort++;
+    const candidate = new PGLiteSocketServer({ db: client, port, host: "127.0.0.1", maxConnections: 1 });
+    try {
+      await candidate.start();
+      server = candidate;
+    } catch {
+      // port in use: try the next one
+    }
+  }
+  if (!server) throw new Error("could not start pglite socket server");
+  const db: Database = createPrismaClient(`postgresql://postgres:postgres@127.0.0.1:${port}/postgres?sslmode=disable`, 1);
+  const close = async () => {
+    await db.$disconnect();
+    await server!.stop();
+    await client.close();
+  };
+  return { client, db, close };
 }
 
 type Row = Record<string, unknown>;
@@ -86,6 +127,6 @@ export async function expectDbError(promise: Promise<unknown>, pattern: RegExp) 
     error = e;
   }
   if (!error) throw new Error(`Expected database error matching ${pattern}, but the statement succeeded`);
-  const message = error instanceof Error ? error.message : String(error);
+  const message = error instanceof Error ? `${error.message} ${JSON.stringify((error as { meta?: unknown }).meta ?? "")}` : String(error);
   if (!pattern.test(message)) throw new Error(`Expected error matching ${pattern}, got: ${message}`);
 }

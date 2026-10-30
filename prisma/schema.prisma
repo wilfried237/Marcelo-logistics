@@ -1,0 +1,342 @@
+// Prisma schema for the application database (Supabase PostgreSQL).
+//
+// Prisma is the ORM for all application queries. Database-level security that
+// Prisma Schema Language cannot express (Row Level Security, policies, grants,
+// triggers, SECURITY DEFINER functions, CHECK constraints) lives in reviewed SQL
+// migrations under prisma/migrations. See docs/DATABASE.md.
+//
+// Names (@map/@@map, constraint and index `map:`) mirror the existing database
+// exactly, so `prisma migrate diff` reports no drift.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["auth", "public"]
+}
+
+// ---------------------------------------------------------------------------
+// Supabase-managed table. Declared external in prisma.config.ts: Prisma never
+// creates or alters it. Only the columns the application relies on are listed.
+// ---------------------------------------------------------------------------
+model AuthUser {
+  id    String  @id @db.Uuid
+  email String?
+
+  profile          Profile?
+  customer         Customer?
+  submittedQuotes  QuoteRequest[]  @relation("QuoteRequestSubmitter")
+  createdQuotes    Quote[]         @relation("QuoteCreator")
+  createdShipments Shipment[]      @relation("ShipmentCreator")
+  createdEvents    ShipmentEvent[] @relation("ShipmentEventCreator")
+  uploadedDocs     Document[]      @relation("DocumentUploader")
+
+  @@map("users")
+  @@schema("auth")
+}
+
+// ---------------------------------------------------------------------------
+// Enums (values are stored; display text comes from translations)
+// ---------------------------------------------------------------------------
+enum UserRole {
+  customer
+  staff
+  admin
+
+  @@map("user_role")
+  @@schema("public")
+}
+
+enum AppLocale {
+  en
+  fr
+
+  @@map("app_locale")
+  @@schema("public")
+}
+
+enum ServiceCode {
+  parcels
+  barrels
+  air_freight
+  sea_freight
+  vehicle
+  commercial_cargo
+
+  @@map("service_code")
+  @@schema("public")
+}
+
+enum QuoteStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  AWAITING_CUSTOMER
+  QUOTED
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  CANCELLED
+
+  @@map("quote_status")
+  @@schema("public")
+}
+
+enum ShipmentStatus {
+  BOOKED
+  IN_TRANSIT
+  AT_DESTINATION
+  DELIVERED
+  ON_HOLD
+  CANCELLED
+
+  @@map("shipment_status")
+  @@schema("public")
+}
+
+enum MilestoneCode {
+  BOOKED
+  RECEIVED_AT_DEPOT
+  DEPARTED_ORIGIN
+  IN_TRANSIT
+  ARRIVED_DESTINATION_PORT
+  IN_CUSTOMS
+  CUSTOMS_CLEARED
+  READY_FOR_COLLECTION
+  OUT_FOR_DELIVERY
+  DELIVERED
+  DELAYED
+  ON_HOLD
+
+  @@map("milestone_code")
+  @@schema("public")
+}
+
+enum DocumentOwnerType {
+  quote_request
+  shipment
+
+  @@map("document_owner_type")
+  @@schema("public")
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+
+  @@map("email_status")
+  @@schema("public")
+}
+
+// ---------------------------------------------------------------------------
+// Application tables
+// ---------------------------------------------------------------------------
+
+/// 1:1 with auth.users. Role changes only through admin_set_user_role().
+model Profile {
+  id        String   @id @db.Uuid
+  role      UserRole @default(customer)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  user AuthUser @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "profiles_id_users_id_fk")
+
+  @@map("profiles")
+  @@schema("public")
+}
+
+/// Contact who requested a quote. Email is deliberately not unique (see docs/DATABASE.md).
+model Customer {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String?   @unique(map: "customers_user_id_key") @map("user_id") @db.Uuid
+  name            String
+  email           String
+  phone           String?
+  preferredLocale AppLocale @default(en) @map("preferred_locale")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  user          AuthUser?      @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "customers_user_id_users_id_fk")
+  quoteRequests QuoteRequest[]
+  shipments     Shipment[]
+  documents     Document[]
+
+  @@index([email], map: "customers_email_idx")
+  @@map("customers")
+  @@schema("public")
+}
+
+model QuoteRequest {
+  id                 String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reference          String      @unique(map: "quote_requests_reference_key")
+  customerId         String      @map("customer_id") @db.Uuid
+  serviceCode        ServiceCode @map("service_code")
+  originCountry      String      @map("origin_country") @db.Char(2)
+  destinationCountry String      @map("destination_country") @db.Char(2)
+  destinationCity    String?     @map("destination_city")
+  items              Json        @db.JsonB
+  notes              String?
+  status             QuoteStatus @default(SUBMITTED)
+  locale             AppLocale
+  cancellationReason String?     @map("cancellation_reason")
+  idempotencyKey     String?     @unique(map: "quote_requests_idempotency_key_key") @map("idempotency_key") @db.Uuid
+  submittedBy        String?     @map("submitted_by") @db.Uuid
+  createdAt          DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime    @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  customer  Customer  @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "quote_requests_customer_id_customers_id_fk")
+  submitter AuthUser? @relation("QuoteRequestSubmitter", fields: [submittedBy], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "quote_requests_submitted_by_users_id_fk")
+  quotes    Quote[]
+
+  @@index([customerId], map: "quote_requests_customer_idx")
+  @@index([status, createdAt(sort: Desc)], map: "quote_requests_status_created_idx")
+  @@map("quote_requests")
+  @@schema("public")
+}
+
+/// Staff-entered quote. amount_minor is an integer in minor units (EUR cents; XAF has none).
+model Quote {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quoteRequestId String    @map("quote_request_id") @db.Uuid
+  amountMinor    BigInt    @map("amount_minor")
+  currency       String    @db.Char(3)
+  inclusions     String    @default("")
+  exclusions     String    @default("")
+  validUntil     DateTime  @map("valid_until") @db.Timestamptz(6)
+  createdBy      String    @map("created_by") @db.Uuid
+  sentAt         DateTime? @map("sent_at") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  quoteRequest QuoteRequest @relation(fields: [quoteRequestId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "quotes_quote_request_id_quote_requests_id_fk")
+  creator      AuthUser     @relation("QuoteCreator", fields: [createdBy], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "quotes_created_by_users_id_fk")
+  shipment     Shipment?
+
+  @@index([quoteRequestId], map: "quotes_request_idx")
+  @@map("quotes")
+  @@schema("public")
+}
+
+model Shipment {
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reference   String         @unique(map: "shipments_reference_key")
+  quoteId     String         @unique(map: "shipments_quote_key") @map("quote_id") @db.Uuid
+  /// Derived from the quote by trigger; never client-supplied.
+  customerId  String         @map("customer_id") @db.Uuid
+  serviceCode ServiceCode    @map("service_code")
+  status      ShipmentStatus @default(BOOKED)
+  etaFrom     DateTime?      @map("eta_from") @db.Date
+  etaTo       DateTime?      @map("eta_to") @db.Date
+  etaVisible  Boolean        @default(false) @map("eta_visible")
+  createdBy   String         @map("created_by") @db.Uuid
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime       @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  quote    Quote           @relation(fields: [quoteId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "shipments_quote_id_quotes_id_fk")
+  customer Customer        @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "shipments_customer_id_customers_id_fk")
+  creator  AuthUser        @relation("ShipmentCreator", fields: [createdBy], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "shipments_created_by_users_id_fk")
+  events   ShipmentEvent[]
+
+  @@index([customerId], map: "shipments_customer_idx")
+  @@index([status], map: "shipments_status_idx")
+  @@map("shipments")
+  @@schema("public")
+}
+
+/// Only public events reach customers; non-public events are staff working notes.
+model ShipmentEvent {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  shipmentId    String        @map("shipment_id") @db.Uuid
+  milestoneCode MilestoneCode @map("milestone_code")
+  location      String?
+  occurredAt    DateTime      @map("occurred_at") @db.Timestamptz(6)
+  noteEn        String?       @map("note_en")
+  noteFr        String?       @map("note_fr")
+  public        Boolean       @default(false)
+  createdBy     String        @map("created_by") @db.Uuid
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "shipment_events_shipment_id_shipments_id_fk")
+  creator  AuthUser @relation("ShipmentEventCreator", fields: [createdBy], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "shipment_events_created_by_users_id_fk")
+
+  @@index([shipmentId, occurredAt], map: "shipment_events_shipment_occurred_idx")
+  @@map("shipment_events")
+  @@schema("public")
+}
+
+/// Metadata for private files in Supabase Storage (bucket "customer-documents").
+model Document {
+  id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerType      DocumentOwnerType @map("owner_type")
+  ownerId        String            @map("owner_id") @db.Uuid
+  customerId     String            @map("customer_id") @db.Uuid
+  storageKey     String            @unique(map: "documents_storage_key_key") @map("storage_key")
+  originalName   String            @map("original_name")
+  mime           String
+  sizeBytes      Int               @map("size_bytes")
+  uploadedBy     String            @map("uploaded_by") @db.Uuid
+  /// NULL = keep until a retention policy is approved (owner decision L-03).
+  retentionUntil DateTime?         @map("retention_until") @db.Timestamptz(6)
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "documents_customer_id_customers_id_fk")
+  uploader AuthUser @relation("DocumentUploader", fields: [uploadedBy], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "documents_uploaded_by_users_id_fk")
+
+  @@index([ownerType, ownerId], map: "documents_owner_idx")
+  @@index([customerId], map: "documents_customer_idx")
+  @@map("documents")
+  @@schema("public")
+}
+
+/// Append-only. Written only by SECURITY DEFINER triggers/functions.
+model AuditLog {
+  id       BigInt   @id @default(autoincrement())
+  actor    String?  @db.Uuid
+  action   String
+  entity   String
+  entityId String   @map("entity_id")
+  before   Json?    @db.JsonB
+  after    Json?    @db.JsonB
+  at       DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([entity, entityId], map: "audit_log_entity_idx")
+  @@index([at(sort: Desc)], map: "audit_log_at_idx")
+  @@map("audit_log")
+  @@schema("public")
+}
+
+/// Fixed-window counters for persistent rate limiting (keys are hashed).
+model RateLimit {
+  key         String
+  windowStart DateTime @map("window_start") @db.Timestamptz(6)
+  hits        Int      @default(0)
+
+  @@id([key, windowStart], map: "rate_limits_key_window_start_pk")
+  @@index([windowStart], map: "rate_limits_window_idx")
+  @@map("rate_limits")
+  @@schema("public")
+}
+
+/// Transactional email log: "sent" only when the provider accepted; idempotent.
+model EmailDelivery {
+  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  template          String
+  recipient         String
+  locale            AppLocale
+  entity            String
+  entityId          String      @map("entity_id")
+  idempotencyKey    String      @unique(map: "email_deliveries_idempotency_key") @map("idempotency_key")
+  status            EmailStatus @default(PENDING)
+  providerMessageId String?     @map("provider_message_id")
+  error             String?
+  createdAt         DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  sentAt            DateTime?   @map("sent_at") @db.Timestamptz(6)
+
+  @@index([entity, entityId], map: "email_deliveries_entity_idx")
+  @@map("email_deliveries")
+  @@schema("public")
+}

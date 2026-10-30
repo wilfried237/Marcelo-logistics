@@ -12,7 +12,7 @@ beforeAll(async () => {
   t = await createTestDb();
   db = t.db as unknown as Database;
 });
-afterAll(async () => t?.client.close());
+afterAll(async () => t?.close());
 
 const message = (key: string) => ({
   template: "quote_acknowledgement",

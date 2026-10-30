@@ -6,7 +6,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const SOURCE_DIRS = ["app", "components", "lib", "config", "emails", "middleware.ts", "i18n"];
-const SERVER_ONLY_MODULES = [/@\/lib\/supabase\/admin/, /@\/lib\/db(\/|["'])/, /@\/lib\/config\/env/, /@\/lib\/email\/send/, /@\/lib\/services\//];
+const SERVER_ONLY_MODULES = [/@\/lib\/generated\/prisma/, /@prisma\/client/, /@prisma\/adapter-pg/, /@\/lib\/supabase\/admin/, /@\/lib\/db(\/|["'])/, /@\/lib\/config\/env/, /@\/lib\/email\/send/, /@\/lib\/services\//];
 
 // Claims that must never be published without owner-verified evidence (EN + FR).
 export const BANNED_PHRASES = [

@@ -1,7 +1,5 @@
-import { asc, desc, eq, sql } from "drizzle-orm";
 import { withSystem, withUser } from "@/lib/db/context";
 import { domainErrorCode } from "@/lib/db/errors";
-import { auditLog, customers, profiles } from "@/lib/db/schema";
 import type { Database } from "@/lib/db/types";
 import { assertAdmin, assertStaff, type AppUser } from "@/lib/auth/types";
 import { USER_ROLES, type UserRole } from "@/lib/domain/enums";
@@ -12,26 +10,18 @@ import type { StaffActionResult } from "./quote-requests";
  * The id must come from a verified Supabase session (supabase.auth.getUser()).
  */
 export async function loadAppUser(db: Database, userId: string, email: string | null): Promise<AppUser | null> {
-  const [row] = await withSystem(db, null, (tx) =>
-    tx
-      .select({ role: profiles.role, customerId: customers.id })
-      .from(profiles)
-      .leftJoin(customers, eq(customers.userId, profiles.id))
-      .where(eq(profiles.id, userId)),
+  const profile = await withSystem(db, null, (tx) =>
+    tx.profile.findUnique({ where: { id: userId }, select: { role: true, user: { select: { customer: { select: { id: true } } } } } }),
   );
-  if (!row) return null;
-  return { id: userId, email, role: row.role, customerId: row.customerId ?? null };
+  if (!profile) return null;
+  return { id: userId, email, role: profile.role, customerId: profile.user.customer?.id ?? null };
 }
 
 export async function getOwnCustomerProfile(db: Database, user: AppUser) {
   if (!user.customerId) return null;
-  const [row] = await withUser(db, user.id, (tx) =>
-    tx
-      .select({ name: customers.name, email: customers.email, phone: customers.phone, preferredLocale: customers.preferredLocale })
-      .from(customers)
-      .where(eq(customers.id, user.customerId!)),
+  return withUser(db, user.id, (tx) =>
+    tx.customer.findUnique({ where: { id: user.customerId! }, select: { name: true, email: true, phone: true, preferredLocale: true } }),
   );
-  return row ?? null;
 }
 
 export async function updateOwnCustomerProfile(
@@ -41,10 +31,8 @@ export async function updateOwnCustomerProfile(
 ): Promise<StaffActionResult> {
   if (!user.customerId) return { ok: false, code: "not_found" };
   try {
-    const rows = await withUser(db, user.id, (tx) =>
-      tx.update(customers).set(input).where(eq(customers.id, user.customerId!)).returning({ id: customers.id }),
-    );
-    return rows.length ? { ok: true } : { ok: false, code: "not_found" };
+    const updated = await withUser(db, user.id, (tx) => tx.customer.updateMany({ where: { id: user.customerId! }, data: input }));
+    return updated.count ? { ok: true } : { ok: false, code: "not_found" };
   } catch (error) {
     return { ok: false, code: domainErrorCode(error) };
   }
@@ -52,32 +40,31 @@ export async function updateOwnCustomerProfile(
 
 export async function listCustomersForStaff(db: Database, user: AppUser) {
   assertStaff(user);
-  return withUser(db, user.id, (tx) =>
-    tx
-      .select({ id: customers.id, name: customers.name, email: customers.email, phone: customers.phone, hasAccount: sql<boolean>`${customers.userId} is not null`, createdAt: customers.createdAt })
-      .from(customers)
-      .orderBy(asc(customers.name))
-      .limit(500),
+  const rows = await withUser(db, user.id, (tx) =>
+    tx.customer.findMany({ select: { id: true, name: true, email: true, phone: true, userId: true, createdAt: true }, orderBy: { name: "asc" }, take: 500 }),
   );
+  return rows.map(({ userId, ...c }) => ({ ...c, hasAccount: userId !== null }));
 }
 
 export async function listUsersForAdmin(db: Database, user: AppUser) {
   assertAdmin(user);
-  return withUser(db, user.id, (tx) =>
-    tx
-      .select({ id: profiles.id, role: profiles.role, name: customers.name, email: customers.email, createdAt: profiles.createdAt })
-      .from(profiles)
-      .leftJoin(customers, eq(customers.userId, profiles.id))
-      .orderBy(asc(profiles.createdAt)),
+  const rows = await withUser(db, user.id, (tx) =>
+    tx.profile.findMany({ select: { id: true, role: true, createdAt: true }, orderBy: { createdAt: "asc" }, take: 500 }),
   );
+  // Names/emails come from the linked customer record (RLS: staff may read customers).
+  const customers = await withUser(db, user.id, (tx) =>
+    tx.customer.findMany({ where: { userId: { in: rows.map((r) => r.id) } }, select: { userId: true, name: true, email: true } }),
+  );
+  const byUser = new Map(customers.map((c) => [c.userId, c]));
+  return rows.map((r) => ({ ...r, name: byUser.get(r.id)?.name ?? null, email: byUser.get(r.id)?.email ?? null }));
 }
 
 /** Role changes go through the admin-only database function, which also audits them. */
 export async function setUserRole(db: Database, user: AppUser, targetUserId: string, role: UserRole): Promise<StaffActionResult> {
   assertAdmin(user);
-  if (!USER_ROLES.includes(role)) return { ok: false, code: "invalid" };
+  if (!USER_ROLES.includes(role) || !/^[0-9a-f-]{36}$/i.test(targetUserId)) return { ok: false, code: "invalid" };
   try {
-    await withUser(db, user.id, (tx) => tx.execute(sql`select public.admin_set_user_role(${targetUserId}::uuid, ${role}::public.user_role)`));
+    await withUser(db, user.id, (tx) => tx.$executeRaw`select public.admin_set_user_role(${targetUserId}::uuid, ${role}::public.user_role)`);
     return { ok: true };
   } catch (error) {
     return { ok: false, code: domainErrorCode(error) };
@@ -87,11 +74,8 @@ export async function setUserRole(db: Database, user: AppUser, targetUserId: str
 /** Most recent audit entries (staff and admin; RLS also restricts this table). */
 export async function listAuditEntries(db: Database, user: AppUser, limit = 200) {
   assertStaff(user);
-  return withUser(db, user.id, (tx) =>
-    tx
-      .select({ id: auditLog.id, actor: auditLog.actor, action: auditLog.action, entity: auditLog.entity, entityId: auditLog.entityId, at: auditLog.at })
-      .from(auditLog)
-      .orderBy(desc(auditLog.at))
-      .limit(limit),
+  const rows = await withUser(db, user.id, (tx) =>
+    tx.auditLog.findMany({ select: { id: true, actor: true, action: true, entity: true, entityId: true, at: true }, orderBy: { at: "desc" }, take: limit }),
   );
+  return rows.map((r) => ({ ...r, id: Number(r.id) }));
 }

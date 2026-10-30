@@ -45,3 +45,6 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# generated Prisma Client (npm postinstall / prebuild)
+/lib/generated/

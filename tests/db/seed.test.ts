@@ -14,7 +14,7 @@ beforeAll(async () => {
     customerTwoId: (await createUser(t.client, "demo.customer2@example.test", "customer", "Demo Customer Two")).id,
   };
 });
-afterAll(async () => t?.client.close());
+afterAll(async () => t?.close());
 
 const query = async (sql: string, params: unknown[] = []) => (await t.client.query<Record<string, unknown>>(sql, params)).rows;
 const queryAs = (actor: string, sql: string, params: unknown[] = []) => asSystem(t.client, sql, params, actor);

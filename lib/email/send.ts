@@ -1,7 +1,5 @@
-import { eq } from "drizzle-orm";
 import { render } from "@react-email/components";
 import { getEmailTransport, type EmailTransport } from "@/lib/config/env";
-import { emailDeliveries } from "@/lib/db/schema";
 import type { Database } from "@/lib/db/types";
 
 export interface EmailMessage {
@@ -46,30 +44,23 @@ export async function sendEmail(
   options: { transport?: EmailTransport; provider?: EmailProvider } = {},
 ): Promise<EmailOutcome> {
   const transport = options.transport ?? getEmailTransport();
-  const inserted = await db
-    .insert(emailDeliveries)
-    .values({
-      template: message.template,
-      recipient: message.to,
-      locale: message.locale,
-      entity: message.entity,
-      entityId: message.entityId,
-      idempotencyKey: message.idempotencyKey,
-      status: "PENDING",
-    })
-    .onConflictDoNothing({ target: emailDeliveries.idempotencyKey })
-    .returning({ id: emailDeliveries.id });
+  // Insert-if-absent keyed on the idempotency key (unique index).
+  const inserted = await db.emailDelivery.createMany({
+    data: [{ template: message.template, recipient: message.to, locale: message.locale, entity: message.entity, entityId: message.entityId, idempotencyKey: message.idempotencyKey, status: "PENDING" }],
+    skipDuplicates: true,
+  });
 
-  if (inserted.length === 0) {
-    const [existing] = await db.select({ status: emailDeliveries.status }).from(emailDeliveries).where(eq(emailDeliveries.idempotencyKey, message.idempotencyKey));
+  if (inserted.count === 0) {
+    const existing = await db.emailDelivery.findUnique({ where: { idempotencyKey: message.idempotencyKey }, select: { status: true } });
     if (existing?.status === "SENT") return "already_sent";
     if (existing?.status === "PENDING") return "skipped"; // another attempt is in flight
   }
   const finish = (status: "SENT" | "FAILED" | "SKIPPED", fields: { providerMessageId?: string; error?: string } = {}) =>
-    db
-      .update(emailDeliveries)
-      .set({ status, providerMessageId: fields.providerMessageId ?? null, error: fields.error?.slice(0, 1000) ?? null, sentAt: status === "SENT" ? new Date() : null })
-      .where(eq(emailDeliveries.idempotencyKey, message.idempotencyKey));
+    db.emailDelivery.update({
+      where: { idempotencyKey: message.idempotencyKey },
+      data: { status, providerMessageId: fields.providerMessageId ?? null, error: fields.error?.slice(0, 1000) ?? null, sentAt: status === "SENT" ? new Date() : null },
+      select: { id: true },
+    });
 
   if (transport.kind === "disabled") {
     await finish("SKIPPED", { error: transport.reason });

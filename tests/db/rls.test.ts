@@ -9,7 +9,7 @@ beforeAll(async () => {
   t = await createTestDb();
   s = await createScenario(t.client);
 });
-afterAll(async () => t?.client.close());
+afterAll(async () => t?.close());
 
 describe("row level security and authorisation (executed against PostgreSQL)", () => {
   it("1. customer A cannot read customer B's quote requests", async () => {

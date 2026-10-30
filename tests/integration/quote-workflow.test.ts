@@ -53,7 +53,7 @@ beforeAll(async () => {
   customerA = await user("a@example.test", "customer");
   customerB = await user("b@example.test", "customer");
 });
-afterAll(async () => t?.client.close());
+afterAll(async () => t?.close());
 
 const count = async (table: string) => (await t.client.query<{ n: number }>(`select count(*)::int n from public.${table}`)).rows[0].n;
 
@@ -142,7 +142,7 @@ describe("quote submission", () => {
   it("never reports success when the database fails", async () => {
     const broken = new Proxy(db, {
       get(target, prop, receiver) {
-        if (prop === "transaction") return () => Promise.reject(new Error("connection terminated"));
+        if (prop === "$transaction") return () => Promise.reject(new Error("connection terminated"));
         return Reflect.get(target, prop, receiver);
       },
     });

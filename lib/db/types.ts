@@ -1,6 +1,6 @@
-import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
-import type * as schema from "./schema";
+import type { Prisma, PrismaClient } from "@/lib/generated/prisma/client";
 
-/** Works for both the postgres-js runtime driver and the PGlite test driver. */
-export type Database = PgDatabase<PgQueryResultHKT, typeof schema>;
-export type Tx = Parameters<Parameters<Database["transaction"]>[0]>[0];
+/** The application's Prisma client (runtime: node-postgres adapter; tests: PGlite over a socket). */
+export type Database = PrismaClient;
+/** Client inside an interactive transaction. */
+export type Tx = Prisma.TransactionClient;

@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { migrate } from "drizzle-orm/pglite/migrator";
 import { readFileSync } from "node:fs";
-import { createTestDb, type TestDb } from "./harness";
+import { createTestDb, migrationFiles, type TestDb } from "./harness";
 import { QUOTE_STATUSES, MILESTONE_CODES, USER_ROLES, SHIPMENT_STATUSES } from "@/lib/domain/enums";
 import { SERVICE_CODES } from "@/lib/domain/services";
 import { canTransition } from "@/lib/domain/quote-lifecycle";
@@ -10,34 +9,37 @@ let t: TestDb;
 beforeAll(async () => {
   t = await createTestDb();
 });
-afterAll(async () => t?.client.close());
+afterAll(async () => t?.close());
 
 const APP_TABLES = ["profiles", "customers", "quote_requests", "quotes", "shipments", "shipment_events", "documents", "audit_log", "rate_limits", "email_deliveries"];
 
-describe("migrations", () => {
+describe("migrations (PGlite)", () => {
   it("apply cleanly to an empty database and create every table", async () => {
     const { rows } = await t.client.query<{ tablename: string }>("select tablename from pg_tables where schemaname = 'public' order by 1");
     expect(rows.map((r) => r.tablename).sort()).toEqual([...APP_TABLES].sort());
   });
 
-  it("are safe to re-run through the migrator (no-op)", async () => {
-    await migrate(t.db, { migrationsFolder: "drizzle" });
-    const { rows } = await t.client.query<{ n: number }>("select count(*)::int n from drizzle.__drizzle_migrations");
-    expect(rows[0].n).toBe(2);
+  it("are stored in Prisma Migrate order and layout", () => {
+    const names = migrationFiles().map((m) => m.name);
+    expect(names[0]).toBe("20261029000000_initial_schema");
+    expect(names).toEqual([...names].sort());
+    for (const name of names) expect(name).toMatch(/^\d{14}_[a-z0-9_]+$/);
+    expect(readFileSync("prisma/migrations/migration_lock.toml", "utf8")).toContain('provider = "postgresql"');
   });
 
-  it("the security migration is itself idempotent when executed twice", async () => {
-    const sqlText = readFileSync("drizzle/0001_security_model.sql", "utf8").split("--> statement-breakpoint");
-    for (const statement of sqlText) if (statement.trim()) await t.client.exec(statement);
+  it("all migrations after the initial schema are safe to execute twice", async () => {
+    // Prisma's history table normally prevents re-runs; the SQL itself is still
+    // idempotent so a partially applied migration can be completed safely.
+    for (const migration of migrationFiles().slice(1)) await t.client.exec(migration.sql);
   });
 
   it("contain no destructive statements", () => {
-    for (const file of ["drizzle/0000_initial_schema.sql", "drizzle/0001_security_model.sql"]) {
-      const text = readFileSync(file, "utf8").replace(/--.*$/gm, "");
-      expect(text).not.toMatch(/\bdrop\s+(table|schema|column|type)\b/i);
+    for (const { name, sql } of migrationFiles()) {
+      const text = sql.replace(/--.*$/gm, "");
+      expect(text, name).not.toMatch(/\bdrop\s+(table|schema|column|type)\b/i);
       // A statement starting with TRUNCATE (the audit trigger "before truncate" is allowed).
-      expect(text).not.toMatch(/(^|;)\s*truncate\b/im);
-      expect(text).not.toMatch(/\bdelete\s+from\s+public\.(?!rate_limits)/i);
+      expect(text, name).not.toMatch(/(^|;)\s*truncate\b/im);
+      expect(text, name).not.toMatch(/\bdelete\s+from\s+public\.(?!rate_limits)/i);
     }
   });
 
@@ -55,6 +57,10 @@ describe("migrations", () => {
     expect(rows[0].n).toBe(0);
   });
 
+  it("store customer emails in lower case only", async () => {
+    await expect(t.client.query("insert into public.customers (name, email) values ('X', 'Mixed@Example.test')")).rejects.toThrow(/customers_email_lowercase/);
+  });
+
   it("create the expected unique constraints and indexes", async () => {
     const { rows } = await t.client.query<{ indexname: string }>("select indexname from pg_indexes where schemaname = 'public'");
     const names = rows.map((r) => r.indexname);
@@ -64,6 +70,7 @@ describe("migrations", () => {
       "shipments_reference_key",
       "shipments_quote_key",
       "customers_user_id_key",
+      "customers_email_idx",
       "documents_storage_key_key",
       "email_deliveries_idempotency_key",
       "quote_requests_status_created_idx",
@@ -71,6 +78,7 @@ describe("migrations", () => {
     ]) {
       expect(names).toContain(name);
     }
+    expect(names).not.toContain("customers_email_lower_idx");
   });
 
   it("define enums that match the TypeScript domain values", async () => {
