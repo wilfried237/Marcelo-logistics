@@ -48,7 +48,7 @@ export async function sql<T = Record<string, unknown>>(text: string, params: unk
 }
 
 /** Creates a confirmed user through the Auth Admin API and sets the role through the trusted path. */
-export async function createUser(role: "customer" | "staff" | "admin" = "customer", label = role) {
+export async function createUser(role: "customer" | "staff" | "admin" = "customer", label: string = role) {
   const email = uniqueEmail(label);
   const { data, error } = await adminClient().auth.admin.createUser({ email, password: PASSWORD, email_confirm: true, user_metadata: { full_name: `Test ${label}` } });
   if (error || !data.user) throw new Error(`createUser failed: ${error?.message}`);

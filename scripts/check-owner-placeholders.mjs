@@ -10,7 +10,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 export const MARKER = "{{NEEDS_OWNER}}";
-export const OWNER_CONTENT = ["config/owner.ts", ...readdirSync("messages").filter((f) => f.endsWith(".json")).map((f) => join("messages", f))];
+export const OWNER_CONTENT = ["config/owner.ts", "config/retention.ts", ...readdirSync("messages").filter((f) => f.endsWith(".json")).map((f) => join("messages", f))];
 
 export function findPlaceholders(files = OWNER_CONTENT) {
   const hits = [];
