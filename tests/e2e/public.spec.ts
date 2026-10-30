@@ -41,6 +41,21 @@ test.describe("public pages", () => {
     expect(headers["x-content-type-options"]).toBe("nosniff");
     expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
     expect(headers["x-powered-by"]).toBeUndefined();
+    const scriptSrc = /script-src ([^;]+)/.exec(headers["content-security-policy"])?.[1] ?? "";
+    expect(scriptSrc).toMatch(/'nonce-[A-Za-z0-9+/=]+'/);
+    expect(scriptSrc).not.toContain("unsafe-inline");
+  });
+
+  test("pages hydrate under the nonce CSP without violations", async ({ page }) => {
+    const violations: string[] = [];
+    page.on("console", (msg) => {
+      if (/Content Security Policy|Refused to (execute|load)/i.test(msg.text())) violations.push(msg.text());
+    });
+    for (const path of ["/en", "/fr/quote", "/en/track", "/en/login"]) await page.goto(path);
+    await page.goto("/en/quote");
+    await page.getByRole("button", { name: "Continue" }).click(); // client-side validation needs hydrated JS
+    await expect(page.getByText("This field is required.")).toBeVisible();
+    expect(violations).toEqual([]);
   });
 
   test("language switch keeps the current page", async ({ page, isMobile }) => {
