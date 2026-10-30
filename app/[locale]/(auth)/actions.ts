@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { getSiteUrl } from "@/lib/config/env";
@@ -10,6 +11,14 @@ import { safeNextPath } from "@/lib/auth/redirects";
 import { isAccountSystemAvailable } from "@/lib/auth/session";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { loadAppUser } from "@/lib/services/users";
+import { authAttemptAllowed, type AuthAttempt } from "@/lib/services/auth-limits";
+
+/** Persistent per-client and per-email limits (fail closed), on top of Supabase's own limits. */
+async function allowed(attempt: AuthAttempt, email: string): Promise<boolean> {
+  const h = await headers();
+  const clientId = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown-client";
+  return authAttemptAllowed(getDb(), attempt, clientId, email);
+}
 
 export type AuthFormState = { status: "idle" } | { status: "error"; code: string; fieldErrors?: Record<string, string> } | { status: "sent" } | { status: "done" };
 
@@ -36,6 +45,7 @@ export async function loginAction(_prev: AuthFormState, formData: FormData): Pro
   if (!isAccountSystemAvailable()) return { status: "error", code: "generic" };
   const parsed = z.object({ email: emailSchema, password: z.string().min(1, "required").max(128) }).safeParse({ email: formData.get("email"), password: formData.get("password") });
   if (!parsed.success) return { status: "error", code: "invalid_credentials", fieldErrors: firstErrors(parsed.error) };
+  if (!(await allowed("login", parsed.data.email))) return { status: "error", code: "rate_limited" };
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
@@ -59,6 +69,7 @@ export async function registerAction(_prev: AuthFormState, formData: FormData): 
     })
     .safeParse({ fullName: formData.get("fullName"), email: formData.get("email"), password: formData.get("password"), consent: formData.get("consent") });
   if (!parsed.success) return { status: "error", code: "validation", fieldErrors: firstErrors(parsed.error) };
+  if (!(await allowed("register", parsed.data.email))) return { status: "error", code: "rate_limited" };
 
   const supabase = await createSupabaseServerClient();
   // The role is never taken from the form: new users always start as customers
@@ -81,6 +92,8 @@ export async function forgotPasswordAction(_prev: AuthFormState, formData: FormD
   if (!isAccountSystemAvailable()) return { status: "error", code: "generic" };
   const parsed = emailSchema.safeParse(formData.get("email"));
   if (!parsed.success) return { status: "error", code: "validation", fieldErrors: { email: "invalid_email" } };
+  // Limited requests get the same "check your email" answer, so the limit reveals nothing about the address.
+  if (!(await allowed("reset", parsed.data))) return { status: "sent" };
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
     redirectTo: `${getSiteUrl()}/api/auth/callback?next=${encodeURIComponent(`/${locale}/reset-password`)}`,

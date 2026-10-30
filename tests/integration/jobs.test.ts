@@ -147,3 +147,18 @@ describe("retention", () => {
     expect(again).toMatchObject({ documentsEligible: 0, documentsDeleted: 0 });
   });
 });
+
+describe("authentication attempt limits", () => {
+  it("limit attempts per email, cap reset emails, and fail closed", async () => {
+    const { authAttemptAllowed } = await import("@/lib/services/auth-limits");
+    const results: boolean[] = [];
+    for (let i = 0; i < 11; i++) results.push(await authAttemptAllowed(t.db, "login", `10.0.0.${i}`, "victim@example.test"));
+    expect(results.slice(0, 10).every(Boolean)).toBe(true);
+    expect(results[10]).toBe(false); // 10 attempts per email per 10 minutes
+    const resets: boolean[] = [];
+    for (let i = 0; i < 4; i++) resets.push(await authAttemptAllowed(t.db, "reset", `10.0.1.${i}`, "reset@example.test"));
+    expect(resets).toEqual([true, true, true, false]); // 3 reset emails per address per hour
+    const broken = new Proxy(t.db, { get: (target, prop, r) => (prop === "$queryRaw" ? () => Promise.reject(new Error("db down")) : Reflect.get(target, prop, r)) });
+    expect(await authAttemptAllowed(broken, "login", "10.0.0.99", "x@example.test")).toBe(false);
+  });
+});
