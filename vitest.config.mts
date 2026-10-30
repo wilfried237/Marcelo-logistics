@@ -16,6 +16,8 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
+    // Real-Supabase tests need the local stack: run them with `npm run test:supabase`.
+    exclude: ["tests/supabase/**", "node_modules/**"],
     pool: "forks",
     testTimeout: 60_000,
     hookTimeout: 120_000,
