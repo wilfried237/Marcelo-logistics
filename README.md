@@ -17,10 +17,12 @@ Without Supabase and database settings, the site runs with honest "not available
 |---|---|
 | `dev`, `build`, `start` | Next.js (build runs the owner-placeholder and i18n gates first) |
 | `typecheck`, `lint` | Static checks |
-| `test`, `test:db`, `test:e2e` | Vitest (unit, PostgreSQL, integration) and Playwright |
+| `test`, `test:db`, `test:e2e` | Vitest (unit, PostgreSQL via PGlite, integration) and Playwright |
+| `test:supabase` | Vitest against a running **local** Supabase stack (refuses non-local hosts) |
 | `check` | typecheck + lint + i18n + security + tests |
 | `check:i18n`, `check:owner`, `check:security` | Quality gates |
-| `db:generate`, `db:migrate`, `db:seed` | Drizzle migrations (guarded) and local-only seed |
+| `db:generate`, `db:validate`, `db:diff`, `db:status` | Prisma Client generation, schema validation, drift check, migration status |
+| `db:migrate`, `db:seed` | Prisma migrations (`migrate deploy`, local hosts only unless approved) and local-only seed |
 
 ## Documentation
 - [Implementation status](docs/IMPLEMENTATION-STATUS.md): what is done, tested and pending
@@ -32,4 +34,5 @@ Without Supabase and database settings, the site runs with honest "not available
 - Never invent business facts, prices, delivery times, reviews or legal text. Use `{{NEEDS_OWNER}}` in `config/owner.ts` or `messages/*.json`.
 - Every user-facing string goes in both `messages/en.json` and `messages/fr.json`.
 - Feature flags default to off. A flag never replaces authorisation.
-- Never use `drizzle-kit push`; never apply migrations to shared databases without approval.
+- Never use `prisma db push` or `prisma migrate dev` against a shared database; never apply migrations to shared databases without approval.
+- Prisma Client and the service-role key are server-only (enforced by `npm run check:security`).

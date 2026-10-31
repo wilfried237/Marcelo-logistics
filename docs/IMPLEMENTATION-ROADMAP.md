@@ -264,7 +264,7 @@ Keep the existing framework. Only add what is needed, phase by phase. Final choi
 | Mutations | **Server Actions** for forms, plus Route Handlers only for public or external APIs (tracking lookup, webhooks) | Fewer endpoints; built-in CSRF protection for actions |
 | Validation | **Zod** schemas in `lib/schemas/*`, shared by client (react-hook-form) and server | Already installed |
 | Database | **PostgreSQL** (managed: Neon, Supabase or RDS) ❓ | Relational data (customers, quotes, shipments, events, invoices) |
-| ORM / migrations | **Drizzle** or **Prisma** ❓, with versioned migrations and never destructive auto-push in production | Type safety; reviewable migrations |
+| ORM / migrations | **Prisma** (decided; replaced the interim Drizzle layer on 2026-10-31), with versioned migrations and never destructive auto-push in production | Type safety; reviewable migrations |
 | Auth | **Auth.js v5** or **Better Auth** ❓ with email magic link and password, and roles `customer`, `staff`, `admin`. Protection enforced in the data layer, not only in middleware | Self-hosted, no per-user fees |
 | Pricing | A single `lib/pricing/` module fed by **database rate tables** (route × service × weight/volume bands, surcharges, currency, validity dates). The client calls a server action for the estimate | Fixes §5.2; staff can edit prices |
 | Tracking | `shipments` + `shipment_events` tables with a fixed **milestone enum** (booked → collected → at origin hub → departed → arrived destination port → customs → out for delivery → delivered, plus exceptions). Public lookup returns a limited view | Translatable statuses; no fabricated events |

@@ -209,7 +209,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Answer:**
 
 ### R-02 ◆ Apply the database migration
-- **Decision needed:** approval to apply the reviewed SQL in `drizzle/` to the Supabase project (see [DATABASE.md](./DATABASE.md)).
+- **Decision needed:** approval to apply the reviewed SQL in `prisma/migrations/` to the Supabase project (see [DATABASE.md](./DATABASE.md)).
 - **If delayed:** the hosted database stays empty; database features stay unavailable outside local development.
 - **Development can continue:** yes.
 - **Answer:**

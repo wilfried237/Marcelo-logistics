@@ -6,37 +6,54 @@
 | `npm run lint` | ESLint (Next.js core-web-vitals + TypeScript) | — |
 | `npm run check:i18n` | EN/FR key parity, value types, empty values, ICU arguments, technical placeholders | — |
 | `npm run check:owner` | Lists unresolved `{{NEEDS_OWNER}}` markers; **fails release builds** (`RELEASE_BUILD=true` or `VERCEL_ENV=production`) | — |
-| `npm run check:security` | Server-only modules in client code, `NEXT_PUBLIC_` secrets, unverified claims and template leftovers, tracked env files | git |
-| `npm test` | All Vitest suites (unit, database, integration) | — (PGlite runs in-process) |
+| `npm run check:security` | Server-only modules (incl. Prisma Client) in client code, `NEXT_PUBLIC_` secrets, unverified claims and template leftovers, tracked env files | git |
+| `npm run db:validate`, `npm run db:diff` | Prisma schema validation; drift between migration history and schema (must print an empty migration) | `db:diff` needs `SHADOW_DATABASE_URL` (local) |
+| `npm test` | All default Vitest suites (unit, database, integration) | — (PGlite runs in-process) |
 | `npm run test:db` | Database suites only | — |
-| `npm run build` | Production build (runs the owner and i18n checks first) | network for `next/font` |
+| `npm run test:supabase` | Real local Supabase stack suites | `supabase start`, migrated, `.env.local` with local values. Refuses non-local hosts |
+| `npm run build` | Production build (runs `prisma generate`, the owner and i18n checks first) | network for `next/font` |
 | `npm run test:e2e` | Playwright + axe on desktop and mobile viewports | a build; Google Chrome installed |
+| `node scripts/verify-local-journeys.mjs` | Sign-in, cookies, role-based access, sign-out in Chrome against a local build on the local Supabase stack | seed + build + `next start -p 3100`. Local URLs only |
 | `npm run check` | typecheck + lint + i18n + security + Vitest | — |
 
-## Suites
+On machines with little free memory run Vitest with `--maxWorkers=1` (each PGlite instance uses several hundred MB).
 
-| Suite | Files | Executed against |
-|---|---|---|
-| Unit | `tests/unit/*.test.ts` | Node |
-| Database | `tests/db/*.test.ts`: migrations, RLS (the 10 required cases and more), lifecycle and audit, constraints, references, rate limiting, seed | **Real PostgreSQL 17** in-process (PGlite) + `tests/db/supabase-stub.sql` |
-| Integration | `tests/integration/*.test.ts`: quote workflow services, documents, email | PGlite via Drizzle; email provider and storage are in-memory fakes (no real recipients) |
-| E2E | `tests/e2e/*.spec.ts` | Production build in Chrome; no database or Supabase configured (verifies public pages and honest unavailable states) |
+## Suites and what they run against
 
-## Last recorded results (2026-10-30)
-- Vitest: **16 files, 150 tests passed**.
-- Playwright: desktop **28 passed**; mobile **28 passed, 1 skipped** (keyboard skip-link test is desktop-only).
-- typecheck, lint (0 problems), i18n (472 keys per locale), security check: passed.
-- Production build: passed.
+| Suite | Files | Executed against | Kind |
+|---|---|---|---|
+| Unit | `tests/unit/*.test.ts` | Node | Pure logic, headers/CSP, cookies options, quality gates |
+| Database | `tests/db/*.test.ts`: migrations (Prisma history, idempotency, no destructive SQL), RLS, lifecycle and audit, constraints, references, rate limiting, seed | **PostgreSQL 17 in-process (PGlite)** served over the wire protocol, so the **real Prisma Client** connects; `tests/db/supabase-stub.sql` emulates Supabase roles and `auth` | Real SQL, emulated Supabase |
+| Integration | `tests/integration/*.test.ts`: quote workflow services, documents, email, cron auth, quote expiry, retention, auth rate limits | PGlite via Prisma. **Email provider and storage are in-memory fakes**: no message is sent, no file leaves the process | Mocked providers |
+| Real Supabase | `tests/supabase/*.test.ts`: Auth (sign-up refused, sign-in, wrong password, password policy, single-use recovery tokens, sign-out revocation, invitation → customer role), RLS isolation and hidden columns, anon denial, public tracking, Storage privacy, concurrent last-admin protection, full Prisma workflow under RLS, overlapping expiry runs, no role/claims leak on a pooled connection | **Real local Supabase stack** (official CLI, Docker): GoTrue, PostgREST, Storage, Postgres 17 | Real services, local only |
+| E2E | `tests/e2e/*.spec.ts` | Production build in Chrome, **no** database or Supabase configured (public pages, honest unavailable states, nonce CSP, axe) | Browser |
+| Journeys | `scripts/verify-local-journeys.mjs` | Production build + real local Supabase, seeded demo users | Browser, real local services |
 
-## Not executed in this environment, and how to run them
-These need services that were not available (Docker daemon stopped; no Supabase project):
+**Not tested against any real external provider:** email delivery (Resend; no verified domain, C-02), hosted Supabase (no approved project, R-01/R-02), Vercel Cron and Deployment Protection.
 
-1. **Database suites on a real Supabase stack**
-   ```bash
-   supabase start                      # local Docker stack
-   DIRECT_URL=postgres://postgres:postgres@127.0.0.1:54322/postgres npm run db:migrate
-   ```
-   Then repeat the RLS checks with the Supabase SQL editor or `psql`, using `set local role authenticated` and `set_config('request.jwt.claims', …)` exactly as in `tests/db/harness.ts`.
-2. **Auth flows (manual, local Supabase)**: register (with `ENABLE_CUSTOMER_REGISTRATION=true`), confirm via Inbucket (`http://127.0.0.1:54324`), sign in, sign out, forgot/reset password, staff invitation, and checking that a customer cannot open `/admin` (404) or another customer's `/portal/quotes/<ref>` (404).
-3. **End-to-end with data**: `npm run db:seed`, set `ENABLE_QUOTE_SUBMISSION=true` and `EMAIL_DEV_LOG=true`, submit a quote, review it as `demo.staff@example.test`, send a quote, accept it as the customer, create a shipment, add a public event, then track it publicly.
-4. **Storage**: with `ENABLE_DOCUMENT_UPLOADS=true`, upload and download a PDF from the portal and confirm the bucket is private.
+## Last recorded results (2026-10-31, branch `feat/prisma-integration-hardening`)
+| Check | Result |
+|---|---|
+| Vitest default suites | **17 files, 163 tests passed** (unit 9 files / 78; database 4 / 46; integration 4 / 39) |
+| `npm run test:supabase` | **2 files, 14 tests passed** on the real local stack |
+| Playwright | **58 passed, 2 skipped** (desktop + mobile; the skips are the viewport-specific tests) |
+| Local journeys | **18/18 passed** (customer, staff, admin; HttpOnly + SameSite=Lax cookies; staff 404 on admin-only page; sign-out) |
+| typecheck, lint | pass, 0 problems |
+| check:i18n | OK, 472 keys per locale |
+| check:security | OK |
+| check:owner | 11 unresolved owner markers (expected; release builds fail by design) |
+| `prisma validate`, `db:diff` | valid; empty migration (no drift) |
+| `npm run build` | pass |
+| `npm audit` | 4 low, 0 moderate/high/critical (SECURITY.md) |
+
+## Running the real-stack checks
+```bash
+npx supabase start -x realtime,studio,edge-runtime,logflare,vector,imgproxy,supavisor,postgres-meta
+npx supabase status -o env          # copy the LOCAL values into .env.local (see LOCAL-SETUP.md)
+npm run db:migrate                  # local hosts only
+npm run test:supabase
+npm run db:seed && npm run build && npx next start -p 3100
+node scripts/verify-local-journeys.mjs
+npx supabase stop                   # when finished
+```
+Auth emails sent by the local stack are captured by its Inbucket/Mailpit inbox (`http://127.0.0.1:54324`), never delivered.

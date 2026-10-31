@@ -1,13 +1,14 @@
 # Architecture
 
-_Last updated: 2026-10-30 · Reflects the implemented MVP on `feat/mvp-database-and-app`._
+_Last updated: 2026-10-31 · Reflects branch `feat/prisma-integration-hardening`._
 
 ## Stack (settled by the project directive)
-Next.js 15.5 App Router · React 19.1 · TypeScript strict · Tailwind CSS 4 · shadcn/ui (Radix) · next-intl (EN/FR) · Inter via `next/font` · light theme only · React Hook Form + Zod · Supabase (PostgreSQL in the EU, Auth with `@supabase/ssr`, private Storage) · Drizzle ORM + `drizzle-kit` · Resend + React Email · Vercel (EU region, preview only) · Vitest + PGlite · Playwright + axe. No analytics. No payments.
+Next.js 15.5 App Router · React 19.1 · TypeScript strict · Tailwind CSS 4 · shadcn/ui (Radix) · next-intl (EN/FR) · Inter via `next/font` · light theme only · React Hook Form + Zod · Supabase (PostgreSQL in the EU, Auth with `@supabase/ssr`, private Storage) · Prisma ORM 7.10.1 (`@prisma/adapter-pg`, SQL migrations for RLS/triggers) · Resend + React Email · Vercel (EU region, preview only) · Vitest + PGlite · Playwright + axe. No analytics. No payments.
 
 ## Request flow
 ```
 Browser ──► middleware.ts
+            ├─ per-request CSP nonce (script-src nonce + strict-dynamic; pages render dynamically)
             ├─ next-intl locale routing (pages only; /api, /_next, files excluded)
             └─ Supabase session refresh (cookies only; no authorisation here)
         ──► app/[locale]/
@@ -20,6 +21,7 @@ Browser ──► middleware.ts
             quote/            legacy endpoint: always 503, no GET
             auth/callback/    PKCE code / token_hash verification for email links
             documents/[id]/   RLS-checked 60-second signed download URL
+            cron/expire-quotes, cron/retention   Bearer CRON_SECRET; counts-only logs
 ```
 `*` terms returns 404 until legally approved.
 
@@ -28,7 +30,7 @@ Browser ──► middleware.ts
 |---|---|---|
 | Domain | `lib/domain/` | Enums, service codes, quote lifecycle table, references (crypto), Zod schemas, money (integer minor units), time-zone helpers. Pure and unit-tested |
 | Configuration | `lib/config/`, `config/owner.ts` | Feature flags (default off), validated environment access, owner-controlled business facts with `{{NEEDS_OWNER}}` markers |
-| Data access | `lib/db/` | Drizzle schema and client; `withUser()` (RLS as `authenticated` + JWT subject) and `withSystem()` (privileged, audited actor); DB error mapping |
+| Data access | `lib/db/`, `prisma/` | Prisma schema, migrations and server-only client; `withUser()` (RLS as `authenticated` + JWT subject, transaction-scoped), `withAnon()`, `withSystem()` (privileged, audited actor); DB error mapping |
 | Services | `lib/services/` | Business operations, each enforcing role and ownership before the database enforces them again |
 | Auth | `lib/auth/`, `lib/supabase/` | Session (validated with Supabase), role from `profiles`, guards, safe redirects |
 | Email | `lib/email/` | Templates (EN/FR), delivery log, idempotent send, honest outcome |
@@ -40,8 +42,9 @@ Browser ──► middleware.ts
 2. **Database-enforced workflow.** Quote transitions, sent/valid-quote requirements, shipment creation from accepted quotes, immutable fields and audit records are enforced by triggers, so no code path can skip them.
 3. **Honest states over fake functionality.** Every unavailable capability says so. Success is shown only after a confirmed commit. "Email sent" is shown only when the provider accepted the message.
 4. **No invented business facts.** Owner-controlled values live in one place, carry markers, are hidden from visitors while unresolved, and block release builds.
-5. **Persistent abuse controls.** Rate limits and idempotency are stored in Postgres, because serverless instances do not share memory.
+5. **Persistent abuse controls.** Rate limits (quotes, tracking, sign-in, registration, password reset) and idempotency are stored in Postgres, because serverless instances do not share memory. They fail closed.
 6. **Staff-entered prices only.** No pricing engine exists. Amounts are stored as integer minor units with a currency code.
+7. **Prisma for data access, SQL for security.** Prisma models the tables and runs the migration history; RLS, grants, triggers and definer functions stay in reviewed SQL migrations, so no ORM path can bypass them. See [DATABASE.md](./DATABASE.md#how-prisma-interacts-with-row-level-security).
 
 ## Configuration matrix
 | Capability | Requires |
@@ -51,5 +54,6 @@ Browser ──► middleware.ts
 | Transactional email | `ENABLE_TRANSACTIONAL_EMAIL` + `RESEND_API_KEY` + `EMAIL_FROM` |
 | Staff invitations, uploads | `SUPABASE_SERVICE_ROLE_KEY` (+ `ENABLE_DOCUMENT_UPLOADS` for uploads) |
 | Public tracking | `DATABASE_URL` |
+| Scheduled jobs | `CRON_SECRET` + database; retention deletion also needs an approved policy (L-03) and `RETENTION_EXECUTION_ENABLED=true` |
 
 See [DATABASE.md](./DATABASE.md), [SECURITY.md](./SECURITY.md), [TESTING.md](./TESTING.md), [LOCAL-SETUP.md](./LOCAL-SETUP.md) and [DEPLOYMENT.md](./DEPLOYMENT.md).
