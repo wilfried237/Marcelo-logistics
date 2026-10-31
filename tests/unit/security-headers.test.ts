@@ -59,3 +59,11 @@ describe("static security headers", () => {
     expect(response.headers.get("x-middleware-request-x-nonce")).toBe("n");
   });
 });
+
+describe("session cookies", () => {
+  it("are HttpOnly and SameSite=Lax, and Secure on HTTPS deployments", async () => {
+    const { sessionCookieOptions } = await import("@/lib/supabase/cookie-options");
+    expect(sessionCookieOptions(true)).toMatchObject({ httpOnly: true, sameSite: "lax", secure: true, path: "/" });
+    expect(sessionCookieOptions(false).secure).toBe(false);
+  });
+});

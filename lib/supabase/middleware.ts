@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { sessionCookieOptions } from "./cookie-options";
 
 /**
  * Refreshes the Supabase session cookie on the response produced by the locale
@@ -11,6 +12,7 @@ export async function refreshSupabaseSession(request: NextRequest, response: Nex
   const anonKey = process.env.SUPABASE_ANON_KEY;
   if (!url || !anonKey) return response;
   const supabase = createServerClient(url, anonKey, {
+    cookieOptions: sessionCookieOptions(),
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll: (list) => {

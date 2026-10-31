@@ -1,6 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
+import { sessionCookieOptions } from "./cookie-options";
 import { getSupabasePublicConfig } from "@/lib/config/env";
 
 /** Supabase client bound to the request cookies (Server Components, Server Actions, Route Handlers). */
@@ -8,6 +9,7 @@ export async function createSupabaseServerClient() {
   const { url, anonKey } = getSupabasePublicConfig();
   const cookieStore = await cookies();
   return createServerClient(url, anonKey, {
+    cookieOptions: sessionCookieOptions(),
     cookies: {
       getAll: () => cookieStore.getAll(),
       setAll: (list) => {
