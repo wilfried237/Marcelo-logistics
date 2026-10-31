@@ -4,15 +4,15 @@
   "ignorePaths": [
     "node_modules",
     ".next",
-    "drizzle/**",
+    "prisma/migrations/**",
+    "lib/generated/**",
     "messages/fr.json",
     "**/*.fr.*",
-    "package-lock.json",
-    "drizzle/**"
+    "package-lock.json"
   ],
   "words": [
-    "Drizzle",
-    "drizzle",
+    "Prisma",
+    "prisma",
     "Supabase",
     "supabase",
     "PGlite",
