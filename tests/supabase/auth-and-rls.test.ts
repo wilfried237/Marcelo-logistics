@@ -138,34 +138,41 @@ describe("Storage (private bucket)", () => {
 
 describe("concurrency on real Postgres sessions", () => {
   it("two administrators demoting each other cannot remove the last administrator", async () => {
-    // Make these two the only administrators in the local database.
+    // Make these two the only administrators in the local database, and give the
+    // role back to the existing administrators (e.g. the seeded demo admin) afterwards.
     const a = await createUser("admin", "admin.a");
     const b = await createUser("admin", "admin.b");
-    await sql(
-      "begin; select set_config('app.role_change','allowed', true); update public.profiles set role = 'staff' where role = 'admin' and id not in ($1, $2); commit;".replace(/\$1/, `'${a.id}'`).replace(/\$2/, `'${b.id}'`),
-    );
-    const session = async (actor: string, target: string) => {
-      const client = new pg.Client({ connectionString: DATABASE_URL });
-      await client.connect();
-      try {
-        await client.query("begin");
-        await client.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ sub: actor, role: "authenticated" })]);
-        await client.query("set local role authenticated");
-        await client.query("select public.admin_set_user_role($1, 'staff')", [target]);
-        await new Promise((r) => setTimeout(r, 300)); // hold the transaction open to force overlap
-        await client.query("commit");
-        return "ok";
-      } catch (error) {
-        await client.query("rollback").catch(() => undefined);
-        return (error as Error).message;
-      } finally {
-        await client.end();
-      }
-    };
-    const results = await Promise.all([session(a.id, b.id), session(b.id, a.id)]);
-    const [{ admins }] = await sql<{ admins: number }>("select count(*)::int as admins from public.profiles where role = 'admin'");
-    expect(admins).toBe(1);
-    expect(results.filter((r) => r === "ok")).toHaveLength(1);
-    expect(results.find((r) => r !== "ok")).toMatch(/forbidden|last_admin/);
+    const others = (await sql<{ id: string }>("select id from public.profiles where role = 'admin' and id not in ($1, $2)", [a.id, b.id])).map((r) => r.id);
+    try {
+      await sql(
+        "begin; select set_config('app.role_change','allowed', true); update public.profiles set role = 'staff' where role = 'admin' and id not in ($1, $2); commit;".replace(/\$1/, `'${a.id}'`).replace(/\$2/, `'${b.id}'`),
+      );
+      const session = async (actor: string, target: string) => {
+        const client = new pg.Client({ connectionString: DATABASE_URL });
+        await client.connect();
+        try {
+          await client.query("begin");
+          await client.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ sub: actor, role: "authenticated" })]);
+          await client.query("set local role authenticated");
+          await client.query("select public.admin_set_user_role($1, 'staff')", [target]);
+          await new Promise((r) => setTimeout(r, 300)); // hold the transaction open to force overlap
+          await client.query("commit");
+          return "ok";
+        } catch (error) {
+          await client.query("rollback").catch(() => undefined);
+          return (error as Error).message;
+        } finally {
+          await client.end();
+        }
+      };
+      const results = await Promise.all([session(a.id, b.id), session(b.id, a.id)]);
+      const [{ admins }] = await sql<{ admins: number }>("select count(*)::int as admins from public.profiles where role = 'admin'");
+      expect(admins).toBe(1);
+      expect(results.filter((r) => r === "ok")).toHaveLength(1);
+      expect(results.find((r) => r !== "ok")).toMatch(/forbidden|last_admin/);
+    } finally {
+      const restore = others.map((id) => `'${id}'`).join(",");
+      if (restore) await sql(`begin; select set_config('app.role_change','allowed', true); update public.profiles set role = 'admin' where id in (${restore}); commit;`);
+    }
   });
 });

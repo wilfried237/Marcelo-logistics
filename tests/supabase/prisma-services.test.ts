@@ -1,7 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
 import { createPrismaClient } from "@/lib/db/client";
-import type { Database } from "@/lib/db/types";
+import type { Database, Tx } from "@/lib/db/types";
+import { withUser } from "@/lib/db/context";
 import type { AppUser } from "@/lib/auth/types";
 import { loadAppUser } from "@/lib/services/users";
 import { getCustomerQuoteRequest, respondToQuote, sendQuote, submitQuoteRequest, transitionQuoteRequest } from "@/lib/services/quote-requests";
@@ -102,6 +103,26 @@ describe("Prisma services on real Supabase Postgres", () => {
       expect(await expireQuotes(db)).toEqual({ expired: 0 });
     } finally {
       await second.$disconnect();
+    }
+  });
+
+  it("does not leak the RLS role or JWT claims to the next query on a pooled connection", async () => {
+    // One connection, so the follow-up queries are guaranteed to reuse it.
+    const single = createPrismaClient(DATABASE_URL, 1);
+    const state = (client: Database | Tx) =>
+      client.$queryRaw<{ role: string; claims: string | null }[]>`select current_user::text as role, nullif(current_setting('request.jwt.claims', true), '') as claims`;
+    try {
+      const before = await state(single);
+      const inside = await withUser(single, a.id, (tx) => state(tx));
+      expect(inside[0].role).toBe("authenticated");
+      expect(JSON.parse(inside[0].claims!).sub).toBe(a.id);
+      await expect(withUser(single, a.id, async () => Promise.reject(new Error("rollback")))).rejects.toThrow("rollback");
+      const after = await state(single);
+      expect(after[0].role).toBe(before[0].role);
+      expect(after[0].role).not.toBe("authenticated");
+      expect(after[0].claims).toBeNull();
+    } finally {
+      await single.$disconnect();
     }
   });
 });
