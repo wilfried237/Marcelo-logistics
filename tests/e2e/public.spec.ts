@@ -96,6 +96,41 @@ test.describe("navigation", () => {
     await expect(page).toHaveURL(/\/en\/track$/);
   });
 
+  test("mobile menu groups expand and lead to the shipping guide", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "mobile only");
+    await page.goto("/fr");
+    await page.getByRole("button", { name: "Ouvrir le menu" }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByText("Envoyer", { exact: true }).click();
+    await dialog.getByRole("link", { name: /Guide d’expédition/ }).click();
+    await expect(page).toHaveURL(/\/fr\/shipping-guide$/);
+  });
+
+  test("desktop Send menu works with the keyboard and closes on Escape", async ({ page, isMobile }) => {
+    test.skip(isMobile, "desktop navigation");
+    await page.goto("/en");
+    const send = page.getByRole("navigation", { name: "Main navigation" }).getByRole("button", { name: "Send" });
+    await send.focus();
+    await page.keyboard.press("Enter");
+    await expect(send).toHaveAttribute("aria-expanded", "true");
+    const panel = page.locator(`#${await send.getAttribute("aria-controls")}`);
+    await expect(panel.getByRole("link")).toHaveCount(3);
+    await page.keyboard.press("Escape");
+    await expect(send).toHaveAttribute("aria-expanded", "false");
+    await expect(send).toBeFocused();
+    await send.click();
+    await panel.getByRole("link", { name: /Services/ }).click();
+    await expect(page).toHaveURL(/\/en\/services$/);
+  });
+
+  test("content pages show a breadcrumb back to the home page", async ({ page }) => {
+    await page.goto("/fr/how-it-works");
+    const crumb = page.getByRole("navigation", { name: "Fil d’Ariane" });
+    await expect(crumb.locator("[aria-current=page]")).toHaveText("Comment ça marche");
+    await crumb.getByRole("link", { name: "Accueil" }).click();
+    await expect(page).toHaveURL(/\/fr$/);
+  });
+
   test("skip link moves focus to main content", async ({ page, isMobile }) => {
     test.skip(isMobile, "keyboard test on desktop");
     await page.goto("/en");
