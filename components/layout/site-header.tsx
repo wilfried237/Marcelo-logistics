@@ -2,17 +2,20 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Menu, PackageSearch } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { BrandMark } from "@/components/brand/illustrations";
 import { BrandName } from "./brand-name";
 
 const NAV = [
-  { key: "services", href: { pathname: "/services" } },
-  { key: "track", href: { pathname: "/track" } },
-  { key: "contact", href: { pathname: "/contact" } },
+  { key: "nav.services", href: "/services" },
+  { key: "nav2.howItWorks", href: "/how-it-works" },
+  { key: "nav2.guide", href: "/shipping-guide" },
+  { key: "nav.track", href: "/track" },
+  { key: "nav.contact", href: "/contact" },
 ] as const;
 
 function LocaleSwitch({ onNavigate }: { onNavigate?: () => void }) {
@@ -41,6 +44,8 @@ function LocaleSwitch({ onNavigate }: { onNavigate?: () => void }) {
 export function SiteHeader({ showAccount = false }: { showAccount?: boolean }) {
   const t = useTranslations("nav");
   const t2 = useTranslations("nav2");
+  const tAll = useTranslations();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -51,30 +56,35 @@ export function SiteHeader({ showAccount = false }: { showAccount?: boolean }) {
       </a>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 md:px-6">
         <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold text-foreground">
-          <PackageSearch className="h-6 w-6 shrink-0 text-primary" aria-hidden />
-          <BrandName className="truncate" />
+          <BrandMark className="shrink-0" />
+          <BrandName className="sr-only sm:not-sr-only sm:max-w-[15rem] sm:leading-tight" />
         </Link>
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-1 lg:flex">
           <nav aria-label="Main" className="flex items-center gap-1">
             {NAV.map((item) => (
-              <Link key={item.key} href={item.href} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
-                {t(item.key)}
+              <Link
+                key={item.key}
+                href={item.href}
+                aria-current={pathname === item.href ? "page" : undefined}
+                className="whitespace-nowrap rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground aria-[current=page]:text-primary"
+              >
+                {tAll(item.key)}
               </Link>
             ))}
           </nav>
           <LocaleSwitch />
           {showAccount && (
-            <Link href="/login" className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
+            <Link href="/login" className="whitespace-nowrap rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
               {t2("account")}
             </Link>
           )}
-          <Button asChild size="sm" className="ml-2">
+          <Button asChild size="sm" className="ml-2 whitespace-nowrap">
             <Link href="/quote">{t("quote")}</Link>
           </Button>
         </div>
 
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
           <Button asChild size="sm">
             <Link href="/quote">{t("quote")}</Link>
           </Button>
@@ -95,8 +105,8 @@ export function SiteHeader({ showAccount = false }: { showAccount?: boolean }) {
                   {t("home")}
                 </Link>
                 {NAV.map((item) => (
-                  <Link key={item.key} href={item.href} onClick={close} className="rounded-md px-3 py-3 font-medium hover:bg-secondary">
-                    {t(item.key)}
+                  <Link key={item.key} href={item.href} onClick={close} aria-current={pathname === item.href ? "page" : undefined} className="rounded-md px-3 py-3 font-medium hover:bg-secondary aria-[current=page]:text-primary">
+                    {tAll(item.key)}
                   </Link>
                 ))}
                 <Link href="/quote" onClick={close} className="rounded-md px-3 py-3 font-medium hover:bg-secondary">
