@@ -6,7 +6,11 @@ import { contentSecurityPolicy, createNonce, forwardRequestHeaders } from "./lib
 
 const handleI18nRouting = createMiddleware(routing);
 
-export default async function middleware(request: NextRequest) {
+/**
+ * Next.js 16 proxy (formerly middleware), Node.js runtime. Runs before every
+ * page request: locale routing, session refresh and the per-request CSP.
+ */
+export default async function proxy(request: NextRequest) {
   // Per-request CSP nonce: Next.js reads it from the request's CSP header and
   // adds it to its own scripts; the same policy is sent to the browser.
   const nonce = createNonce();

@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 
-// The matcher must be a literal in middleware.ts (Next.js analyses it statically),
+// The matcher must be a literal in proxy.ts (Next.js analyses it statically),
 // so the test reads it from the source file. Runtime behaviour is additionally
 // verified against a production build (see docs/TESTING.md, "routing probes").
-const source = readFileSync("middleware.ts", "utf8");
+const source = readFileSync("proxy.ts", "utf8");
 const literal = /matcher:\s*\["(.+?)"\]/.exec(source)?.[1];
 // Interpret the source literal exactly as JavaScript does (escape sequences included),
 // because Next.js uses the string VALUE, not the raw source text.
 const value = JSON.parse(`"${literal}"`) as string;
 const matcher = new RegExp(`^${value}$`);
 
-describe("middleware matcher", () => {
+describe("proxy matcher", () => {
   it("is defined", () => expect(literal).toBeTruthy());
 
   it.each(["/", "/en", "/fr/quote", "/en/track/MLABC", "/en/api-docs", "/apiary"])("handles page path %s", (path) => {

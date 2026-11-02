@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin", "latin-ext"], display: "swap", variable
 
 export const viewport: Viewport = { themeColor: "#1f3a68", colorScheme: "light" };
 
-// Per-request rendering: required for the CSP nonce applied by middleware.ts.
+// Per-request rendering: required for the CSP nonce applied by proxy.ts.
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -29,7 +29,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   // Reading request headers makes every page render per request, which the CSP
-  // nonce requires (middleware.ts). Next.js applies the nonce to its scripts.
+  // nonce requires (proxy.ts). Next.js applies the nonce to its scripts.
   await headers();
   const messages = await getMessages();
 

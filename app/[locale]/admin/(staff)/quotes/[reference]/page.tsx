@@ -10,6 +10,7 @@ import { Alert } from "@/components/app/alert";
 import { PageHeader } from "@/components/app/page-header";
 import { ItemsList } from "@/components/app/record-lists";
 import { QuoteStatusBadge } from "@/components/app/status-badge";
+import { suggestedValidUntil } from "@/lib/domain/time";
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
@@ -33,7 +34,7 @@ export default async function AdminQuoteDetail({ params }: { params: Promise<{ l
   const ts = await getTranslations("services");
   const tq = await getTranslations("status.quote");
   const format = await getFormatter();
-  const defaultValidUntil = new Date(Date.now() + 14 * 86400_000).toISOString().slice(0, 10);
+  const defaultValidUntil = suggestedValidUntil();
   const canQuote = request.status === "UNDER_REVIEW" || request.status === "AWAITING_CUSTOMER";
 
   return (

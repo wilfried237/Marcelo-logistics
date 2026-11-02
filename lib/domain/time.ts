@@ -13,3 +13,11 @@ export function dublinLocalToIso(value: string): string | null {
   guess = new Date(asUtc.getTime() - offsetAt(guess) * 60000);
   return guess.toISOString();
 }
+
+/**
+ * Suggested "valid until" date (YYYY-MM-DD) for a new staff quote: `days` after
+ * `now`. Only a form default; staff choose the real validity per quote (P-03).
+ */
+export function suggestedValidUntil(days = 14, now: Date = new Date()): string {
+  return new Date(now.getTime() + days * 86_400_000).toISOString().slice(0, 10);
+}

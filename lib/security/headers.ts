@@ -1,7 +1,7 @@
 /**
  * Security headers.
  *
- * The Content-Security-Policy is built per request in middleware.ts with a
+ * The Content-Security-Policy is built per request in proxy.ts with a
  * fresh nonce: scripts run only if they carry that nonce (or were loaded by a
  * nonced script, via 'strict-dynamic'). There is no 'unsafe-inline' for
  * scripts in production. Next.js reads the nonce from the request's CSP header
@@ -49,7 +49,7 @@ export function createNonce(): string {
   return btoa(String.fromCharCode(...bytes));
 }
 
-/** Static headers for every response (next.config.ts). The CSP is added per request by middleware. */
+/** Static headers for every response (next.config.ts). The CSP is added per request by proxy.ts. */
 export function securityHeaders(options: HeaderOptions): { key: string; value: string }[] {
   const headers = [
     { key: "X-Content-Type-Options", value: "nosniff" },
