@@ -88,7 +88,7 @@ Helper functions (`app_current_role`, `app_is_staff`, `app_is_admin`, `app_owns_
 | `GET /api/cron/expire-quotes` | Runs `app_expire_quotes()`: moves `QUOTED` requests whose sent quote has passed `valid_until` to `EXPIRED`, audited. Idempotent and safe to overlap (row locks; tested with concurrent runs) | `Authorization: Bearer $CRON_SECRET` (≥ 32 chars, timing-safe). Without the secret: `503 CRON_DISABLED` |
 | `GET /api/cron/retention` | Dry run by default: reports counts that **would** be deleted. Deletes only with `?mode=execute` **and** an approved policy in `config/retention.ts` **and** `RETENTION_EXECUTION_ENABLED=true` | Same |
 
-The retention policy has **no periods** (`approved: false`, all periods `null`) until the owner decides (L-03); the job refuses to delete anything until then. Logs contain counts only, never personal data. `vercel.json` schedules only the expiry job (hourly); Vercel runs crons on production deployments only.
+The retention policy has **no periods** (`approved: false`, all periods `null`) until the owner decides (L-03); the job refuses to delete anything until then. Logs contain counts only, never personal data. `vercel.json` schedules only the expiry job (daily, the Vercel Hobby limit); Vercel runs crons on production deployments only.
 
 ## Migration procedure
 

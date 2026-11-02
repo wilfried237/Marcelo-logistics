@@ -21,7 +21,7 @@ Every step below needs the owner's accounts and approval; none has been done.
    - **Deployment Protection: on** (Vercel Authentication or password) for every preview, so unfinished pages are never public.
    - Environment variables for **Preview** only (names in `.env.example`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL` (pooler, port 6543), `SITE_URL`, `RATE_LIMIT_SALT`, `CRON_SECRET`. `DIRECT_URL` is only for migrations and is not needed by the running app. Never give a secret a `NEXT_PUBLIC_` prefix (`npm run check:security` enforces this).
    - Keep `RETENTION_EXECUTION_ENABLED` unset.
-4. **Scheduled jobs**: `vercel.json` schedules `/api/cron/expire-quotes` hourly. Vercel runs crons **only on production deployments**, so on a preview call it manually with the bearer secret if needed. Without `CRON_SECRET` the endpoint answers `503 CRON_DISABLED`. Expired quotes are already refused at acceptance, so a missed run is not a correctness problem.
+4. **Scheduled jobs**: `vercel.json` schedules `/api/cron/expire-quotes` once a day (03:15 UTC), because Vercel Hobby plans reject deployments whose crons run more than daily. On a Pro plan the schedule can be tightened (for example hourly). Vercel runs crons **only on production deployments**, so on a preview call it manually with the bearer secret if needed. Without `CRON_SECRET` the endpoint answers `503 CRON_DISABLED`. Expired quotes are already refused at acceptance, so a missed run is not a correctness problem.
 5. Keep the `ENABLE_*` flags off on the preview until each prerequisite is met:
 
 | Flag | Enable only when |
