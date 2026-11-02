@@ -1,13 +1,13 @@
 # Architecture
 
-_Last updated: 2026-10-31 · Reflects branch `feat/prisma-integration-hardening`._
+_Last updated: 2026-11-03 · Reflects branch `feat/royal-mail-inspired-redesign`._
 
 ## Stack (settled by the project directive)
-Next.js 15.5 App Router · React 19.1 · TypeScript strict · Tailwind CSS 4 · shadcn/ui (Radix) · next-intl (EN/FR) · Inter via `next/font` · light theme only · React Hook Form + Zod · Supabase (PostgreSQL in the EU, Auth with `@supabase/ssr`, private Storage) · Prisma ORM 7.10.1 (`@prisma/adapter-pg`, SQL migrations for RLS/triggers) · Resend + React Email · Vercel (EU region, preview only) · Vitest + PGlite · Playwright + axe. No analytics. No payments.
+Next.js 16.4 App Router (Turbopack builds; `proxy.ts` on the Node.js runtime) · React 19.1 · TypeScript strict · Tailwind CSS 4 · shadcn/ui (Radix) · next-intl (EN/FR) · Inter via `next/font` · light theme only · React Hook Form + Zod · Supabase (PostgreSQL in the EU, Auth with `@supabase/ssr`, private Storage) · Prisma ORM 7.10.1 (`@prisma/adapter-pg`, SQL migrations for RLS/triggers) · Resend + React Email · Vercel (EU region, preview only) · Vitest + PGlite · Playwright + axe. No analytics. No payments.
 
 ## Request flow
 ```
-Browser ──► middleware.ts
+Browser ──► proxy.ts (Next.js 16 proxy, formerly middleware; Node.js runtime)
             ├─ per-request CSP nonce (script-src nonce + strict-dynamic; pages render dynamically)
             ├─ next-intl locale routing (pages only; /api, /_next, files excluded)
             └─ Supabase session refresh (cookies only; no authorisation here)

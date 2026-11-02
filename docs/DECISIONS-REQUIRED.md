@@ -1,6 +1,6 @@
 # Decisions Required from the Owner
 
-_Last updated: 2026-10-29 · This is the single consolidated list of open **business** decisions._
+_Last updated: 2026-11-03 · This is the single consolidated list of open **business** decisions._
 
 **How to answer:** write your answer on the `Answer:` line under each decision (or reply by email quoting the ID). Answers already recorded here are preserved. Development continues on everything that does not depend on an answer.
 
@@ -12,7 +12,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 
 | ID | Decision | Blocks |
 |---|---|---|
-| B-01 ★ | Official business name | Release |
+| B-01 ✓ | Official business name: **Marchelo Logistics** (answered 2026-11-03) | — |
 | B-02 ★ | Legal entity, registration and VAT details | Release (legal pages, footer) |
 | S-01 ★ | Which services are offered now | Release (services shown as "to be confirmed") |
 | S-02 | Routes and destination cities | Quote form options |
@@ -47,7 +47,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **If delayed:** the site shows the neutral tagline "Logistics between Ireland and Cameroon" instead of a name; release builds fail.
 - **Affected:** `messages/en.json` and `messages/fr.json` → `brand.name`; email templates; footer.
 - **Development can continue:** yes.
-- **Answer:**
+- **Answer:** **Marchelo Logistics**, without “Cargo”. Given in the developer’s instruction of 2026-11-03 and applied to `brand.name` (EN and FR). Owner to confirm in writing if this did not come from them directly.
 
 ### B-02 ★ Legal entity details
 - **Decision needed:** registered company or sole-trader name, registration number (CRO or other), registered address, VAT number (if registered).
@@ -228,5 +228,5 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 
 | Topic | Evidence | Resolution needed |
 |---|---|---|
-| Business name | Brief: "Marcel Logistics" · Live site and logo: "Marchelo Logistics (Cargo)" · Old code: "Machelo" | B-01 |
+| Business name | Brief: "Marcel Logistics" · Live site and logo: "Marchelo Logistics (Cargo)" · Old code: "Machelo" | Resolved 2026-11-03: "Marchelo Logistics" (B-01). The logo still reads "…LOGISTICS CARGO" and stays hidden until A-01 |
 | Contact email | Gmail address in old code vs. branded domain on the live site | C-01 |

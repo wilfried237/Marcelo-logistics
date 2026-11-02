@@ -1,6 +1,6 @@
 # Implementation Status
 
-_Last updated: 2026-10-31_
+_Last updated: 2026-11-03_
 
 **Overall: locally verified. Not preview-ready** until the owner decisions and external configuration below are done. Not production-ready.
 
@@ -9,6 +9,8 @@ _Last updated: 2026-10-31_
 |---|---|---|---|
 | `phase-0-stabilisation` | `master` | Phase 0 (stable checkpoint, `6d97295`) | No (local only) |
 | `feat/mvp-database-and-app` | `phase-0-stabilisation` | Database, data layer, auth, email, pages, portal, staff area, tests, docs (on Drizzle) | No (local only) |
+| `feat/frontend-landing-and-pages` | `feat/prisma-integration-hardening` | Logo palette, real photos, How it works and Shipping guide pages | No (local only) |
+| `feat/royal-mail-inspired-redesign` | `feat/frontend-landing-and-pages` | Royal Mail-inspired layout, fewer icons, business name, Next.js 16.4.4 | See below |
 | `feat/prisma-integration-hardening` | `feat/mvp-database-and-app` | Prisma ORM replaces Drizzle; real local Supabase tests; role-change race fix; cron expiry and retention; auth rate limits; nonce CSP; cookie hardening; docs | No (local only) |
 
 The intended integration is a pull request per branch to `master`, in order. Nothing has been merged, pushed, force-pushed or deployed, and no history was rewritten.
@@ -26,21 +28,24 @@ The intended integration is a pull request per branch to `master`, in order. Not
 | Documents | ✅ Implemented; uploads **disabled** (L-03); bucket privacy verified on the local stack | `tests/integration/documents.test.ts`, `tests/supabase` |
 | Security hardening | ✅ Nonce CSP, auth/quote/tracking limits, HttpOnly/Secure session cookies, headers, audit | SECURITY.md |
 | Public website | ✅ EN/FR complete; owner placeholders hidden from visitors | E2E + axe |
+| Royal Mail-inspired redesign | ✅ Utility bar, dropdown navigation, tracking panel, task grid, light title bands with breadcrumbs, dark footer; decorative icons and illustrations removed; name “Marchelo Logistics” (B-01) | 110 page/viewport checks (320–1440 px, EN/FR): no overflow, one h1 each |
+| Next.js 16.4.4 | ✅ `proxy.ts` (Node.js runtime), ESLint flat config, React Compiler lint rules satisfied | Build, all suites and signed-in journeys pass |
 | Frontend redesign (branch `feat/frontend-landing-and-pages`) | ✅ Logo palette (ink + logo blue), new landing page, new “How it works” and “Shipping guide” pages, banner style on content pages, real operation photos (A-02 to confirm), original SVG illustrations, sitemap and production-only robots | Playwright 76 passed, 2 skipped; axe on new pages |
 
-## Tests executed (2026-10-31)
+## Tests executed (2026-11-03, Next.js 16.4.4)
 | Check | Result | Runs against |
 |---|---|---|
-| Vitest default | ✅ 17 files, 163 tests | Node + PGlite (real Postgres SQL, emulated Supabase); email/storage mocked |
+| Vitest default | ✅ 17 files, 163 tests (unit 78, database 46, integration 39) | Node + PGlite (real Postgres SQL, emulated Supabase); email/storage mocked |
 | `npm run test:supabase` | ✅ 2 files, 14 tests | **Real local Supabase** (Docker) |
 | Local journeys | ✅ 18/18 | Chrome + production build + real local Supabase |
-| Playwright | ✅ 58 passed, 2 skipped | Chrome + production build, no services |
+| Playwright | ✅ 80 passed, 4 skipped (viewport-specific) | Chrome + production build, no services; desktop and mobile; axe on 8 pages |
+| Responsive sweep | ✅ 110 page/viewport combinations, no overflow, one h1 each | 1440, 1280, 820, 390, 320 px; EN and FR |
 | typecheck / lint | ✅ / 0 problems | |
-| check:i18n / check:security | ✅ 472 keys per locale / OK | |
-| check:owner | ⚠️ 11 unresolved markers (expected; release builds fail by design) | |
-| prisma validate / db:diff | ✅ valid / empty migration | |
+| check:i18n / check:security | ✅ 561 keys per locale / OK | |
+| check:owner | ⚠️ 9 unresolved markers (expected; production builds fail by design) | |
+| prisma validate | ✅ | |
 | build | ✅ | |
-| npm audit (all and `--omit=dev`) | ✅ 4 low, nothing higher (accepted, SECURITY.md) | |
+| npm audit | `--omit=dev`: 4 low (accepted). All: +16 moderate in dev-only lint tooling (accepted, SECURITY.md) | |
 
 **Not tested against real external providers:** Resend email delivery, a hosted Supabase project, Vercel (crons, Deployment Protection, EU region).
 

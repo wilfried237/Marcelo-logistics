@@ -31,17 +31,17 @@ On machines with little free memory run Vitest with `--maxWorkers=1` (each PGlit
 
 **Not tested against any real external provider:** email delivery (Resend; no verified domain, C-02), hosted Supabase (no approved project, R-01/R-02), Vercel Cron and Deployment Protection.
 
-## Last recorded results (2026-10-31, branch `feat/prisma-integration-hardening`)
+## Last recorded results (2026-11-03, branch `feat/royal-mail-inspired-redesign`, Next.js 16.4.4)
 | Check | Result |
 |---|---|
 | Vitest default suites | **17 files, 163 tests passed** (unit 9 files / 78; database 4 / 46; integration 4 / 39) |
 | `npm run test:supabase` | **2 files, 14 tests passed** on the real local stack |
-| Playwright | **58 passed, 2 skipped** (desktop + mobile; the skips are the viewport-specific tests) |
+| Playwright | **80 passed, 4 skipped** (desktop + mobile; the 4 skips are tests that only apply to the other viewport) |
 | Local journeys | **18/18 passed** (customer, staff, admin; HttpOnly + SameSite=Lax cookies; staff 404 on admin-only page; sign-out) |
 | typecheck, lint | pass, 0 problems |
-| check:i18n | OK, 472 keys per locale |
+| check:i18n | OK, 561 keys per locale |
 | check:security | OK |
-| check:owner | 11 unresolved owner markers (expected; release builds fail by design) |
+| check:owner | 9 unresolved owner markers (expected; release builds fail by design) |
 | `prisma validate`, `db:diff` | valid; empty migration (no drift) |
 | `npm run build` | pass |
 | `npm audit` | 4 low, 0 moderate/high/critical (SECURITY.md) |

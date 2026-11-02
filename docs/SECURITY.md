@@ -1,6 +1,6 @@
 # Security
 
-_Last reviewed: 2026-10-31 · Scope: full application on branch `feat/prisma-integration-hardening`._
+_Last reviewed: 2026-11-03 · Scope: full application on branch `feat/royal-mail-inspired-redesign`._
 
 This is an engineering review, **not** a legal compliance assessment. GDPR obligations (controller identity, retention, records of processing) need owner and legal review (decisions L-02, L-03).
 
@@ -25,14 +25,15 @@ This is an engineering review, **not** a legal compliance assessment. GDPR oblig
 | CSRF | Server Actions (Next.js origin check); no state-changing GET handlers except authenticated cron jobs; legacy API write methods removed (405) | — | API route tests |
 | Cookies | Supabase session cookies set by `@supabase/ssr` (HttpOnly not applicable to its design; `SameSite=Lax`, `Secure` on HTTPS) | `lib/supabase/*` | review |
 | Errors | Database errors mapped to stable codes; generic error page; no stack traces or SQL in responses | `lib/db/errors.ts`, `app/[locale]/error.tsx` | review |
-| Headers | **Nonce-based CSP** per request: `script-src 'self' 'nonce-…' 'strict-dynamic'`, no `'unsafe-inline'` for scripts (style-src keeps it for React/Radix style attributes); `frame-ancestors 'none'`, `object-src 'none'`; `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, COOP, `Permissions-Policy`; HSTS on HTTPS; no `X-Powered-By` | `middleware.ts`, `lib/security/headers.ts` | unit tests; E2E checks every script carries the nonce and pages hydrate with no CSP violation |
+| Headers | **Nonce-based CSP** per request: `script-src 'self' 'nonce-…' 'strict-dynamic'`, no `'unsafe-inline'` for scripts (style-src keeps it for React/Radix style attributes); `frame-ancestors 'none'`, `object-src 'none'`; `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, COOP, `Permissions-Policy`; HSTS on HTTPS; no `X-Powered-By` | `proxy.ts`, `lib/security/headers.ts` | unit tests; E2E checks every script carries the nonce and pages hydrate with no CSP violation |
 | Feature flags | All default off; demo data and preview areas never in production builds | `lib/config/flags.ts` | unit tests |
 | Content integrity | No fabricated claims (static check + E2E); release builds fail while owner placeholders remain | `scripts/check-*.mjs` | quality-gate tests, E2E |
 
 ## Dependency audit (2026-10-31)
 - `npm audit --omit=dev` and `npm audit` (all dependencies): **0 critical, 0 high, 0 moderate, 4 low**, both run with TLS certificate validation enabled. The low findings are one advisory chain: `deepmerge` (prototype pollution in `mergeObject`) via `html-to-text` via `@react-email/render`, reached only when rendering our own templates. **Accepted**; re-check when React Email updates.
 - The earlier moderate `esbuild` findings came from `drizzle-kit`, which has been removed with Drizzle.
-- Next.js pinned at 15.5.28; `postcss` overridden to ^8.5.32 inside Next.
+- Next.js pinned at **16.4.4** (latest stable on 2026-11-03) with `eslint-config-next` 16.4.4; `postcss` is still overridden to ^8.5.32 inside Next.
+- 2026-11-03 re-audit (TLS verification on): `npm audit --omit=dev` unchanged (4 low, the `deepmerge` chain above). `npm audit` including development tools: 16 moderate in `minimatch` (glob-pattern amplification, GHSA-g3hv-75wg-m249) pulled in by ESLint 9 and the plugins bundled with `eslint-config-next`. Lint tooling only, never deployed, and it only evaluates the repository's own glob patterns. The offered fix is a breaking downgrade, so it is **accepted**; re-check when ESLint or `eslint-config-next` update.
 
 ## Known gaps and follow-ups
 | # | Gap | Status / plan |
