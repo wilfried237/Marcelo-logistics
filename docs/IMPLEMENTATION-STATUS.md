@@ -26,6 +26,7 @@ The intended integration is a pull request per branch to `master`, in order. Not
 | Documents | ✅ Implemented; uploads **disabled** (L-03); bucket privacy verified on the local stack | `tests/integration/documents.test.ts`, `tests/supabase` |
 | Security hardening | ✅ Nonce CSP, auth/quote/tracking limits, HttpOnly/Secure session cookies, headers, audit | SECURITY.md |
 | Public website | ✅ EN/FR complete; owner placeholders hidden from visitors | E2E + axe |
+| Frontend redesign (branch `feat/frontend-landing-and-pages`) | ✅ Logo palette (ink + logo blue), new landing page, new “How it works” and “Shipping guide” pages, banner style on content pages, real operation photos (A-02 to confirm), original SVG illustrations, sitemap and production-only robots | Playwright 76 passed, 2 skipped; axe on new pages |
 
 ## Tests executed (2026-10-31)
 | Check | Result | Runs against |

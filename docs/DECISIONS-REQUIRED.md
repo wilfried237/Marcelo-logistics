@@ -81,8 +81,8 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 ### S-03 Prohibited and restricted items
 - **Decision needed:** the list of items you will not carry, or carry only with conditions.
 - **Why it matters:** customers need it before packing barrels and boxes; it reduces customs problems.
-- **If delayed:** no list is published; the FAQ says to ask before sending unusual items.
-- **Affected:** FAQ, service pages, quote form guidance.
+- **If delayed:** no binding list is published. The shipping guide (`/shipping-guide`) shows general categories under “Ask us before packing these” (flammables and gas, loose batteries, weapons, medicines and chemicals, perishable food, cash and valuables) and says the final list is confirmed in the quote.
+- **Affected:** FAQ, shipping guide (`guide.restricted*` in `messages/*.json`), quote form guidance.
 - **Development can continue:** yes.
 - **Answer:**
 
@@ -195,8 +195,9 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Answer:**
 
 ### A-02 Photographs
-- **Decision needed:** real photos you own (depot, packing, loading, containers) that may be used.
-- **If delayed:** the site uses no photos (no stock imagery implying facilities you may not have).
+- **Status (2026-11-03):** the two photos supplied with the project (`assets/photos/yard-loading-container.jpeg`, `assets/photos/side-loader-container.jpeg`, previously `public/work1.jpeg` and `work2.jpeg`) are now used on the home, services, about, how-it-works and shipping-guide pages, at the developer’s request. No stock photography is used; the other images are original illustrations drawn for the site.
+- **Decision needed:** confirm (1) the business owns these photos or has the right to use them; (2) the people shown agree to appear on the website (GDPR: they may be identifiable); (3) whether more photos can be supplied. `side-loader-container.jpeg` is only 300×300 pixels: a larger original would look sharper.
+- **If refused:** remove the entries in `components/brand/photos.tsx`; the illustrations remain.
 - **Development can continue:** yes.
 - **Answer:**
 
