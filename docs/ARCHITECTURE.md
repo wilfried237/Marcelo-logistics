@@ -41,7 +41,7 @@ Browser ──► proxy.ts (Next.js 16 proxy, formerly middleware; Node.js runti
 1. **Defence in depth for authorisation.** Guards in layouts and pages, role assertions in services, and RLS, column grants and triggers in PostgreSQL. App queries for signed-in users run under RLS (`withUser`).
 2. **Database-enforced workflow.** Quote transitions, sent/valid-quote requirements, shipment creation from accepted quotes, immutable fields and audit records are enforced by triggers, so no code path can skip them.
 3. **Honest states over fake functionality.** Every unavailable capability says so. Success is shown only after a confirmed commit. "Email sent" is shown only when the provider accepted the message.
-4. **No invented business facts.** Owner-controlled values live in one place, carry markers, are hidden from visitors while unresolved, and block release builds.
+4. **No invented business facts.** Owner-controlled values live in one place, carry markers, are hidden from visitors while unresolved, and block the launch build (`RELEASE_BUILD=true`).
 5. **Persistent abuse controls.** Rate limits (quotes, tracking, sign-in, registration, password reset) and idempotency are stored in Postgres, because serverless instances do not share memory. They fail closed.
 6. **Staff-entered prices only.** No pricing engine exists. Amounts are stored as integer minor units with a currency code.
 7. **Prisma for data access, SQL for security.** Prisma models the tables and runs the migration history; RLS, grants, triggers and definer functions stay in reviewed SQL migrations, so no ORM path can bypass them. See [DATABASE.md](./DATABASE.md#how-prisma-interacts-with-row-level-security).

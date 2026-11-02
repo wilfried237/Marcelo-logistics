@@ -27,7 +27,7 @@ This is an engineering review, **not** a legal compliance assessment. GDPR oblig
 | Errors | Database errors mapped to stable codes; generic error page; no stack traces or SQL in responses | `lib/db/errors.ts`, `app/[locale]/error.tsx` | review |
 | Headers | **Nonce-based CSP** per request: `script-src 'self' 'nonce-…' 'strict-dynamic'`, no `'unsafe-inline'` for scripts (style-src keeps it for React/Radix style attributes); `frame-ancestors 'none'`, `object-src 'none'`; `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, COOP, `Permissions-Policy`; HSTS on HTTPS; no `X-Powered-By` | `proxy.ts`, `lib/security/headers.ts` | unit tests; E2E checks every script carries the nonce and pages hydrate with no CSP violation |
 | Feature flags | All default off; demo data and preview areas never in production builds | `lib/config/flags.ts` | unit tests |
-| Content integrity | No fabricated claims (static check + E2E); release builds fail while owner placeholders remain | `scripts/check-*.mjs` | quality-gate tests, E2E |
+| Content integrity | No fabricated claims (static check + E2E); the launch build (`RELEASE_BUILD=true`) fails while owner placeholders remain; pre-launch builds are not indexed | `scripts/check-*.mjs` | quality-gate tests, E2E |
 
 ## Dependency audit (2026-10-31)
 - `npm audit --omit=dev` and `npm audit` (all dependencies): **0 critical, 0 high, 0 moderate, 4 low**, both run with TLS certificate validation enabled. The low findings are one advisory chain: `deepmerge` (prototype pollution in `mergeObject`) via `html-to-text` via `@react-email/render`, reached only when rendering our own templates. **Accepted**; re-check when React Email updates.

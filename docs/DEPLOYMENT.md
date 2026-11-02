@@ -35,5 +35,6 @@ Every step below needs the owner's accounts and approval; none has been done.
 6. Smoke test on the preview: public pages in EN/FR, response headers (nonce CSP, HSTS), sign-in as the bootstrapped admin, invite a staff member to a test address the owner controls, and `node scripts/verify-local-journeys.mjs`-style checks by hand. Do not send messages to real customers.
 
 ## Production (requires explicit approval: R-03)
-- A Vercel production build sets `VERCEL_ENV=production`, which makes the build **fail** while any `{{NEEDS_OWNER}}` marker remains. This is intentional.
+- Since 2026-11-03 a Vercel **production** build (on its `vercel.app` URL) succeeds while owner decisions are pending: the build log lists every unresolved `{{NEEDS_OWNER}}` marker, visitors see the neutral fallbacks, and `robots.txt` blocks indexing.
+- The **launch** build for the business domain must set `RELEASE_BUILD=true` in Vercel's Production environment. That build **fails** while any marker remains, and it is the only build that allows search indexing. Set it only with launch approval (R-03).
 - The domain cut-over from WordPress needs a migration plan: URLs and redirects, email records on the domain, and DNS ownership. Out of scope until approved.

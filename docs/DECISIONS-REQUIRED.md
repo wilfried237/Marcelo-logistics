@@ -4,7 +4,7 @@ _Last updated: 2026-11-03 · This is the single consolidated list of open **busi
 
 **How to answer:** write your answer on the `Answer:` line under each decision (or reply by email quoting the ID). Answers already recorded here are preserved. Development continues on everything that does not depend on an answer.
 
-**How unresolved items are handled in the code:** every unresolved fact carries the marker `{{NEEDS_OWNER}}` (in `config/owner.ts` or `messages/*.json`). Visitors never see the marker; a neutral fallback or nothing is shown instead. A **release build fails** while any marker remains (`npm run check:owner` lists them).
+**How unresolved items are handled in the code:** every unresolved fact carries the marker `{{NEEDS_OWNER}}` (in `config/owner.ts` or `messages/*.json`). Visitors never see the marker; a neutral fallback or nothing is shown instead. The **launch build** (`RELEASE_BUILD=true`) **fails** while any marker remains; Vercel preview and pre-launch production builds only list them as warnings (`npm run check:owner` lists them).
 
 Technical decisions (stack, database, auth, hosting, email provider, testing) are settled by the project directive and documented in [ARCHITECTURE.md](./ARCHITECTURE.md). They are not repeated here.
 
@@ -44,7 +44,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Why it matters:** it appears in the header, emails, legal pages and metadata. The material shows **conflicting evidence**: the project brief says "Marcel Logistics"; the live site `marchelo-logistics.com` and the logo file say "Marchelo Logistics" ("MARCHELO LOGISTICS CARGO" on the logo); the old code also had "Machelo".
 - **Recommended:** confirm one spelling and say whether "Cargo" is part of it.
 - **Options:** "Marcel Logistics" · "Marchelo Logistics" · "Marchelo Logistics Cargo" · other.
-- **If delayed:** the site shows the neutral tagline "Logistics between Ireland and Cameroon" instead of a name; release builds fail.
+- **If delayed:** the site shows the neutral tagline "Logistics between Ireland and Cameroon" instead of a name; the launch build (`RELEASE_BUILD=true`) fails.
 - **Affected:** `messages/en.json` and `messages/fr.json` → `brand.name`; email templates; footer.
 - **Development can continue:** yes.
 - **Answer:** **Marchelo Logistics**, without “Cargo”. Given in the developer’s instruction of 2026-11-03 and applied to `brand.name` (EN and FR). Owner to confirm in writing if this did not come from them directly.
@@ -53,7 +53,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Decision needed:** registered company or sole-trader name, registration number (CRO or other), registered address, VAT number (if registered).
 - **Why it matters:** needed for the footer, privacy notice, terms and invoices. Irish and EU rules require identifying the trader online.
 - **Recommended:** provide them as registered.
-- **If delayed:** the footer shows "Business and legal details will be published once confirmed"; release builds fail via L-01/L-02.
+- **If delayed:** the footer shows "Business and legal details will be published once confirmed"; the launch build (`RELEASE_BUILD=true`) fails via L-01/L-02.
 - **Affected:** footer, `/privacy`, `/terms`.
 - **Development can continue:** yes.
 - **Answer:**
@@ -144,7 +144,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
   - Email marchelodis@gmail.com (or a domain address?)
   - Opening hours and time zones
 - **Why it matters:** unverified details are never shown, so the site currently has **no visible contact channel**.
-- **If delayed:** the contact page says the details are being confirmed; release builds fail.
+- **If delayed:** the contact page says the details are being confirmed; the launch build (`RELEASE_BUILD=true`) fails.
 - **Affected:** `config/owner.ts` → `contact.*`.
 - **Development can continue:** yes.
 - **Answer:**
@@ -168,13 +168,13 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 
 ### L-01 ★ Terms and conditions of carriage
 - **Decision needed:** approved terms (liability limits, claims process, packing responsibilities, payment terms), ideally reviewed by a solicitor.
-- **If delayed:** `/terms` is not published (returns 404); release builds fail.
+- **If delayed:** `/terms` is not published (returns 404); the launch build (`RELEASE_BUILD=true`) fails.
 - **Development can continue:** yes.
 - **Answer:**
 
 ### L-02 ★ Privacy notice
 - **Decision needed:** data controller identity and contact; whether a solicitor or DPO reviews the notice. The site provides a factual draft of what data is collected and why, generated from the actual code.
-- **If delayed:** the privacy page shows the factual draft with the controller details marked as pending; release builds fail.
+- **If delayed:** the privacy page shows the factual draft with the controller details marked as pending; the launch build (`RELEASE_BUILD=true`) fails.
 - **Development can continue:** yes.
 - **Answer:**
 
@@ -189,7 +189,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 
 ### A-01 ★ Logo approval
 - **Decision needed:** is `public/LOGO.png` (reads "MARCHELO LOGISTICS CARGO") the official logo? Is there a vector (SVG) version?
-- **If delayed:** a neutral icon and text are used; release builds fail.
+- **If delayed:** a neutral icon and text are used; the launch build (`RELEASE_BUILD=true`) fails.
 - **Affected:** `config/owner.ts` → `brand.logo.approved`.
 - **Development can continue:** yes.
 - **Answer:**

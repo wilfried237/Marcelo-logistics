@@ -5,7 +5,7 @@
 | `npm run typecheck` | TypeScript strict mode | — |
 | `npm run lint` | ESLint (Next.js core-web-vitals + TypeScript) | — |
 | `npm run check:i18n` | EN/FR key parity, value types, empty values, ICU arguments, technical placeholders | — |
-| `npm run check:owner` | Lists unresolved `{{NEEDS_OWNER}}` markers; **fails release builds** (`RELEASE_BUILD=true` or `VERCEL_ENV=production`) | — |
+| `npm run check:owner` | Lists unresolved `{{NEEDS_OWNER}}` markers; **fails the launch build** (`RELEASE_BUILD=true`); warns on every other build, including Vercel production | — |
 | `npm run check:security` | Server-only modules (incl. Prisma Client) in client code, `NEXT_PUBLIC_` secrets, unverified claims and template leftovers, tracked env files | git |
 | `npm run db:validate`, `npm run db:diff` | Prisma schema validation; drift between migration history and schema (must print an empty migration) | `db:diff` needs `SHADOW_DATABASE_URL` (local) |
 | `npm test` | All default Vitest suites (unit, database, integration) | — (PGlite runs in-process) |
@@ -41,7 +41,7 @@ On machines with little free memory run Vitest with `--maxWorkers=1` (each PGlit
 | typecheck, lint | pass, 0 problems |
 | check:i18n | OK, 561 keys per locale |
 | check:security | OK |
-| check:owner | 9 unresolved owner markers (expected; release builds fail by design) |
+| check:owner | 9 unresolved owner markers (expected; the `RELEASE_BUILD=true` launch build fails by design) |
 | `prisma validate`, `db:diff` | valid; empty migration (no drift) |
 | `npm run build` | pass |
 | `npm audit` | 4 low, 0 moderate/high/critical (SECURITY.md) |

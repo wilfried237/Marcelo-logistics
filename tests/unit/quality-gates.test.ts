@@ -37,8 +37,10 @@ describe("owner placeholder release gate", () => {
   it("is strict only for release builds", () => {
     expect(isReleaseBuild({})).toBe(false);
     expect(isReleaseBuild({ VERCEL_ENV: "preview" })).toBe(false);
-    expect(isReleaseBuild({ VERCEL_ENV: "production" })).toBe(true);
+    // Vercel production (vercel.app) builds; only the explicit launch build is gated.
+    expect(isReleaseBuild({ VERCEL_ENV: "production" })).toBe(false);
     expect(isReleaseBuild({ RELEASE_BUILD: "true" })).toBe(true);
+    expect(isReleaseBuild({ RELEASE_BUILD: "true", VERCEL_ENV: "production" })).toBe(true);
   });
 
   it("finds unresolved markers in owner content but ignores the marker definition", () => {

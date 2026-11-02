@@ -3,9 +3,11 @@
 //
 // Scans owner-controlled content (translation files and config/owner.ts) for the
 // {{NEEDS_OWNER}} marker.
-// - Release builds (RELEASE_BUILD=true, or VERCEL_ENV=production) FAIL if any remain.
-// - Every other build (local dev, CI, preview) only prints a warning, so normal
-//   development is not blocked.
+// - Launch builds (RELEASE_BUILD=true) FAIL if any remain. Set it only for the
+//   approved public launch on the business domain (owner decision R-03).
+// - Every other build (local dev, CI, Vercel preview AND Vercel production on its
+//   vercel.app URL) prints the full list as a warning and continues. Visitors never
+//   see the marker: unresolved values fall back to neutral wording or are hidden.
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
@@ -27,7 +29,7 @@ export function findPlaceholders(files = OWNER_CONTENT) {
 
 /** @param {Record<string, string | undefined>} [env] */
 export function isReleaseBuild(env = process.env) {
-  return env.RELEASE_BUILD === "true" || env.VERCEL_ENV === "production";
+  return env.RELEASE_BUILD === "true";
 }
 
 function main() {
@@ -40,8 +42,9 @@ function main() {
     console.error(`owner placeholders: ${hits.length} unresolved ${MARKER} value(s). A release build cannot ship them.\nResolve them via docs/DECISIONS-REQUIRED.md:\n  ${hits.join("\n  ")}`);
     process.exit(1);
   }
-  console.warn(`owner placeholders: ${hits.length} unresolved (allowed in non-release builds; a release build will fail). Run "npm run check:owner" for details.`);
-  if (process.argv.includes("--list")) console.warn(`  ${hits.join("\n  ")}`);
+  console.warn(`owner placeholders: ${hits.length} unresolved (allowed until launch; a RELEASE_BUILD=true build will fail).`);
+  // Always list them on Vercel so every deployment log shows what is still pending.
+  if (process.argv.includes("--list") || process.env.VERCEL === "1") console.warn(`  ${hits.join("\n  ")}`);
 }
 
 if (process.argv[1]?.endsWith("check-owner-placeholders.mjs")) main();
