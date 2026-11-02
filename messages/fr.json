@@ -21,10 +21,12 @@
   },
   "home": {
     "hero": {
-      "title": "Logistique et transit entre l’Irlande et le Cameroun",
-      "subtitle": "Dites-nous ce que vous souhaitez envoyer. Notre équipe examine chaque demande et vous contacte avec un devis.",
+      "title": "Vos envois de l’Irlande vers le Cameroun, chiffrés par des personnes, pas par un calculateur",
+      "subtitle": "Effets personnels, fûts et cartons, véhicules ou marchandises commerciales : dites-nous ce que vous souhaitez envoyer. Un membre de notre équipe examine chaque demande et vous répond avec un devis établi pour votre envoi.",
       "quoteCta": "Demander un devis",
-      "trackCta": "Suivre un envoi"
+      "trackCta": "Suivre un envoi",
+      "eyebrow": "Irlande → Cameroun",
+      "secondaryCta": "Comment ça marche"
     },
     "services": {
       "heading": "Ce que nous pouvons faire pour vous",
@@ -45,6 +47,40 @@
     "about": {
       "heading": "Qui sommes-nous",
       "body": "Nous sommes une entreprise bilingue (anglais et français) de logistique et de transit, spécialisée dans les envois entre l’Irlande et le Cameroun."
+    },
+    "highlights": {
+      "heading": "Pourquoi nos clients utilisent ce service",
+      "quoteTitle": "Des devis établis par notre équipe",
+      "quoteBody": "Chaque prix est calculé pour votre envoi par une personne. Rien n’est facturé automatiquement.",
+      "trackTitle": "Suivi avec votre référence",
+      "trackBody": "Suivez en ligne chaque étape enregistrée de votre envoi grâce à votre référence ML.",
+      "languageTitle": "Anglais et français",
+      "languageBody": "Utilisez le site en anglais ou en français, selon ce qui vous convient, à vous et à votre famille.",
+      "accountTitle": "Aucun compte nécessaire",
+      "accountBody": "Demandez un devis et suivez un envoi sans créer de compte."
+    },
+    "processMore": "Voir chaque étape en détail",
+    "photos": {
+      "heading": "De vraies marchandises, un vrai travail",
+      "body": "Des photos de nos opérations au quotidien : préparation des marchandises et manutention des conteneurs avant l’expédition."
+    },
+    "route": {
+      "heading": "Un seul corridor, traité avec soin",
+      "body": "Nous nous concentrons sur les envois de l’Irlande vers le Cameroun. Dites-nous où se trouvent vos marchandises et où elles doivent arriver, et nous vous expliquerons les options pour votre envoi.",
+      "cta": "Nous parler de votre envoi"
+    },
+    "guide": {
+      "heading": "Bien emballer pour un long voyage",
+      "body": "Un bon emballage protège vos marchandises en mer et sur la route. Lisez notre guide pour emballer vos fûts et cartons, les étiqueter et lister leur contenu.",
+      "cta": "Lire le guide d’expédition"
+    },
+    "faq": {
+      "heading": "Questions fréquentes",
+      "more": "Toutes les questions"
+    },
+    "final": {
+      "heading": "Prêt à envoyer quelque chose ?",
+      "body": "Décrivez votre envoi en quelques minutes. Nous vous répondrons avec un devis, et rien n’est facturé automatiquement."
     }
   },
   "services": {
@@ -629,6 +665,69 @@
     "portalNav": "Navigation du compte",
     "adminNav": "Navigation du personnel",
     "legal": "Mentions légales",
-    "company": "Entreprise"
+    "company": "Entreprise",
+    "howItWorks": "Comment ça marche",
+    "guide": "Guide d’expédition"
+  },
+  "media": {
+    "yardLoadingAlt": "Deux membres de l’équipe déplacent des ballots emballés, des caisses et des sacs de marchandises entre un conteneur maritime et un véhicule, dans un dépôt.",
+    "yardLoadingCaption": "Préparation des marchandises au dépôt",
+    "sideLoaderAlt": "Un camion à grue latérale soulève un conteneur maritime.",
+    "sideLoaderCaption": "Manutention d’un conteneur avec une grue latérale",
+    "routeLabel": "Illustration de l’itinéraire : de l’Irlande au Cameroun",
+    "ireland": "Irlande",
+    "cameroon": "Cameroun",
+    "packingLabel": "Illustration d’un fût fermé et de cartons scotchés prêts à être expédiés"
+  },
+  "howItWorks": {
+    "title": "Comment ça marche",
+    "intro": "De votre première demande jusqu’à la livraison au Cameroun, voici ce qui se passe et ce dont nous avons besoin de votre part à chaque étape.",
+    "step1Title": "1. Envoyez une demande de devis",
+    "step1Body": "Utilisez le formulaire de devis pour nous dire ce que vous voulez envoyer. Plus vous donnez de détails, plus votre devis sera précis.",
+    "step1Point1": "La nature des articles et leur nombre",
+    "step1Point2": "La taille et le poids approximatifs, si vous les connaissez",
+    "step1Point3": "Où se trouvent les marchandises en Irlande et où elles vont au Cameroun",
+    "step1Point4": "Comment nous pouvons vous contacter",
+    "step2Title": "2. Notre équipe l’examine",
+    "step2Body": "Un membre de notre équipe vérifie votre demande. S’il manque une information ou si quelque chose n’est pas clair, nous vous posons la question avant de préparer un prix, pour ne pas chiffrer le mauvais envoi.",
+    "step3Title": "3. Vous recevez un devis",
+    "step3Body": "Votre devis indique le prix, la devise, sa durée de validité, ainsi que ce qui est inclus et exclu. Vous décidez de l’accepter ou non. Rien n’est facturé automatiquement.",
+    "step4Title": "4. Remettez vos marchandises",
+    "step4Body": "Une fois le devis accepté, nous convenons avec vous de la manière et du moment de la remise de vos marchandises.",
+    "step5Title": "5. Suivez votre envoi",
+    "step5Body": "Votre envoi reçoit une référence ML. Chaque fois que notre équipe enregistre une étape, elle apparaît sur la page de suivi. Voici les étapes par lesquelles un envoi peut passer :",
+    "step5Exceptions": "Si un envoi est retenu, il apparaît comme « Retardé » ou « En attente », et notre équipe vous explique ce qui se passe.",
+    "step6Title": "6. Livraison ou retrait au Cameroun",
+    "step6Body": "Lorsque vos marchandises sont prêtes, la page de suivi indique si elles peuvent être retirées ou si elles sont en cours de livraison.",
+    "cta": "Commencer une demande de devis"
+  },
+  "guide": {
+    "title": "Guide d’expédition",
+    "intro": "Des conseils pratiques pour emballer et préparer vos marchandises pour le long voyage de l’Irlande vers le Cameroun. Il s’agit de conseils généraux : votre devis confirme les détails de votre envoi.",
+    "packingTitle": "Emballer vos fûts et cartons",
+    "packing1": "Utilisez des fûts rigides et solides ou des cartons à double cannelure. Les cartons usés et mous peuvent s’écraser sous le poids des autres marchandises.",
+    "packing2": "Placez les objets lourds au fond et les objets légers au-dessus.",
+    "packing3": "Comblez les espaces vides avec des vêtements, des serviettes ou du matériel de calage pour que rien ne bouge.",
+    "packing4": "Emballez les objets fragiles un par un et éloignez-les des parois.",
+    "packing5": "Enfermez les liquides dans des sacs plastiques au cas où un couvercle s’ouvrirait.",
+    "packing6": "Fermez les fûts avec leur cerclage de verrouillage et scotchez toutes les jointures des cartons.",
+    "labelTitle": "Étiquetage",
+    "label1": "Inscrivez le nom complet et le numéro de téléphone de l’expéditeur et du destinataire sur chaque fût et chaque carton.",
+    "label2": "Numérotez vos colis, par exemple 1 sur 3, 2 sur 3, 3 sur 3.",
+    "label3": "Une fois votre envoi réservé, ajoutez votre référence ML sur chaque colis.",
+    "listTitle": "Gardez une liste du contenu",
+    "listBody": "Notez ce que contient chaque fût ou carton et sa valeur approximative. Vous aurez besoin de ces informations pour votre demande de devis, et elles sont utiles si la douane pose des questions.",
+    "restrictedTitle": "Demandez-nous avant d’emballer ces articles",
+    "restrictedBody": "Certaines marchandises ne peuvent jamais être expédiées et d’autres demandent un traitement particulier. N’emballez aucun des articles suivants sans nous demander d’abord :",
+    "restricted1": "Liquides inflammables, bouteilles de gaz, aérosols et carburant",
+    "restricted2": "Piles et batteries en vrac, en particulier au lithium",
+    "restricted3": "Armes, munitions et tout ce qui y ressemble",
+    "restricted4": "Médicaments, drogues et produits chimiques",
+    "restricted5": "Denrées fraîches ou périssables",
+    "restricted6": "Argent liquide, bijoux et documents importants",
+    "restrictedNote": "La liste définitive pour votre envoi est confirmée dans votre devis.",
+    "customsTitle": "Douane et droits",
+    "customsBody": "Les marchandises qui arrivent au Cameroun peuvent faire l’objet de contrôles douaniers, de droits et de taxes. Votre devis précise ce qui est inclus et ce qui ne l’est pas : n’hésitez pas à nous poser vos questions.",
+    "cta": "Demander un devis"
   }
 }

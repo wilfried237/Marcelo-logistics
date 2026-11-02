@@ -21,10 +21,12 @@
   },
   "home": {
     "hero": {
-      "title": "Logistics and freight forwarding between Ireland and Cameroon",
-      "subtitle": "Tell us what you need to send. Our team reviews every request and contacts you with a quote.",
+      "title": "Shipping from Ireland to Cameroon, quoted by people, not a calculator",
+      "subtitle": "Personal effects, barrels and boxes, vehicles or commercial goods: tell us what you need to send. A member of our team reviews every request and replies with a quote prepared for your shipment.",
       "quoteCta": "Request a quote",
-      "trackCta": "Track a shipment"
+      "trackCta": "Track a shipment",
+      "eyebrow": "Ireland → Cameroon",
+      "secondaryCta": "How it works"
     },
     "services": {
       "heading": "What we can help with",
@@ -45,6 +47,40 @@
     "about": {
       "heading": "About us",
       "body": "We are a bilingual (English and French) logistics and freight-forwarding business focused on shipments between Ireland and Cameroon."
+    },
+    "highlights": {
+      "heading": "Why customers use this service",
+      "quoteTitle": "Quotes prepared by our team",
+      "quoteBody": "Every price is worked out for your shipment by a person. Nothing is charged automatically.",
+      "trackTitle": "Track with your reference",
+      "trackBody": "Follow each recorded step of your shipment online with your ML reference.",
+      "languageTitle": "English and French",
+      "languageBody": "Use the website in English or French, whichever suits you and your family.",
+      "accountTitle": "No account needed",
+      "accountBody": "Request a quote and track a shipment without creating an account."
+    },
+    "processMore": "See every step in detail",
+    "photos": {
+      "heading": "Real goods, real work",
+      "body": "Photos from our day-to-day operations: goods being prepared and containers being moved for shipment."
+    },
+    "route": {
+      "heading": "One corridor, handled with care",
+      "body": "We focus on shipments from Ireland to Cameroon. Tell us where your goods are and where they need to go, and we will explain the options for your shipment.",
+      "cta": "Ask about your shipment"
+    },
+    "guide": {
+      "heading": "Packing for a long journey",
+      "body": "Good packing protects your goods at sea and on the road. Read our guide to packing barrels and boxes, labelling them and listing what is inside.",
+      "cta": "Read the shipping guide"
+    },
+    "faq": {
+      "heading": "Common questions",
+      "more": "All questions"
+    },
+    "final": {
+      "heading": "Ready to send something?",
+      "body": "Describe your shipment in a few minutes. We will reply with a quote, and nothing is charged automatically."
     }
   },
   "services": {
@@ -629,6 +665,69 @@
     "portalNav": "Account navigation",
     "adminNav": "Staff navigation",
     "legal": "Legal",
-    "company": "Company"
+    "company": "Company",
+    "howItWorks": "How it works",
+    "guide": "Shipping guide"
+  },
+  "media": {
+    "yardLoadingAlt": "Two team members moving wrapped bales, crates and bags of goods between a shipping container and a vehicle in a yard.",
+    "yardLoadingCaption": "Preparing goods for shipment in the yard",
+    "sideLoaderAlt": "A side-loader truck lifting a shipping container with its crane arms.",
+    "sideLoaderCaption": "Moving a container with a side-loader",
+    "routeLabel": "Route illustration: Ireland to Cameroon",
+    "ireland": "Ireland",
+    "cameroon": "Cameroon",
+    "packingLabel": "Illustration of a sealed barrel and taped boxes ready for shipment"
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "intro": "From your first request to delivery in Cameroon, here is what happens and what we need from you at each stage.",
+    "step1Title": "1. Send a quote request",
+    "step1Body": "Use the quote form to tell us what you want to send. The more detail you give, the more accurate your quote.",
+    "step1Point1": "What the items are and how many",
+    "step1Point2": "Approximate size and weight, if you know them",
+    "step1Point3": "Where the goods are in Ireland and where they are going in Cameroon",
+    "step1Point4": "How we can contact you",
+    "step2Title": "2. Our team reviews it",
+    "step2Body": "A member of our team checks your request. If something is missing or unclear, we ask you before preparing a price, so you are not quoted for the wrong thing.",
+    "step3Title": "3. You receive a quote",
+    "step3Body": "Your quote shows the price, the currency, how long it stays valid, and what is included and excluded. You decide whether to accept it. Nothing is charged automatically.",
+    "step4Title": "4. Hand over your goods",
+    "step4Body": "Once you accept, we agree with you how and when your goods are handed over for your shipment.",
+    "step5Title": "5. Follow your shipment",
+    "step5Body": "Your shipment gets an ML reference. Each time our team records a step, it appears on the tracking page. These are the steps a shipment can go through:",
+    "step5Exceptions": "If something holds a shipment up, it is shown as “Delayed” or “On hold”, and our team will explain what is happening.",
+    "step6Title": "6. Delivery or collection in Cameroon",
+    "step6Body": "When your goods are ready, the tracking page shows whether they are ready for collection or out for delivery.",
+    "cta": "Start a quote request"
+  },
+  "guide": {
+    "title": "Shipping guide",
+    "intro": "Practical advice for packing and preparing goods for the long journey from Ireland to Cameroon. This is general guidance: your quote confirms the details for your shipment.",
+    "packingTitle": "Packing barrels and boxes",
+    "packing1": "Use strong, rigid barrels or double-walled boxes. Old, soft boxes can collapse under the weight of other cargo.",
+    "packing2": "Put heavy items at the bottom and lighter items on top.",
+    "packing3": "Fill empty spaces with clothes, towels or packing material so nothing moves.",
+    "packing4": "Wrap fragile items individually and keep them away from the sides.",
+    "packing5": "Seal liquids in plastic bags in case a lid opens.",
+    "packing6": "Close barrels with their locking ring and tape every box seam.",
+    "labelTitle": "Labelling",
+    "label1": "Write the sender’s and the receiver’s full names and phone numbers on every barrel and box.",
+    "label2": "Number your pieces, for example 1 of 3, 2 of 3, 3 of 3.",
+    "label3": "Once your shipment is booked, add your ML reference to every piece.",
+    "listTitle": "Keep a list of contents",
+    "listBody": "Write down what is in each barrel or box and its approximate value. You will need this information for your quote request and it helps if customs ask questions.",
+    "restrictedTitle": "Ask us before packing these",
+    "restrictedBody": "Some goods can never be shipped and others need special handling. Do not pack any of the following without asking us first:",
+    "restricted1": "Flammable liquids, gas cylinders, aerosols and fuel",
+    "restricted2": "Loose batteries, especially lithium batteries",
+    "restricted3": "Weapons, ammunition and anything that looks like them",
+    "restricted4": "Medicines, drugs and chemicals",
+    "restricted5": "Fresh or perishable food",
+    "restricted6": "Cash, jewellery and important documents",
+    "restrictedNote": "The final list for your shipment is confirmed in your quote.",
+    "customsTitle": "Customs and duties",
+    "customsBody": "Goods arriving in Cameroon may be subject to customs checks, duties and taxes. Your quote states what is included and what is not, so ask us if anything is unclear.",
+    "cta": "Request a quote"
   }
 }

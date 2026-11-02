@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Container, PageHeader } from "@/components/app/page-header";
+import { Container } from "@/components/app/page-header";
+import { PageBanner } from "@/components/app/page-banner";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -14,21 +15,23 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
   setRequestLocale(locale);
   const t = await getTranslations("faq");
   return (
-    <Container size="narrow" className="py-10 md:py-14">
-      <PageHeader title={t("title")} description={t("intro")} />
-      <div className="mt-8 divide-y rounded-xl border bg-card">
-        {QUESTIONS.map((n) => (
-          <details key={n} className="group p-5 [&_summary::-webkit-details-marker]:hidden">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
-              {t(`q${n}`)}
-              <span className="text-muted-foreground transition-transform group-open:rotate-45" aria-hidden>
-                +
-              </span>
-            </summary>
-            <p className="mt-3 text-muted-foreground">{t(`a${n}`)}</p>
-          </details>
-        ))}
-      </div>
-    </Container>
+    <>
+      <PageBanner title={t("title")} description={t("intro")} />
+      <Container size="narrow" className="py-10 md:py-14">
+        <div className="divide-y rounded-2xl border bg-card">
+          {QUESTIONS.map((n) => (
+            <details key={n} className="group p-5 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
+                {t(`q${n}`)}
+                <span className="text-primary transition-transform group-open:rotate-45" aria-hidden>
+                  +
+                </span>
+              </summary>
+              <p className="mt-3 text-muted-foreground">{t(`a${n}`)}</p>
+            </details>
+          ))}
+        </div>
+      </Container>
+    </>
   );
 }

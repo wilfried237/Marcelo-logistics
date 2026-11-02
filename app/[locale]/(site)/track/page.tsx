@@ -1,7 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { normaliseReference } from "@/lib/domain/references";
-import { Container, PageHeader } from "@/components/app/page-header";
+import { Container } from "@/components/app/page-header";
+import { PageBanner } from "@/components/app/page-banner";
 import { TrackSearch } from "@/components/tracking/track-search";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -19,11 +20,13 @@ export default async function TrackPage({ params, searchParams }: { params: Prom
   }
   const t = await getTranslations("track");
   return (
-    <Container size="narrow" className="py-10 md:py-14">
-      <PageHeader title={t("hero.title")} description={t("hero.subtitle")} />
-      <div className="mt-8 rounded-xl border bg-card p-5 md:p-8">
-        <TrackSearch locale={locale} />
-      </div>
-    </Container>
+    <>
+      <PageBanner title={t("hero.title")} description={t("hero.subtitle")} />
+      <Container size="narrow" className="-mt-8 pb-14">
+        <div className="relative rounded-2xl border bg-card p-5 shadow-lg md:p-8">
+          <TrackSearch locale={locale} />
+        </div>
+      </Container>
+    </>
   );
 }
