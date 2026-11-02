@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const PAGES = ["/en", "/fr", "/en/services", "/en/quote", "/fr/quote", "/en/track", "/en/about", "/fr/faq", "/en/privacy", "/en/contact", "/en/login"];
+const PAGES = ["/en", "/fr", "/en/services", "/en/quote", "/fr/quote", "/en/track", "/en/about", "/fr/faq", "/en/privacy", "/en/contact", "/en/login", "/en/how-it-works", "/fr/how-it-works", "/en/shipping-guide", "/fr/shipping-guide"];
 
 test.describe("public pages", () => {
   for (const path of PAGES) {
@@ -20,7 +20,7 @@ test.describe("public pages", () => {
     });
   }
 
-  for (const path of ["/en", "/en/quote", "/en/track", "/en/login", "/en/faq"]) {
+  for (const path of ["/en", "/en/quote", "/en/track", "/en/login", "/en/faq", "/en/how-it-works", "/fr/shipping-guide", "/en/about"]) {
     test(`${path} has no serious or critical accessibility violations`, async ({ page }) => {
       await page.goto(path);
       const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
@@ -51,11 +51,29 @@ test.describe("public pages", () => {
     page.on("console", (msg) => {
       if (/Content Security Policy|Refused to (execute|load)/i.test(msg.text())) violations.push(msg.text());
     });
-    for (const path of ["/en", "/fr/quote", "/en/track", "/en/login"]) await page.goto(path);
+    for (const path of ["/en", "/fr/quote", "/en/track", "/en/login", "/en/how-it-works", "/fr/shipping-guide"]) await page.goto(path);
     await page.goto("/en/quote");
     await page.getByRole("button", { name: "Continue" }).click(); // client-side validation needs hydrated JS
     await expect(page.getByText("This field is required.")).toBeVisible();
     expect(violations).toEqual([]);
+  });
+
+  test("home page shows the real operation photos with descriptive alt text", async ({ page }) => {
+    await page.goto("/en");
+    const photos = page.locator("figure img[alt]:not([alt=''])");
+    await expect(photos).toHaveCount(2);
+    for (const img of await photos.all()) {
+      await img.scrollIntoViewIfNeeded();
+      await expect.poll(() => img.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    }
+  });
+
+  test("previews and local builds are not indexable; the sitemap lists both locales", async ({ request }) => {
+    expect(await (await request.get("/robots.txt")).text()).toMatch(/Disallow: \/\s/);
+    const sitemap = await (await request.get("/sitemap.xml")).text();
+    expect(sitemap).toContain("/en/shipping-guide");
+    expect(sitemap).toContain("/fr/how-it-works");
+    expect(sitemap).not.toContain("/terms");
   });
 
   test("language switch keeps the current page", async ({ page, isMobile }) => {
