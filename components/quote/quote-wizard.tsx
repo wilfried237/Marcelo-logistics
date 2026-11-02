@@ -80,13 +80,12 @@ function toPayload(values: FormValues, locale: string, idempotencyKey: string) {
 
 export function QuoteWizard({
   available,
-  originCountries,
-  destinationCountries,
+  routes,
   confirmedServices,
 }: {
   available: boolean;
-  originCountries: string[];
-  destinationCountries: string[];
+  /** Routes offered online, in both directions (config/owner.ts). */
+  routes: { origin: string; destination: string }[];
   confirmedServices: string[];
 }) {
   const t = useTranslations("quoteForm");
@@ -111,8 +110,8 @@ export function QuoteWizard({
   const form = useForm<FormValues>({
     defaultValues: {
       service: "",
-      originCountry: originCountries[0] ?? "",
-      destinationCountry: destinationCountries[0] ?? "",
+      originCountry: routes[0]?.origin ?? "",
+      destinationCountry: routes[0]?.destination ?? "",
       destinationCity: "",
       items: [{ ...EMPTY_ITEM }],
       notes: "",
@@ -120,9 +119,10 @@ export function QuoteWizard({
       website: "",
     },
   });
-  const { register, getValues, control } = form;
+  const { register, getValues, setValue, control } = form;
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
   const service = useWatch({ control, name: "service" });
+  const [originCountry, destinationCountry] = useWatch({ control, name: ["originCountry", "destinationCountry"] });
   const current = STEPS[step];
 
   useEffect(() => {
@@ -263,30 +263,27 @@ export function QuoteWizard({
                 {t("routeTitle")}
               </h2>
             </legend>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <FormField id="originCountry" label={t("originLabel")} error={err("originCountry")}>
-                {(p) => (
-                  <select {...p} {...register("originCountry")} className={selectClassName}>
-                    {originCountries.map((c) => (
-                      <option key={c} value={c}>
-                        {countryName(c)}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </FormField>
-              <FormField id="destinationCountry" label={t("destinationLabel")} error={err("destinationCountry")}>
-                {(p) => (
-                  <select {...p} {...register("destinationCountry")} className={selectClassName}>
-                    {destinationCountries.map((c) => (
-                      <option key={c} value={c}>
-                        {countryName(c)}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </FormField>
-            </div>
+            {/* One choice per offered route, so an unoffered combination cannot be picked. */}
+            <FormField id="route" label={t("routeLabel")} error={err("destinationCountry") ?? err("originCountry")}>
+              {(p) => (
+                <select
+                  {...p}
+                  value={`${originCountry}-${destinationCountry}`}
+                  onChange={(e) => {
+                    const [origin, destination] = e.target.value.split("-");
+                    setValue("originCountry", origin);
+                    setValue("destinationCountry", destination);
+                  }}
+                  className={selectClassName}
+                >
+                  {routes.map((r) => (
+                    <option key={`${r.origin}-${r.destination}`} value={`${r.origin}-${r.destination}`}>
+                      {countryName(r.origin)} → {countryName(r.destination)}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </FormField>
             <FormField id="destinationCity" label={t("cityLabel")} optionalLabel={tc("optional")} error={err("destinationCity")}>
               {(p) => <Input {...p} {...register("destinationCity")} maxLength={120} autoComplete="address-level2" className={inputClassName} />}
             </FormField>

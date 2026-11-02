@@ -36,8 +36,7 @@ export default async function QuotePage({ params }: { params: Promise<{ locale: 
         <div>
           <QuoteWizard
             available={available}
-            originCountries={[...ownerConfig.operations.originCountries]}
-            destinationCountries={[...ownerConfig.operations.destinationCountries]}
+            routes={ownerConfig.operations.routes.map(({ origin, destination }) => ({ origin, destination }))}
             confirmedServices={[...ownerConfig.operations.confirmedServices]}
           />
         </div>

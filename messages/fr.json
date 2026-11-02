@@ -21,11 +21,11 @@
   },
   "home": {
     "hero": {
-      "title": "Vos envois de l’Irlande vers le Cameroun, chiffrés par des personnes, pas par un calculateur",
+      "title": "Vos envois entre l’Irlande et le Cameroun, chiffrés par des personnes, pas par un calculateur",
       "subtitle": "Effets personnels, fûts et cartons, véhicules ou marchandises commerciales : dites-nous ce que vous souhaitez envoyer. Un membre de notre équipe examine chaque demande et vous répond avec un devis établi pour votre envoi.",
       "quoteCta": "Demander un devis",
       "trackCta": "Suivre un envoi",
-      "eyebrow": "Irlande → Cameroun",
+      "eyebrow": "Irlande ⇄ Cameroun",
       "secondaryCta": "Comment ça marche"
     },
     "services": {
@@ -336,7 +336,7 @@
     "invalid_phone": "Saisissez un numéro de téléphone composé de chiffres, avec l’indicatif du pays.",
     "invalid_range": "La date de fin doit être identique ou postérieure à la date de début.",
     "in_past": "Choisissez une date dans le futur.",
-    "not_offered": "Cette destination n’est pas proposée en ligne. Veuillez nous contacter.",
+    "not_offered": "Ce trajet n’est pas proposé en ligne. Veuillez nous contacter.",
     "password_too_short": "Utilisez au moins 12 caractères.",
     "password_mismatch": "Les mots de passe ne correspondent pas.",
     "consent_required": "Veuillez confirmer pour continuer."
@@ -400,7 +400,8 @@
       "rate_limited": "Trop de demandes ont été envoyées depuis cette connexion. Veuillez réessayer plus tard.",
       "route_not_offered": "Ce trajet n’est pas encore proposé en ligne.",
       "server_error": "Votre demande n’a pas été enregistrée à cause d’un problème technique. Vos informations sont toujours là ; veuillez réessayer plus tard."
-    }
+    },
+    "routeLabel": "Trajet"
   },
   "trackPage": {
     "invalid": "Ceci ne ressemble pas à une référence d’envoi. Les références commencent par ML suivi de 10 lettres ou chiffres.",
@@ -594,7 +595,9 @@
     "q4": "Puis-je envoyer n’importe quel article ?",
     "a4": "Certains articles ne peuvent pas être expédiés. Décrivez vos articles dans votre demande et notre équipe vous indiquera si certains ne peuvent pas être transportés.",
     "q5": "Dans quelles langues puis-je utiliser le site ?",
-    "a5": "Vous pouvez utiliser le site en anglais ou en français."
+    "a5": "Vous pouvez utiliser le site en anglais ou en français.",
+    "q6": "Quand les envois partent-ils ?",
+    "a6": "Nous organisons un envoi express chaque mois dans chaque sens. Les périodes de départ sont :"
   },
   "privacyPage": {
     "title": "Informations sur la confidentialité",
@@ -672,12 +675,12 @@
   },
   "howItWorks": {
     "title": "Comment ça marche",
-    "intro": "De votre première demande jusqu’à la livraison au Cameroun, voici ce qui se passe et ce dont nous avons besoin de votre part à chaque étape.",
+    "intro": "De votre première demande jusqu’à la livraison à destination, voici ce qui se passe et ce dont nous avons besoin de votre part à chaque étape.",
     "step1Title": "1. Envoyez une demande de devis",
     "step1Body": "Utilisez le formulaire de devis pour nous dire ce que vous voulez envoyer. Plus vous donnez de détails, plus votre devis sera précis.",
     "step1Point1": "La nature des articles et leur nombre",
     "step1Point2": "La taille et le poids approximatifs, si vous les connaissez",
-    "step1Point3": "Où se trouvent les marchandises en Irlande et où elles vont au Cameroun",
+    "step1Point3": "Où se trouvent les marchandises et où elles doivent aller",
     "step1Point4": "Comment nous pouvons vous contacter",
     "step2Title": "2. Notre équipe l’examine",
     "step2Body": "Un membre de notre équipe vérifie votre demande. S’il manque une information ou si quelque chose n’est pas clair, nous vous posons la question avant de préparer un prix, pour ne pas chiffrer le mauvais envoi.",
@@ -688,13 +691,13 @@
     "step5Title": "5. Suivez votre envoi",
     "step5Body": "Votre envoi reçoit une référence ML. Chaque fois que notre équipe enregistre une étape, elle apparaît sur la page de suivi. Voici les étapes par lesquelles un envoi peut passer :",
     "step5Exceptions": "Si un envoi est retenu, il apparaît comme « Retardé » ou « En attente », et notre équipe vous explique ce qui se passe.",
-    "step6Title": "6. Livraison ou retrait au Cameroun",
+    "step6Title": "6. Livraison ou retrait à destination",
     "step6Body": "Lorsque vos marchandises sont prêtes, la page de suivi indique si elles peuvent être retirées ou si elles sont en cours de livraison.",
     "cta": "Commencer une demande de devis"
   },
   "guide": {
     "title": "Guide d’expédition",
-    "intro": "Des conseils pratiques pour emballer et préparer vos marchandises pour le long voyage de l’Irlande vers le Cameroun. Il s’agit de conseils généraux : votre devis confirme les détails de votre envoi.",
+    "intro": "Des conseils pratiques pour emballer et préparer vos marchandises pour le long voyage entre l’Irlande et le Cameroun. Il s’agit de conseils généraux : votre devis confirme les détails de votre envoi.",
     "packingTitle": "Emballer vos fûts et cartons",
     "packing1": "Utilisez des fûts rigides et solides ou des cartons à double cannelure. Les cartons usés et mous peuvent s’écraser sous le poids des autres marchandises.",
     "packing2": "Placez les objets lourds au fond et les objets légers au-dessus.",
@@ -718,7 +721,7 @@
     "restricted6": "Argent liquide, bijoux et documents importants",
     "restrictedNote": "La liste définitive pour votre envoi est confirmée dans votre devis.",
     "customsTitle": "Douane et droits",
-    "customsBody": "Les marchandises qui arrivent au Cameroun peuvent faire l’objet de contrôles douaniers, de droits et de taxes. Votre devis précise ce qui est inclus et ce qui ne l’est pas : n’hésitez pas à nous poser vos questions.",
+    "customsBody": "Les marchandises qui arrivent au Cameroun ou en Irlande peuvent faire l’objet de contrôles douaniers, de droits et de taxes. Votre devis précise ce qui est inclus et ce qui ne l’est pas : n’hésitez pas à nous poser vos questions.",
     "cta": "Demander un devis"
   },
   "header": {
@@ -733,9 +736,16 @@
     "helpFaqDesc": "Réponses aux questions fréquentes",
     "helpContactDesc": "Contactez notre équipe",
     "trackDesc": "Suivez un envoi grâce à sa référence",
-    "corridor": "Expéditions de l’Irlande vers le Cameroun"
+    "corridor": "Expéditions entre l’Irlande et le Cameroun"
   },
   "breadcrumb": {
     "label": "Fil d’Ariane"
+  },
+  "schedule": {
+    "heading": "Départs express chaque mois",
+    "intro": "Nous organisons un envoi express chaque mois dans chaque sens. Demandez-nous la date exacte lors de votre demande de devis.",
+    "window": "Entre le {from} et le {to} de chaque mois",
+    "routeLabel": "{origin} → {destination}",
+    "askExact": "Demandez-nous la date exacte lors de votre demande de devis."
   }
 }

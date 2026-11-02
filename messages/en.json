@@ -21,11 +21,11 @@
   },
   "home": {
     "hero": {
-      "title": "Shipping from Ireland to Cameroon, quoted by people, not a calculator",
+      "title": "Shipping between Ireland and Cameroon, quoted by people, not a calculator",
       "subtitle": "Personal effects, barrels and boxes, vehicles or commercial goods: tell us what you need to send. A member of our team reviews every request and replies with a quote prepared for your shipment.",
       "quoteCta": "Request a quote",
       "trackCta": "Track a shipment",
-      "eyebrow": "Ireland → Cameroon",
+      "eyebrow": "Ireland ⇄ Cameroon",
       "secondaryCta": "How it works"
     },
     "services": {
@@ -336,7 +336,7 @@
     "invalid_phone": "Enter a phone number with digits only, including the country code.",
     "invalid_range": "The end date must be on or after the start date.",
     "in_past": "Choose a date in the future.",
-    "not_offered": "This destination is not offered online. Please contact us.",
+    "not_offered": "This route is not offered online. Please contact us.",
     "password_too_short": "Use at least 12 characters.",
     "password_mismatch": "The passwords do not match.",
     "consent_required": "Please confirm to continue."
@@ -400,7 +400,8 @@
       "rate_limited": "Too many requests were sent from this connection. Please try again later.",
       "route_not_offered": "This route is not offered online yet.",
       "server_error": "Your request was not saved because of a technical problem. Your details are still here; please try again later."
-    }
+    },
+    "routeLabel": "Route"
   },
   "trackPage": {
     "invalid": "This does not look like a shipment reference. References start with ML followed by 10 letters or digits.",
@@ -594,7 +595,9 @@
     "q4": "Can I send any item?",
     "a4": "Some items cannot be shipped. Describe your items in your request and our team will tell you if anything cannot be carried.",
     "q5": "Which languages can I use?",
-    "a5": "You can use the website in English or French."
+    "a5": "You can use the website in English or French.",
+    "q6": "When do shipments leave?",
+    "a6": "We run an express shipment every month in each direction. The departure windows are:"
   },
   "privacyPage": {
     "title": "Privacy information",
@@ -672,12 +675,12 @@
   },
   "howItWorks": {
     "title": "How it works",
-    "intro": "From your first request to delivery in Cameroon, here is what happens and what we need from you at each stage.",
+    "intro": "From your first request to delivery at the destination, here is what happens and what we need from you at each stage.",
     "step1Title": "1. Send a quote request",
     "step1Body": "Use the quote form to tell us what you want to send. The more detail you give, the more accurate your quote.",
     "step1Point1": "What the items are and how many",
     "step1Point2": "Approximate size and weight, if you know them",
-    "step1Point3": "Where the goods are in Ireland and where they are going in Cameroon",
+    "step1Point3": "Where the goods are now and where they need to go",
     "step1Point4": "How we can contact you",
     "step2Title": "2. Our team reviews it",
     "step2Body": "A member of our team checks your request. If something is missing or unclear, we ask you before preparing a price, so you are not quoted for the wrong thing.",
@@ -688,13 +691,13 @@
     "step5Title": "5. Follow your shipment",
     "step5Body": "Your shipment gets an ML reference. Each time our team records a step, it appears on the tracking page. These are the steps a shipment can go through:",
     "step5Exceptions": "If something holds a shipment up, it is shown as “Delayed” or “On hold”, and our team will explain what is happening.",
-    "step6Title": "6. Delivery or collection in Cameroon",
+    "step6Title": "6. Delivery or collection at the destination",
     "step6Body": "When your goods are ready, the tracking page shows whether they are ready for collection or out for delivery.",
     "cta": "Start a quote request"
   },
   "guide": {
     "title": "Shipping guide",
-    "intro": "Practical advice for packing and preparing goods for the long journey from Ireland to Cameroon. This is general guidance: your quote confirms the details for your shipment.",
+    "intro": "Practical advice for packing and preparing goods for the long journey between Ireland and Cameroon. This is general guidance: your quote confirms the details for your shipment.",
     "packingTitle": "Packing barrels and boxes",
     "packing1": "Use strong, rigid barrels or double-walled boxes. Old, soft boxes can collapse under the weight of other cargo.",
     "packing2": "Put heavy items at the bottom and lighter items on top.",
@@ -718,7 +721,7 @@
     "restricted6": "Cash, jewellery and important documents",
     "restrictedNote": "The final list for your shipment is confirmed in your quote.",
     "customsTitle": "Customs and duties",
-    "customsBody": "Goods arriving in Cameroon may be subject to customs checks, duties and taxes. Your quote states what is included and what is not, so ask us if anything is unclear.",
+    "customsBody": "Goods arriving in Cameroon or Ireland may be subject to customs checks, duties and taxes. Your quote states what is included and what is not, so ask us if anything is unclear.",
     "cta": "Request a quote"
   },
   "header": {
@@ -733,9 +736,16 @@
     "helpFaqDesc": "Answers to common questions",
     "helpContactDesc": "Get in touch with our team",
     "trackDesc": "Follow a shipment with its reference",
-    "corridor": "Shipping from Ireland to Cameroon"
+    "corridor": "Shipping between Ireland and Cameroon"
   },
   "breadcrumb": {
     "label": "Breadcrumb"
+  },
+  "schedule": {
+    "heading": "Monthly express departures",
+    "intro": "We run an express shipment every month in each direction. Ask us for the exact date when you request your quote.",
+    "window": "Between the {from, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} and the {to, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} of each month",
+    "routeLabel": "{origin} → {destination}",
+    "askExact": "Ask us for the exact date when you request your quote."
   }
 }

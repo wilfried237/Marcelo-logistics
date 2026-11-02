@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ServiceGrid } from "@/components/services/service-grid";
 import { TrackSearch } from "@/components/tracking/track-search";
 import { PHOTOS, Photo } from "@/components/brand/photos";
+import { DepartureSchedule } from "@/components/schedule/departure-schedule";
 
 const TASKS = [
   { key: "quote", href: "/quote" },
@@ -26,6 +27,7 @@ export default function HomePage({ params }: { params: Promise<{ locale: string 
   const faq = useTranslations("faq");
   const guide = useTranslations("guide");
   const nav = useTranslations("nav");
+  const schedule = useTranslations("schedule");
 
   return (
     <>
@@ -68,6 +70,18 @@ export default function HomePage({ params }: { params: Promise<{ locale: string 
             </div>
             <TrackSearch locale={locale} />
           </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="schedule-heading" className="mx-auto max-w-7xl px-4 pt-16 md:px-6 md:pt-20">
+        <div className="grid gap-8 lg:grid-cols-[1fr_2fr] lg:items-center">
+          <div>
+            <h2 id="schedule-heading" className="text-3xl font-bold tracking-tight">
+              {schedule("heading")}
+            </h2>
+            <p className="mt-3 text-muted-foreground">{schedule("intro")}</p>
+          </div>
+          <DepartureSchedule />
         </div>
       </section>
 
@@ -168,7 +182,7 @@ export default function HomePage({ params }: { params: Promise<{ locale: string 
         <div>
           <h2 className="text-3xl font-bold tracking-tight">{t("faq.heading")}</h2>
           <div className="mt-6 divide-y border-y">
-            {([1, 3, 4] as const).map((n) => (
+            {([6, 1, 3] as const).map((n) => (
               <details key={n} className="group py-4">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold [&::-webkit-details-marker]:hidden">
                   {faq(`q${n}`)}

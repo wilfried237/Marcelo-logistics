@@ -43,9 +43,17 @@ export const ownerConfig = {
      * every category is shown as "availability to be confirmed" (S-01).
      */
     confirmedServices: [] as string[], // {{NEEDS_OWNER}} S-01
-    /** ISO 3166-1 alpha-2 codes. Ireland -> Cameroon is the stated focus; others need approval (S-02). */
-    originCountries: ["IE"],
-    destinationCountries: ["CM"],
+    /**
+     * Routes offered online (ISO 3166-1 alpha-2) and their monthly departure
+     * windows (days of the month). Source: the client's message relayed by the
+     * developer on 2026-11-03: express shipments every month, Ireland -> Cameroon
+     * between the 10th and 15th, Cameroon -> Ireland between the 20th and 25th
+     * (S-02). These are departure windows only; no transit or delivery times.
+     */
+    routes: [
+      { origin: "IE", destination: "CM", departureDays: { from: 10, to: 15 } },
+      { origin: "CM", destination: "IE", departureDays: { from: 20, to: 25 } },
+    ],
   },
 
   legal: {
@@ -58,6 +66,13 @@ export const ownerConfig = {
 
 export function isOwnerValueResolved(value: unknown): boolean {
   return typeof value === "string" ? !value.includes(NEEDS_OWNER) : value !== undefined && value !== null;
+}
+
+export type Route = (typeof ownerConfig.operations.routes)[number];
+
+/** True only for a route listed in ownerConfig.operations.routes. */
+export function isRouteOffered(origin: string, destination: string): boolean {
+  return ownerConfig.operations.routes.some((r) => r.origin === origin && r.destination === destination);
 }
 
 /** Verified contact channels only. Unverified details are never shown. */

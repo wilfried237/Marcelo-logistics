@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { PageBanner } from "@/components/app/page-banner";
 import { PHOTOS, Photo } from "@/components/brand/photos";
+import { DepartureSchedule } from "@/components/schedule/departure-schedule";
 import { EXCEPTION_MILESTONES, MILESTONE_CODES } from "@/lib/domain/enums";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -18,6 +19,7 @@ export default async function HowItWorksPage({ params }: { params: Promise<{ loc
   const t = await getTranslations("howItWorks");
   const milestones = await getTranslations("milestones");
   const media = await getTranslations("media");
+  const schedule = await getTranslations("schedule");
   const normalMilestones = MILESTONE_CODES.filter((code) => !EXCEPTION_MILESTONES.includes(code));
 
   return (
@@ -34,7 +36,11 @@ export default async function HowItWorksPage({ params }: { params: Promise<{ loc
           </Step>
           <Step title={t("step2Title")} body={t("step2Body")} />
           <Step title={t("step3Title")} body={t("step3Body")} />
-          <Step title={t("step4Title")} body={t("step4Body")} />
+          <Step title={t("step4Title")} body={t("step4Body")}>
+            <h3 className="mt-5 font-semibold">{schedule("heading")}</h3>
+            <DepartureSchedule className="mt-3" />
+            <p className="mt-3 text-sm text-muted-foreground">{schedule("askExact")}</p>
+          </Step>
           <Step title={t("step5Title")} body={t("step5Body")}>
             <ol className="mt-5 grid gap-px border bg-border sm:grid-cols-2">
               {normalMilestones.map((code, i) => (

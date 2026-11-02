@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { PageBanner } from "@/components/app/page-banner";
 import { ServiceGrid } from "@/components/services/service-grid";
 import { PHOTOS, Photo } from "@/components/brand/photos";
+import { DepartureSchedule } from "@/components/schedule/departure-schedule";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -17,6 +18,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
   const t = await getTranslations("home");
   const nav2 = await getTranslations("nav2");
   const media = await getTranslations("media");
+  const schedule = await getTranslations("schedule");
   return (
     <>
       <PageBanner title={t("services.heading")} description={t("services.intro")}>
@@ -26,6 +28,13 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
       </PageBanner>
       <div className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
         <ServiceGrid />
+        <section aria-labelledby="schedule-heading" className="mt-14">
+          <h2 id="schedule-heading" className="text-3xl font-bold tracking-tight">
+            {schedule("heading")}
+          </h2>
+          <p className="mt-3 max-w-2xl text-muted-foreground">{schedule("intro")}</p>
+          <DepartureSchedule className="mt-6" />
+        </section>
       </div>
       <section className="border-t bg-secondary">
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 md:grid-cols-2 md:px-6 md:py-16">

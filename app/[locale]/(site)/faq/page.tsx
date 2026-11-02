@@ -1,19 +1,21 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Container } from "@/components/app/page-header";
 import { PageBanner } from "@/components/app/page-banner";
+import { DepartureSchedule } from "@/components/schedule/departure-schedule";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   return { title: (await getTranslations({ locale, namespace: "faq" }))("title") };
 }
 
-const QUESTIONS = [1, 2, 3, 4, 5] as const;
+const QUESTIONS = [6, 1, 2, 3, 4, 5] as const;
 
 /** Answers describe how the website works; no unverified business promises. */
 export default async function FaqPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("faq");
+  const schedule = await getTranslations("schedule");
   return (
     <>
       <PageBanner title={t("title")} description={t("intro")} />
@@ -28,6 +30,12 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
                 </span>
               </summary>
               <p className="mt-3 text-muted-foreground">{t(`a${n}`)}</p>
+              {n === 6 && (
+                <>
+                  <DepartureSchedule className="mt-4" />
+                  <p className="mt-3 text-sm text-muted-foreground">{schedule("askExact")}</p>
+                </>
+              )}
             </details>
           ))}
         </div>

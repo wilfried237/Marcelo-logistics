@@ -1,4 +1,4 @@
-import { ownerConfig } from "@/config/owner";
+import { isRouteOffered } from "@/config/owner";
 import { quoteSubmissionStatus } from "@/lib/config/env";
 import { withSystem, withUser } from "@/lib/db/context";
 import { domainErrorCode, isUniqueViolation, type DomainErrorCode } from "@/lib/db/errors";
@@ -48,9 +48,7 @@ export async function submitQuoteRequest(
   if (!parsed.success) return { ok: false, code: "invalid", fieldErrors: fieldErrors(parsed.error) };
   const input = parsed.data;
 
-  const origins = ownerConfig.operations.originCountries as readonly string[];
-  const destinations = ownerConfig.operations.destinationCountries as readonly string[];
-  if (!origins.includes(input.originCountry) || !destinations.includes(input.destinationCountry)) {
+  if (!isRouteOffered(input.originCountry, input.destinationCountry)) {
     return { ok: false, code: "route_not_offered", fieldErrors: { destinationCountry: "not_offered" } };
   }
   const fallbackNotify = { email: input.contact.email, name: input.contact.name, locale: input.locale };

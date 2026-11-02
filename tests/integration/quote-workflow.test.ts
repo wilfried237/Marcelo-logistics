@@ -99,6 +99,17 @@ describe("quote submission", () => {
   it("rejects routes that are not offered", async () => {
     const result = await submitQuoteRequest(db, validInput({ destinationCountry: "FR" }), { user: null, clientId: "1.1.1.5" }, AVAILABLE);
     expect(result).toMatchObject({ ok: false, code: "route_not_offered" });
+    const sameCountry = await submitQuoteRequest(db, validInput({ originCountry: "IE", destinationCountry: "IE", contact: { name: "Same", email: "same.country@example.test", phone: "" } }), { user: null, clientId: "1.1.1.6" }, AVAILABLE);
+    expect(sameCountry).toMatchObject({ ok: false, code: "route_not_offered" });
+  });
+
+  it("accepts both monthly routes: Ireland to Cameroon and Cameroon to Ireland", async () => {
+    // Own addresses, so the per-email rate limit shared by the other tests is untouched.
+    const contact = (name: string) => ({ name, email: `${name}@example.test`, phone: "" });
+    const outbound = await submitQuoteRequest(db, validInput({ originCountry: "IE", destinationCountry: "CM", contact: contact("outbound") }), { user: null, clientId: "1.1.1.7" }, AVAILABLE);
+    const inbound = await submitQuoteRequest(db, validInput({ originCountry: "CM", destinationCountry: "IE", contact: contact("inbound") }), { user: null, clientId: "1.1.1.8" }, AVAILABLE);
+    expect(outbound).toMatchObject({ ok: true });
+    expect(inbound).toMatchObject({ ok: true });
   });
 
   it("persists an anonymous request with a secure reference and audit record", async () => {

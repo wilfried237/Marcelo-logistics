@@ -15,7 +15,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 | B-01 ✓ | Official business name: **Marchelo Logistics** (answered 2026-11-03) | — |
 | B-02 ★ | Legal entity, registration and VAT details | Release (legal pages, footer) |
 | S-01 ★ | Which services are offered now | Release (services shown as "to be confirmed") |
-| S-02 | Routes and destination cities | Quote form options |
+| S-02 | Routes and destination cities (routes and monthly windows answered 2026-11-03; cities open) | Quote form options |
 | S-03 | Prohibited and restricted items | Service pages, FAQ |
 | P-01 ◆ | Who reviews quotes and the response-time wording | Enabling quote submission |
 | P-02 | Information required per service | Quote form fields |
@@ -32,7 +32,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 | A-01 ★ | Logo approval | Release (logo hidden) |
 | A-02 | Photographs | Visual quality only |
 | R-01 ◆ | Vercel and Supabase account ownership and EU region | Preview deployment, database |
-| R-02 ◆ | Approval to apply the reviewed migration to the Supabase project | Database go-live |
+| R-02 ✓ | Migrations applied automatically on production deployments (approved 2026-11-03) | — |
 | R-03 ★ | Launch approval and relationship to the live WordPress site | Production launch |
 
 ---
@@ -74,9 +74,9 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Why it matters:** these drive the quote form options and validation.
 - **Recommended:** start with Ireland → Cameroon and list the cities served.
 - **If delayed:** the form offers Ireland → Cameroon with a free-text destination city.
-- **Affected:** `config/owner.ts` → `operations.originCountries` / `destinationCountries`.
+- **Affected:** `config/owner.ts` → `operations.routes`.
 - **Development can continue:** yes.
-- **Answer:**
+- **Answer (partial, 2026-11-03, client message relayed by the developer):** « On fait déjà express shipping tous les mois : Irlande → Cameroun entre le 10 et le 15 de chaque mois, Cameroun → Irlande entre le 20 et le 25 de chaque mois. » Applied: both directions are offered online, with these monthly departure windows shown on the home, services, how-it-works and FAQ pages. **Still open:** destination cities or collection points; whether “express” means air or sea freight, and which services it covers.
 
 ### S-03 Prohibited and restricted items
 - **Decision needed:** the list of items you will not carry, or carry only with conditions.
@@ -211,6 +211,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 
 ### R-02 ◆ Apply the database migration
 - **Decision needed:** approval to apply the reviewed SQL in `prisma/migrations/` to the Supabase project (see [DATABASE.md](./DATABASE.md)).
+- **Answer (2026-11-03, developer instruction):** approved, and made automatic: every Vercel **production** deployment applies pending migrations (`postbuild` → `scripts/deploy-migrate.mjs` → `prisma migrate deploy`). Previews never migrate. See [DEPLOYMENT.md](./DEPLOYMENT.md).
 - **If delayed:** the hosted database stays empty; database features stay unavailable outside local development.
 - **Development can continue:** yes.
 - **Answer:**
