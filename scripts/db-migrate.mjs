@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 // Applies the committed Prisma migrations (prisma/migrations) with
-// `prisma migrate deploy`, using DIRECT_URL.
+// `prisma migrate deploy`, using the session connection: POSTGRES_URL_NON_POOLING
+// (Vercel Supabase integration) or DIRECT_URL.
 //
 // Safety: refuses any non-local database unless ALLOW_MIGRATE_HOST equals the
 // database host exactly. Set it only after the owner has approved the migration
 // SQL for that project (docs/DECISIONS-REQUIRED.md, R-02; docs/DATABASE.md).
 // Never use `prisma db push` or `prisma migrate dev` against shared databases.
 import { spawnSync } from "node:child_process";
+import { pgConnectionOptions, resolveDatabaseUrls } from "../lib/db/connection.mjs";
 
 for (const file of [".env.local", ".env"]) {
   try {
@@ -16,9 +18,9 @@ for (const file of [".env.local", ".env"]) {
   }
 }
 
-const url = process.env.DIRECT_URL;
+const url = resolveDatabaseUrls().direct;
 if (!url) {
-  console.error("db:migrate: DIRECT_URL is not set (see .env.example).");
+  console.error("db:migrate: no session connection: set DIRECT_URL (or POSTGRES_URL_NON_POOLING from the Vercel Supabase integration).");
   process.exit(1);
 }
 
@@ -26,7 +28,7 @@ let host;
 try {
   host = new URL(url).hostname;
 } catch {
-  console.error("db:migrate: DIRECT_URL is not a valid URL.");
+  console.error("db:migrate: the session connection URL is not a valid URL.");
   process.exit(1);
 }
 
@@ -47,7 +49,7 @@ if (!isLocal && process.env.ALLOW_MIGRATE_HOST !== host) {
 // migration from the beginning. A non-empty public schema is left untouched and
 // Prisma's own baseline protection still applies.
 const { default: pg } = await import("pg");
-const client = new pg.Client({ connectionString: url });
+const client = new pg.Client(pgConnectionOptions(url));
 await client.connect();
 try {
   const { rows } = await client.query(
@@ -71,6 +73,6 @@ try {
 }
 
 console.log(`db:migrate: prisma migrate deploy -> ${host}`);
-// Prisma reads DIRECT_URL through prisma.config.ts; credentials are never printed.
+// Prisma reads the same URL through prisma.config.ts; credentials are never printed.
 const result = spawnSync("npx", ["prisma", "migrate", "deploy"], { stdio: "inherit", shell: process.platform === "win32" });
 process.exit(result.status ?? 1);

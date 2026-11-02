@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { defineConfig } from "prisma/config";
+import { prismaCliUrl, resolveDatabaseUrls } from "./lib/db/connection.mjs";
 
 // Prisma does not load .env files itself; local values come from .env.local.
 for (const file of [".env.local", ".env"]) {
@@ -12,7 +14,9 @@ for (const file of [".env.local", ".env"]) {
 
 /**
  * Prisma CLI configuration.
- * - Migrations use DIRECT_URL (session connection, port 5432), never the pooler.
+ * - Migrations use a session connection: POSTGRES_URL_NON_POOLING (Vercel Supabase
+ *   integration) or DIRECT_URL, never the transaction pooler. Supabase hosts are
+ *   verified strictly against the pinned root CA (prisma/supabase-root-2021.crt).
  * - auth.users is owned by Supabase: Prisma models it but never migrates it.
  * - Apply migrations with `npm run db:migrate`, which refuses non-local hosts
  *   unless the owner-approved procedure is followed (docs/DATABASE.md).
@@ -27,7 +31,7 @@ export default defineConfig({
   },
   tables: { external: ["auth.users"] },
   datasource: {
-    url: process.env.DIRECT_URL ?? "postgresql://unused:unused@localhost:5432/unused",
+    url: prismaCliUrl(resolveDatabaseUrls().direct ?? "postgresql://unused:unused@localhost:5432/unused", resolve("prisma/supabase-root-2021.crt")),
     shadowDatabaseUrl: process.env.SHADOW_DATABASE_URL,
   },
 });

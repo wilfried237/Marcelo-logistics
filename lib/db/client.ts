@@ -2,6 +2,7 @@ import "server-only";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/lib/generated/prisma/client";
 import { getDatabaseUrl } from "@/lib/config/env";
+import { pgConnectionOptions } from "./connection.mjs";
 import type { Database } from "./types";
 
 /**
@@ -14,7 +15,8 @@ import type { Database } from "./types";
 const globalForDb = globalThis as unknown as { __mlPrisma?: Database };
 
 export function createPrismaClient(connectionString: string, max = 5): Database {
-  const adapter = new PrismaPg({ connectionString, max, idleTimeoutMillis: 20_000, connectionTimeoutMillis: 10_000 });
+  // Supabase hosts: TLS verified against the pinned Supabase root CA (connection.mjs).
+  const adapter = new PrismaPg({ ...pgConnectionOptions(connectionString), max, idleTimeoutMillis: 20_000, connectionTimeoutMillis: 10_000 });
   return new PrismaClient({ adapter, log: ["error"] });
 }
 

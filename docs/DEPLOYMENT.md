@@ -44,9 +44,21 @@ Vercel runs `npm run build`; after `next build` succeeds, `postbuild` runs `scri
 | Vercel production with `DATABASE_URL` but no `DIRECT_URL`, or `DIRECT_URL` on port 6543 | **Fails** with an explanation |
 | Vercel **preview**, local, CI | Never migrates (previews must not touch production, even if they share variables) |
 
-**Required Vercel settings (Production environment):**
-- `DIRECT_URL` = the Supabase **Session pooler** connection string (Project → Connect → Session pooler; host `aws-…pooler.supabase.com`, **port 5432**, user `postgres.<project-ref>`). Do **not** use `db.<project-ref>.supabase.co`: it is IPv6-only (checked 2026-11-03) and Vercel builds cannot reach it.
-- `DATABASE_URL` = the Supabase **Transaction pooler** string (port 6543) for the running app.
+**Connecting Vercel to Supabase (recommended: the Vercel Supabase integration).**
+Vercel → Storage → Supabase (or Integrations → Supabase), connected to the project's **Production** environment. The integration manages these variables, which the app reads directly; nothing needs to be copied by hand:
+
+| Variable (set by the integration) | Used for |
+|---|---|
+| `POSTGRES_URL` | The running app (pooled connection) |
+| `POSTGRES_URL_NON_POOLING` | Migrations (Supavisor **session** mode, IPv4) |
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Auth, Storage, invitations |
+
+When these are present they take precedence over `DATABASE_URL` / `DIRECT_URL`, so stale hand-copied values cannot break a deployment.
+
+**Manual alternative** (no integration): `DIRECT_URL` = the Supabase **Session pooler** string (host `aws-…pooler.supabase.com`, port 5432, user `postgres.<project-ref>`, the real password, not `[YOUR-PASSWORD]`), and `DATABASE_URL` = the **Transaction pooler** string (port 6543). Do **not** use `db.<project-ref>.supabase.co`: it is IPv6-only (checked 2026-11-03) and Vercel builds cannot reach it.
+
+**TLS:** Supabase signs its certificates with its own "Supabase Root 2021 CA", which Node does not trust by default (verified 2026-11-03: `SELF_SIGNED_CERT_IN_CHAIN`). The app and the migration tool therefore verify Supabase connections against that pinned root (`lib/db/connection.mjs`, `prisma/supabase-root-2021.crt`; SHA-256 `80:70:25:AD…E6:CA:FA`, identical in the certificate chain served by Supabase and in Supabase's published download). Verification is never switched off. Replace the file before it expires on 2031-04-26, or sooner if Supabase rotates its CA.
+
 - Migrations are additive (a test forbids destructive SQL), so the previous deployment keeps working while they run. Concurrent deployments are safe: Prisma takes an advisory lock.
 - After the first successful production deployment, bootstrap the first administrator (DATABASE.md) and check the Auth settings below.
 

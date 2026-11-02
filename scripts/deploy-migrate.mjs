@@ -11,10 +11,12 @@
 // - Vercel preview, local and CI builds: skipped. Previews must never touch the
 //   production database, even if they share environment variables.
 // - Vercel production without any database configured: skipped with a warning.
-// - Vercel production with a database: DIRECT_URL is required and must be a
-//   session connection (Supabase "Session pooler", port 5432), not the
-//   transaction pooler (port 6543).
+// - Vercel production with a database: a session connection is required:
+//   POSTGRES_URL_NON_POOLING (set by the Vercel Supabase integration) or
+//   DIRECT_URL (Supabase "Session pooler", port 5432), never the transaction
+//   pooler (port 6543).
 import { spawnSync } from "node:child_process";
+import { resolveDatabaseUrls } from "../lib/db/connection.mjs";
 
 /**
  * @param {Record<string, string | undefined>} env
@@ -22,15 +24,17 @@ import { spawnSync } from "node:child_process";
  */
 export function planDeployMigration(env) {
   if (env.VERCEL !== "1" || env.VERCEL_ENV !== "production") return { action: "skip", reason: "not a Vercel production build" };
-  if (!env.DIRECT_URL && !env.DATABASE_URL) return { action: "skip", reason: "no database configured for production" };
-  if (!env.DIRECT_URL) return { action: "fail", reason: "DATABASE_URL is set but DIRECT_URL is missing; migrations need DIRECT_URL (Supabase Session pooler, port 5432)" };
+  const { app, direct } = resolveDatabaseUrls(env);
+  if (!direct && !app) return { action: "skip", reason: "no database configured for production" };
+  if (!direct) return { action: "fail", reason: "a database URL is set but no session connection; connect the Vercel Supabase integration (POSTGRES_URL_NON_POOLING) or set DIRECT_URL (Supabase Session pooler, port 5432)" };
   let url;
   try {
-    url = new URL(env.DIRECT_URL);
+    url = new URL(direct);
   } catch {
-    return { action: "fail", reason: "DIRECT_URL is not a valid URL" };
+    return { action: "fail", reason: "the session connection URL is not a valid URL (check for a [YOUR-PASSWORD] placeholder)" };
   }
-  if (url.port === "6543") return { action: "fail", reason: "DIRECT_URL points at the transaction pooler (port 6543); use the Session pooler (port 5432) for migrations" };
+  if (url.port === "6543") return { action: "fail", reason: "the session connection points at the transaction pooler (port 6543); use the Session pooler (port 5432) for migrations" };
+  if (/YOUR-PASSWORD|%5BYOUR/i.test(url.password)) return { action: "fail", reason: "the session connection still contains the [YOUR-PASSWORD] placeholder" };
   return { action: "migrate", reason: "Vercel production build", host: url.hostname };
 }
 

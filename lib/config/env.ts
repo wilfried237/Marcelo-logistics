@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { isEnabled } from "./flags";
+import { resolveDatabaseUrls } from "@/lib/db/connection.mjs";
 
 /**
  * Server configuration, validated at the server boundary where it is used.
@@ -26,12 +27,13 @@ function read<T>(schema: z.ZodType<T>, name: string, env: Env): T {
   return parsed.data;
 }
 
+/** POSTGRES_URL (Vercel Supabase integration) or DATABASE_URL. */
 export function isDatabaseConfigured(env: Env = process.env): boolean {
-  return Boolean(env.DATABASE_URL);
+  return Boolean(resolveDatabaseUrls(env).app);
 }
 
 export function getDatabaseUrl(env: Env = process.env): string {
-  return read(postgresUrl, "DATABASE_URL", env);
+  return read(postgresUrl, "DATABASE_URL", { DATABASE_URL: resolveDatabaseUrls(env).app });
 }
 
 export function isAuthConfigured(env: Env = process.env): boolean {
