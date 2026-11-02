@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { checkMessages, icuArgs } from "../../scripts/check-i18n.mjs";
 import { findPlaceholders, isReleaseBuild, MARKER } from "../../scripts/check-owner-placeholders.mjs";
 import { BANNED_PHRASES } from "../../scripts/check-security.mjs";
@@ -40,8 +42,12 @@ describe("owner placeholder release gate", () => {
   });
 
   it("finds unresolved markers in owner content but ignores the marker definition", () => {
-    const hits: string[] = findPlaceholders(["config/owner.ts", "messages/en.json"]);
-    expect(hits.some((h) => h.startsWith("messages/en.json"))).toBe(true);
+    // A fixture, so the test does not depend on which owner answers have arrived.
+    const messages = join(mkdtempSync(join(tmpdir(), "owner-gate-")), "en.json");
+    writeFileSync(messages, JSON.stringify({ brand: { name: MARKER } }, null, 2));
+    const hits: string[] = findPlaceholders(["config/owner.ts", messages]);
+    expect(hits.some((h) => h.startsWith(messages))).toBe(true);
+    expect(hits.some((h) => h.startsWith("config/owner.ts"))).toBe(true);
     expect(hits.some((h) => h.includes("@owner-marker-definition"))).toBe(false);
     expect(MARKER).toBe("{{NEEDS_OWNER}}");
   });

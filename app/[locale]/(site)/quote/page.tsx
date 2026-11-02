@@ -2,7 +2,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ownerConfig } from "@/config/owner";
 import { quoteSubmissionStatus } from "@/lib/config/env";
 import { Alert } from "@/components/app/alert";
-import { Container, PageHeader } from "@/components/app/page-header";
+import { Container } from "@/components/app/page-header";
+import { PageBanner } from "@/components/app/page-banner";
 import { ContactChannels } from "@/components/contact/contact-channels";
 import { QuoteWizard } from "@/components/quote/quote-wizard";
 
@@ -21,24 +22,26 @@ export default async function QuotePage({ params }: { params: Promise<{ locale: 
   const available = quoteSubmissionStatus().available;
 
   return (
-    <Container size="narrow" className="py-10 md:py-14">
-      <PageHeader title={t("hero.title")} description={t("hero.subtitle")} />
-      {!available && (
-        <div className="mt-6 space-y-4">
-          <Alert variant="warning" title={t("unavailable.title")}>
-            <p>{t("unavailable.body")}</p>
-          </Alert>
-          <ContactChannels />
+    <>
+      <PageBanner title={t("hero.title")} description={t("hero.subtitle")} />
+      <Container size="narrow" className="py-10 md:py-14">
+        {!available && (
+          <div className="mb-8 space-y-4">
+            <Alert variant="warning" title={t("unavailable.title")}>
+              <p>{t("unavailable.body")}</p>
+            </Alert>
+            <ContactChannels />
+          </div>
+        )}
+        <div>
+          <QuoteWizard
+            available={available}
+            originCountries={[...ownerConfig.operations.originCountries]}
+            destinationCountries={[...ownerConfig.operations.destinationCountries]}
+            confirmedServices={[...ownerConfig.operations.confirmedServices]}
+          />
         </div>
-      )}
-      <div className="mt-8">
-        <QuoteWizard
-          available={available}
-          originCountries={[...ownerConfig.operations.originCountries]}
-          destinationCountries={[...ownerConfig.operations.destinationCountries]}
-          confirmedServices={[...ownerConfig.operations.confirmedServices]}
-        />
-      </div>
-    </Container>
+      </Container>
+    </>
   );
 }

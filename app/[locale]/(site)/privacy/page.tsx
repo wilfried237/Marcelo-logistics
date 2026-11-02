@@ -1,7 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ownerConfig } from "@/config/owner";
 import { Alert } from "@/components/app/alert";
-import { Container, PageHeader } from "@/components/app/page-header";
+import { Container } from "@/components/app/page-header";
+import { PageBanner } from "@/components/app/page-banner";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -20,21 +21,23 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
   setRequestLocale(locale);
   const t = await getTranslations("privacyPage");
   return (
-    <Container size="narrow" className="py-10 md:py-14">
-      <PageHeader title={t("title")} />
-      {!ownerConfig.legal.privacyApproved && (
-        <Alert variant="warning" className="mt-6">
-          {t("draftNotice")}
-        </Alert>
-      )}
-      <div className="mt-8 space-y-8">
-        {SECTIONS.map((key) => (
-          <section key={key} className="space-y-2">
-            <h2 className="text-xl font-semibold">{t(`${key}Title`)}</h2>
-            <p className="text-muted-foreground">{t(key)}</p>
-          </section>
-        ))}
-      </div>
-    </Container>
+    <>
+      <PageBanner title={t("title")} />
+      <Container size="narrow" className="py-10 md:py-14">
+        {!ownerConfig.legal.privacyApproved && (
+          <Alert variant="warning">
+            {t("draftNotice")}
+          </Alert>
+        )}
+        <div className="mt-8 space-y-8">
+          {SECTIONS.map((key) => (
+            <section key={key} className="space-y-2">
+              <h2 className="text-xl font-semibold">{t(`${key}Title`)}</h2>
+              <p className="text-muted-foreground">{t(key)}</p>
+            </section>
+          ))}
+        </div>
+      </Container>
+    </>
   );
 }

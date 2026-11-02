@@ -9,6 +9,7 @@ import { trackShipment, type PublicTracking, type TrackResult } from "@/lib/serv
 import type { MilestoneCode } from "@/lib/domain/enums";
 import { Alert } from "@/components/app/alert";
 import { Container } from "@/components/app/page-header";
+import { PageBanner } from "@/components/app/page-banner";
 import { MilestoneTimeline } from "@/components/app/milestone-timeline";
 import { ShipmentStatusBadge } from "@/components/app/status-badge";
 import { ContactChannels } from "@/components/contact/contact-channels";
@@ -55,63 +56,65 @@ export default async function TrackResultPage({ params }: { params: Promise<{ lo
     : undefined;
 
   return (
-    <Container size="narrow" className="py-10 md:py-14">
-      <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{tt("hero.title")}</h1>
+    <>
+      <PageBanner title={tt("hero.title")} />
+      <Container size="narrow" className="pb-14">
 
-      {result.ok ? (
-        <div className="mt-8 space-y-8">
-          <section aria-labelledby="summary" className="rounded-xl border bg-card p-5 md:p-8">
-            <h2 id="summary" className="sr-only">
-              {t("statusLabel")}
-            </h2>
-            <p className="text-sm text-muted-foreground">{tt("shipment.status.tracking")}</p>
-            <p className="font-mono text-xl font-semibold tracking-wider">{result.shipment.reference}</p>
-            <dl className="mt-5 grid gap-4 sm:grid-cols-3">
-              <div>
-                <dt className="text-sm text-muted-foreground">{t("statusLabel")}</dt>
-                <dd className="mt-1">
-                  <ShipmentStatusBadge status={result.shipment.status} />
-                </dd>
-              </div>
-              <div>
-                <dt className="text-sm text-muted-foreground">{tc("service")}</dt>
-                <dd className="mt-1 text-sm font-medium">{ts(`${result.shipment.serviceCode}.title`)}</dd>
-              </div>
-              {result.shipment.etaFrom && result.shipment.etaTo && (
+        {result.ok ? (
+          <div className="mt-8 space-y-8">
+            <section aria-labelledby="summary" className="rounded-xl border bg-card p-5 md:p-8">
+              <h2 id="summary" className="sr-only">
+                {t("statusLabel")}
+              </h2>
+              <p className="text-sm text-muted-foreground">{tt("shipment.status.tracking")}</p>
+              <p className="font-mono text-xl font-semibold tracking-wider">{result.shipment.reference}</p>
+              <dl className="mt-5 grid gap-4 sm:grid-cols-3">
                 <div>
-                  <dt className="text-sm text-muted-foreground">{t("eta")}</dt>
-                  <dd className="mt-1 font-medium">
-                    {t("etaRange", {
-                      from: format.dateTime(new Date(result.shipment.etaFrom), { dateStyle: "medium" }),
-                      to: format.dateTime(new Date(result.shipment.etaTo), { dateStyle: "medium" }),
-                    })}
+                  <dt className="text-sm text-muted-foreground">{t("statusLabel")}</dt>
+                  <dd className="mt-1">
+                    <ShipmentStatusBadge status={result.shipment.status} />
                   </dd>
                 </div>
-              )}
-            </dl>
-          </section>
+                <div>
+                  <dt className="text-sm text-muted-foreground">{tc("service")}</dt>
+                  <dd className="mt-1 text-sm font-medium">{ts(`${result.shipment.serviceCode}.title`)}</dd>
+                </div>
+                {result.shipment.etaFrom && result.shipment.etaTo && (
+                  <div>
+                    <dt className="text-sm text-muted-foreground">{t("eta")}</dt>
+                    <dd className="mt-1 font-medium">
+                      {t("etaRange", {
+                        from: format.dateTime(new Date(result.shipment.etaFrom), { dateStyle: "medium" }),
+                        to: format.dateTime(new Date(result.shipment.etaTo), { dateStyle: "medium" }),
+                      })}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+            </section>
 
-          <section aria-labelledby="history">
-            <h2 id="history" className="text-xl font-semibold">
-              {t("historyTitle")}
-            </h2>
-            <p className="mt-1 text-xs text-muted-foreground">{t("timezoneNote")}</p>
-            <div className="mt-5">{result.shipment.events.length ? <MilestoneTimeline events={result.shipment.events} /> : <p className="text-muted-foreground">{t("noEvents")}</p>}</div>
-          </section>
-        </div>
-      ) : (
-        <Alert variant={result.code === "unavailable" ? "info" : "warning"} className="mt-8">
-          {errorMessage}
-        </Alert>
-      )}
+            <section aria-labelledby="history">
+              <h2 id="history" className="text-xl font-semibold">
+                {t("historyTitle")}
+              </h2>
+              <p className="mt-1 text-xs text-muted-foreground">{t("timezoneNote")}</p>
+              <div className="mt-5">{result.shipment.events.length ? <MilestoneTimeline events={result.shipment.events} /> : <p className="text-muted-foreground">{t("noEvents")}</p>}</div>
+            </section>
+          </div>
+        ) : (
+          <Alert variant={result.code === "unavailable" ? "info" : "warning"} className="mt-8">
+            {errorMessage}
+          </Alert>
+        )}
 
-      <section className="mt-10 space-y-6 border-t pt-8">
-        <TrackSearch locale={locale} defaultValue={result.ok ? undefined : reference} />
-        <div>
-          <p className="mb-3 text-sm text-muted-foreground">{t("help")}</p>
-          <ContactChannels />
-        </div>
-      </section>
-    </Container>
+        <section className="mt-10 space-y-6 border-t pt-8">
+          <TrackSearch locale={locale} defaultValue={result.ok ? undefined : reference} />
+          <div>
+            <p className="mb-3 text-sm text-muted-foreground">{t("help")}</p>
+            <ContactChannels />
+          </div>
+        </section>
+      </Container>
+    </>
   );
 }

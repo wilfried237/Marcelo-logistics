@@ -1,6 +1,6 @@
 {
   "brand": {
-    "name": "{{NEEDS_OWNER}}",
+    "name": "Marchelo Logistics",
     "pending": "Nom de l’entreprise en attente de confirmation",
     "tagline": "Logistique entre l’Irlande et le Cameroun"
   },
@@ -31,7 +31,8 @@
     "services": {
       "heading": "Ce que nous pouvons faire pour vous",
       "intro": "Les catégories de services ci-dessous sont en cours de confirmation. Parlez-nous de votre envoi et nous vous dirons ce qui est disponible.",
-      "availability": "Disponibilité à confirmer"
+      "availability": "Disponibilité à confirmer",
+      "viewAll": "Voir tous les services"
     },
     "process": {
       "heading": "Comment ça marche",
@@ -45,29 +46,9 @@
       "step4Body": "Une fois votre envoi réservé, utilisez votre référence pour suivre son avancement enregistré."
     },
     "about": {
-      "heading": "Qui sommes-nous",
-      "body": "Nous sommes une entreprise bilingue (anglais et français) de logistique et de transit, spécialisée dans les envois entre l’Irlande et le Cameroun."
-    },
-    "highlights": {
-      "heading": "Pourquoi nos clients utilisent ce service",
-      "quoteTitle": "Des devis établis par notre équipe",
-      "quoteBody": "Chaque prix est calculé pour votre envoi par une personne. Rien n’est facturé automatiquement.",
-      "trackTitle": "Suivi avec votre référence",
-      "trackBody": "Suivez en ligne chaque étape enregistrée de votre envoi grâce à votre référence ML.",
-      "languageTitle": "Anglais et français",
-      "languageBody": "Utilisez le site en anglais ou en français, selon ce qui vous convient, à vous et à votre famille.",
-      "accountTitle": "Aucun compte nécessaire",
-      "accountBody": "Demandez un devis et suivez un envoi sans créer de compte."
-    },
-    "processMore": "Voir chaque étape en détail",
-    "photos": {
-      "heading": "De vraies marchandises, un vrai travail",
-      "body": "Des photos de nos opérations au quotidien : préparation des marchandises et manutention des conteneurs avant l’expédition."
-    },
-    "route": {
-      "heading": "Un seul corridor, traité avec soin",
-      "body": "Nous nous concentrons sur les envois de l’Irlande vers le Cameroun. Dites-nous où se trouvent vos marchandises et où elles doivent arriver, et nous vous expliquerons les options pour votre envoi.",
-      "cta": "Nous parler de votre envoi"
+      "heading": "À propos de Marchelo Logistics",
+      "body": "Nous sommes une entreprise bilingue (anglais et français) de logistique et de transit, spécialisée dans les envois entre l’Irlande et le Cameroun.",
+      "cta": "En savoir plus sur nous"
     },
     "guide": {
       "heading": "Bien emballer pour un long voyage",
@@ -81,6 +62,17 @@
     "final": {
       "heading": "Prêt à envoyer quelque chose ?",
       "body": "Décrivez votre envoi en quelques minutes. Nous vous répondrons avec un devis, et rien n’est facturé automatiquement."
+    },
+    "tasks": {
+      "heading": "Que souhaitez-vous faire ?",
+      "quoteTitle": "Demander un devis",
+      "quoteBody": "Décrivez votre envoi et recevez un prix établi par notre équipe.",
+      "trackTitle": "Suivre un envoi",
+      "trackBody": "Suivez votre envoi grâce à sa référence ML.",
+      "prepareTitle": "Préparer vos marchandises",
+      "prepareBody": "Emballage, étiquetage et articles à signaler avant d’emballer.",
+      "contactTitle": "Nous contacter",
+      "contactBody": "Des questions sur un envoi ou un devis."
     }
   },
   "services": {
@@ -264,7 +256,10 @@
   },
   "footer": {
     "rights": "Tous droits réservés.",
-    "pendingDetails": "Les informations sur l’entreprise et les mentions légales seront publiées une fois confirmées."
+    "pendingDetails": "Les informations sur l’entreprise et les mentions légales seront publiées une fois confirmées.",
+    "send": "Envoyer",
+    "help": "Aide",
+    "company": "Entreprise"
   },
   "preview": {
     "banner": "Aperçu uniquement : cet espace n’est pas relié à des données réelles et n’est pas accessible aux clients."
@@ -673,11 +668,7 @@
     "yardLoadingAlt": "Deux membres de l’équipe déplacent des ballots emballés, des caisses et des sacs de marchandises entre un conteneur maritime et un véhicule, dans un dépôt.",
     "yardLoadingCaption": "Préparation des marchandises au dépôt",
     "sideLoaderAlt": "Un camion à grue latérale soulève un conteneur maritime.",
-    "sideLoaderCaption": "Manutention d’un conteneur avec une grue latérale",
-    "routeLabel": "Illustration de l’itinéraire : de l’Irlande au Cameroun",
-    "ireland": "Irlande",
-    "cameroon": "Cameroun",
-    "packingLabel": "Illustration d’un fût fermé et de cartons scotchés prêts à être expédiés"
+    "sideLoaderCaption": "Manutention d’un conteneur avec une grue latérale"
   },
   "howItWorks": {
     "title": "Comment ça marche",
@@ -729,5 +720,22 @@
     "customsTitle": "Douane et droits",
     "customsBody": "Les marchandises qui arrivent au Cameroun peuvent faire l’objet de contrôles douaniers, de droits et de taxes. Votre devis précise ce qui est inclus et ce qui ne l’est pas : n’hésitez pas à nous poser vos questions.",
     "cta": "Demander un devis"
+  },
+  "header": {
+    "mainNav": "Navigation principale",
+    "utilityNav": "Liens rapides",
+    "send": "Envoyer",
+    "help": "Aide",
+    "sendQuoteDesc": "Dites-nous ce que vous souhaitez envoyer",
+    "sendServicesDesc": "Ce que nous pouvons faire pour vous",
+    "sendGuideDesc": "Emballer et préparer vos marchandises",
+    "helpHowDesc": "De la demande à la livraison",
+    "helpFaqDesc": "Réponses aux questions fréquentes",
+    "helpContactDesc": "Contactez notre équipe",
+    "trackDesc": "Suivez un envoi grâce à sa référence",
+    "corridor": "Expéditions de l’Irlande vers le Cameroun"
+  },
+  "breadcrumb": {
+    "label": "Fil d’Ariane"
   }
 }
