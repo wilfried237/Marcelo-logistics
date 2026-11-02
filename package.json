@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "prebuild": "prisma generate && node scripts/check-owner-placeholders.mjs && node scripts/check-i18n.mjs",
     "build": "next build --turbopack",
+    "postbuild": "node scripts/deploy-migrate.mjs",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",

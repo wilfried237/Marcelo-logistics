@@ -34,6 +34,24 @@ Every step below needs the owner's accounts and approval; none has been done.
 
 6. Smoke test on the preview: public pages in EN/FR, response headers (nonce CSP, HSTS), sign-in as the bootstrapped admin, invite a staff member to a test address the owner controls, and `node scripts/verify-local-journeys.mjs`-style checks by hand. Do not send messages to real customers.
 
+## Database migrations on every production deployment
+Vercel runs `npm run build`; after `next build` succeeds, `postbuild` runs `scripts/deploy-migrate.mjs`:
+
+| Build | What happens |
+|---|---|
+| Vercel **production** with `DIRECT_URL` set | `prisma migrate deploy` applies any pending migration (none if already up to date). A failure stops the deployment, so new code never goes live on an outdated schema |
+| Vercel production with no database variables | Skipped with a log line (the site runs with honest "not available" states) |
+| Vercel production with `DATABASE_URL` but no `DIRECT_URL`, or `DIRECT_URL` on port 6543 | **Fails** with an explanation |
+| Vercel **preview**, local, CI | Never migrates (previews must not touch production, even if they share variables) |
+
+**Required Vercel settings (Production environment):**
+- `DIRECT_URL` = the Supabase **Session pooler** connection string (Project → Connect → Session pooler; host `aws-…pooler.supabase.com`, **port 5432**, user `postgres.<project-ref>`). Do **not** use `db.<project-ref>.supabase.co`: it is IPv6-only (checked 2026-11-03) and Vercel builds cannot reach it.
+- `DATABASE_URL` = the Supabase **Transaction pooler** string (port 6543) for the running app.
+- Migrations are additive (a test forbids destructive SQL), so the previous deployment keeps working while they run. Concurrent deployments are safe: Prisma takes an advisory lock.
+- After the first successful production deployment, bootstrap the first administrator (DATABASE.md) and check the Auth settings below.
+
+Verified locally on 2026-11-03: on an empty Supabase database the step applied all 4 migrations (10 tables, all with RLS) and the 14 real-stack security tests passed; a second run applied nothing; a preview build skipped it.
+
 ## Production (requires explicit approval: R-03)
 - Since 2026-11-03 a Vercel **production** build (on its `vercel.app` URL) succeeds while owner decisions are pending: the build log lists every unresolved `{{NEEDS_OWNER}}` marker, visitors see the neutral fallbacks, and `robots.txt` blocks indexing.
 - The **launch** build for the business domain must set `RELEASE_BUILD=true` in Vercel's Production environment. That build **fails** while any marker remains, and it is the only build that allows search indexing. Set it only with launch approval (R-03).

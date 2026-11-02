@@ -92,6 +92,8 @@ The retention policy has **no periods** (`approved: false`, all periods `null`) 
 
 ## Migration procedure
 
+- **Production (automatic):** every Vercel production deployment applies pending migrations after a successful build (`scripts/deploy-migrate.mjs`); see [DEPLOYMENT.md](./DEPLOYMENT.md#database-migrations-on-every-production-deployment). Previews never migrate.
+
 - **Local** (disposable Supabase stack): `npm run db:migrate`. The wrapper `scripts/db-migrate.mjs` refuses any non-local host unless `ALLOW_MIGRATE_HOST` equals that host, then runs `prisma migrate deploy` with `DIRECT_URL`. Because Supabase pre-creates the `auth`/`storage` schemas, it creates Prisma's history table first when `public` is empty (otherwise `P3005`). Re-running is a no-op (tested).
 - **New schema changes:** edit `schema.prisma`, run `npx prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --script` to produce SQL, put it in a new timestamped folder, review it, and add any RLS/grants/triggers by hand in the same migration. Migrations must not contain destructive statements; a test enforces this.
 - **Never** run `prisma db push` or `prisma migrate dev` against a shared or hosted database. `migrate dev` needs a shadow database and may propose resets; use it only against a disposable local database (`SHADOW_DATABASE_URL`).
