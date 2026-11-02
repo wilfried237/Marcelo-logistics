@@ -1,17 +1,34 @@
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+
 /**
- * Title band for public content pages: ink background with the logo-blue arc,
- * matching the home page hero. Holds the page's single h1.
+ * Title band for public content pages: breadcrumb, the page's single h1 and an
+ * introduction, on a light band with a logo-blue rule. Same structure on every
+ * content page so the site reads as one system.
  */
 export function PageBanner({ title, description, children }: { title: string; description?: string; children?: React.ReactNode }) {
+  const t = useTranslations();
   return (
-    <section className="relative isolate overflow-hidden bg-ink text-ink-foreground">
-      <svg viewBox="0 0 600 200" className="absolute -right-24 -top-6 -z-10 h-56 w-[36rem] opacity-60" aria-hidden focusable="false">
-        <path d="M20 190 C 160 -40, 440 -40, 580 150" fill="none" stroke="var(--brand)" strokeWidth="3" strokeDasharray="2 12" strokeLinecap="round" />
-      </svg>
-      <div className="mx-auto max-w-6xl px-4 py-12 md:px-6 md:py-16">
-        <h1 className="max-w-3xl text-3xl font-bold tracking-tight md:text-5xl">{title}</h1>
-        {description && <p className="mt-4 max-w-2xl text-lg text-ink-muted">{description}</p>}
-        {children && <div className="mt-6 flex flex-wrap gap-3">{children}</div>}
+    <section className="border-b bg-secondary">
+      <div className="mx-auto max-w-7xl px-4 pt-6 pb-10 md:px-6 md:pb-14">
+        <nav aria-label={t("breadcrumb.label")}>
+          <ol className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <li>
+              <Link href="/" className="underline-offset-4 hover:text-foreground hover:underline">
+                {t("nav.home")}
+              </Link>
+            </li>
+            <li aria-hidden>/</li>
+            <li aria-current="page" className="font-medium text-foreground">
+              {title}
+            </li>
+          </ol>
+        </nav>
+        <div className="mt-6 border-l-4 border-brand pl-5">
+          <h1 className="max-w-4xl text-3xl font-bold tracking-tight text-foreground md:text-5xl">{title}</h1>
+          {description && <p className="mt-4 max-w-3xl text-lg text-muted-foreground">{description}</p>}
+        </div>
+        {children && <div className="mt-8 flex flex-wrap gap-3">{children}</div>}
       </div>
     </section>
   );

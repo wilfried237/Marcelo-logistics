@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useLocale, useTranslations } from "next-intl";
 import { Check, Plus, Trash2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert } from "@/components/app/alert";
 import { FormField, inputClassName, selectClassName } from "@/components/app/form-field";
-import { SERVICE_ICONS } from "@/components/services/service-grid";
 import { SERVICE_CODES, type ServiceCode } from "@/lib/domain/services";
 import { quoteRequestInputSchema } from "@/lib/domain/quote-schema";
 import { submitQuoteAction, type QuoteActionResult } from "@/app/[locale]/(site)/quote/actions";
@@ -121,9 +120,9 @@ export function QuoteWizard({
       website: "",
     },
   });
-  const { register, watch, getValues, control } = form;
+  const { register, getValues, control } = form;
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
-  const service = watch("service");
+  const service = useWatch({ control, name: "service" });
   const current = STEPS[step];
 
   useEffect(() => {
@@ -234,14 +233,12 @@ export function QuoteWizard({
             <p className="mt-1 text-sm text-muted-foreground">{t("serviceHint")}</p>
             <div role="radiogroup" aria-invalid={errors.service ? true : undefined} aria-describedby={errors.service ? "service-error" : undefined} className="mt-5 grid gap-3 sm:grid-cols-2">
               {SERVICE_CODES.map((code) => {
-                const Icon = SERVICE_ICONS[code];
                 return (
                   <label
                     key={code}
                     className="flex min-h-14 cursor-pointer items-start gap-3 rounded-lg border p-4 has-[:checked]:border-primary has-[:checked]:bg-secondary has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ring"
                   >
                     <input type="radio" value={code} {...register("service")} className="mt-1 h-4 w-4" />
-                    <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
                     <span>
                       <span className="block font-medium">{ts(`${code}.title`)}</span>
                       <span className="block text-sm text-muted-foreground">{ts(`${code}.description`)}</span>
