@@ -11,16 +11,19 @@ import type { QuoteStatus, UserRole } from "./enums";
  * - UNDER_REVIEW -> QUOTED: staff can quote without asking for more information.
  * - AWAITING_CUSTOMER -> UNDER_REVIEW: review resumes once the customer replies.
  * - AWAITING_CUSTOMER -> QUOTED: the missing information arrived by phone/email.
+ * - QUOTED -> UNDER_REVIEW: staff revise a sent quote; the next quote sent is
+ *   announced to the customer as an updated quotation.
+ * - EXPIRED -> UNDER_REVIEW: staff re-quote after the validity date has passed.
  * - Any status except CANCELLED -> CANCELLED, with a mandatory reason.
  */
 export const QUOTE_TRANSITIONS: Readonly<Record<QuoteStatus, readonly QuoteStatus[]>> = {
   SUBMITTED: ["UNDER_REVIEW", "CANCELLED"],
   UNDER_REVIEW: ["AWAITING_CUSTOMER", "QUOTED", "CANCELLED"],
   AWAITING_CUSTOMER: ["UNDER_REVIEW", "QUOTED", "CANCELLED"],
-  QUOTED: ["ACCEPTED", "DECLINED", "EXPIRED", "CANCELLED"],
+  QUOTED: ["ACCEPTED", "DECLINED", "EXPIRED", "UNDER_REVIEW", "CANCELLED"],
   ACCEPTED: ["CANCELLED"],
   DECLINED: ["CANCELLED"],
-  EXPIRED: ["CANCELLED"],
+  EXPIRED: ["UNDER_REVIEW", "CANCELLED"],
   CANCELLED: [],
 };
 

@@ -11,7 +11,10 @@ beforeAll(async () => {
 });
 afterAll(async () => t?.close());
 
-const APP_TABLES = ["profiles", "customers", "quote_requests", "quotes", "shipments", "shipment_events", "documents", "audit_log", "rate_limits", "email_deliveries"];
+const APP_TABLES = [
+  "profiles", "customers", "quote_requests", "quotes", "quote_line_items", "shipments", "shipment_events", "documents",
+  "audit_log", "rate_limits", "email_deliveries", "case_messages", "contact_enquiries", "job_runs",
+];
 
 describe("migrations (PGlite)", () => {
   it("apply cleanly to an empty database and create every table", async () => {

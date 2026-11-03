@@ -33,6 +33,7 @@ model AuthUser {
   createdShipments Shipment[]      @relation("ShipmentCreator")
   createdEvents    ShipmentEvent[] @relation("ShipmentEventCreator")
   uploadedDocs     Document[]      @relation("DocumentUploader")
+  caseMessages     CaseMessage[]   @relation("CaseMessageAuthor")
 
   @@map("users")
   @@schema("auth")
@@ -127,6 +128,11 @@ enum EmailStatus {
   SENT
   FAILED
   SKIPPED
+  SENDING
+  DELIVERED
+  BOUNCED
+  COMPLAINED
+  DEAD
 
   @@map("email_status")
   @@schema("public")
@@ -143,7 +149,8 @@ model Profile {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
 
-  user AuthUser @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "profiles_id_users_id_fk")
+  user             AuthUser       @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "profiles_id_users_id_fk")
+  assignedRequests QuoteRequest[] @relation("QuoteRequestAssignee")
 
   @@map("profiles")
   @@schema("public")
@@ -185,14 +192,19 @@ model QuoteRequest {
   cancellationReason String?     @map("cancellation_reason")
   idempotencyKey     String?     @unique(map: "quote_requests_idempotency_key_key") @map("idempotency_key") @db.Uuid
   submittedBy        String?     @map("submitted_by") @db.Uuid
+  assignedTo         String?     @map("assigned_to") @db.Uuid
+  privacyAcceptedAt  DateTime?   @map("privacy_accepted_at") @db.Timestamptz(6)
   createdAt          DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime    @default(now()) @map("updated_at") @db.Timestamptz(6)
 
-  customer  Customer  @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "quote_requests_customer_id_customers_id_fk")
-  submitter AuthUser? @relation("QuoteRequestSubmitter", fields: [submittedBy], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "quote_requests_submitted_by_users_id_fk")
+  customer  Customer      @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "quote_requests_customer_id_customers_id_fk")
+  submitter AuthUser?     @relation("QuoteRequestSubmitter", fields: [submittedBy], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "quote_requests_submitted_by_users_id_fk")
+  assignee  Profile?      @relation("QuoteRequestAssignee", fields: [assignedTo], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "quote_requests_assigned_to_profiles_id_fk")
   quotes    Quote[]
+  messages  CaseMessage[]
 
   @@index([customerId], map: "quote_requests_customer_idx")
+  @@index([assignedTo], map: "quote_requests_assigned_idx")
   @@index([status, createdAt(sort: Desc)], map: "quote_requests_status_created_idx")
   @@map("quote_requests")
   @@schema("public")
@@ -212,9 +224,10 @@ model Quote {
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
 
-  quoteRequest QuoteRequest @relation(fields: [quoteRequestId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "quotes_quote_request_id_quote_requests_id_fk")
-  creator      AuthUser     @relation("QuoteCreator", fields: [createdBy], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "quotes_created_by_users_id_fk")
+  quoteRequest QuoteRequest    @relation(fields: [quoteRequestId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "quotes_quote_request_id_quote_requests_id_fk")
+  creator      AuthUser        @relation("QuoteCreator", fields: [createdBy], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "quotes_created_by_users_id_fk")
   shipment     Shipment?
+  lines        QuoteLineItem[]
 
   @@index([quoteRequestId], map: "quotes_request_idx")
   @@map("quotes")
@@ -240,6 +253,7 @@ model Shipment {
   customer Customer        @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "shipments_customer_id_customers_id_fk")
   creator  AuthUser        @relation("ShipmentCreator", fields: [createdBy], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "shipments_created_by_users_id_fk")
   events   ShipmentEvent[]
+  messages CaseMessage[]
 
   @@index([customerId], map: "shipments_customer_idx")
   @@index([status], map: "shipments_status_idx")
@@ -325,7 +339,7 @@ model RateLimit {
 model EmailDelivery {
   id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   template          String
-  recipient         String
+  recipient         String?
   locale            AppLocale
   entity            String
   entityId          String      @map("entity_id")
@@ -335,8 +349,115 @@ model EmailDelivery {
   error             String?
   createdAt         DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
   sentAt            DateTime?   @map("sent_at") @db.Timestamptz(6)
+  audience          String      @default("customer")
+  payload           Json        @default("{}") @db.JsonB
+  attempts          Int         @default(0) @db.SmallInt
+  nextAttemptAt     DateTime    @default(now()) @map("next_attempt_at") @db.Timestamptz(6)
+  lockedAt          DateTime?   @map("locked_at") @db.Timestamptz(6)
+  lastEvent         String?     @map("last_event")
+  lastEventAt       DateTime?   @map("last_event_at") @db.Timestamptz(6)
+  deliveredAt       DateTime?   @map("delivered_at") @db.Timestamptz(6)
 
   @@index([entity, entityId], map: "email_deliveries_entity_idx")
+  @@index([status, nextAttemptAt], map: "email_deliveries_due_idx")
+  @@index([providerMessageId], map: "email_deliveries_provider_idx")
   @@map("email_deliveries")
+  @@schema("public")
+}
+
+/// Staff-entered price lines. Integer minor units; quantity is decimal (never a float).
+/// Totals are recomputed and verified by the database when the quote is sent.
+model QuoteLineItem {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quoteId         String        @map("quote_id") @db.Uuid
+  position        Int           @db.SmallInt
+  kind            QuoteLineKind
+  description     String
+  quantity        Decimal       @default(1) @db.Decimal(12, 3)
+  unitAmountMinor BigInt        @map("unit_amount_minor")
+  rateBp          Int?          @map("rate_bp")
+  lineTotalMinor  BigInt        @map("line_total_minor")
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  quote Quote @relation(fields: [quoteId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "quote_line_items_quote_id_quotes_id_fk")
+
+  @@unique([quoteId, position], map: "quote_line_items_quote_position_key")
+  @@map("quote_line_items")
+  @@schema("public")
+}
+
+enum QuoteLineKind {
+  charge
+  discount
+  tax
+
+  @@map("quote_line_kind")
+  @@schema("public")
+}
+
+/// Case history: internal notes, information requests, customer replies, issue reports.
+model CaseMessage {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quoteRequestId String        @map("quote_request_id") @db.Uuid
+  shipmentId     String?       @map("shipment_id") @db.Uuid
+  authorKind     MessageAuthor @map("author_kind")
+  authorId       String?       @map("author_id") @db.Uuid
+  internal       Boolean       @default(false)
+  kind           String
+  body           String
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  quoteRequest QuoteRequest @relation(fields: [quoteRequestId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "case_messages_quote_request_id_quote_requests_id_fk")
+  shipment     Shipment?    @relation(fields: [shipmentId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "case_messages_shipment_id_shipments_id_fk")
+  author       AuthUser?    @relation("CaseMessageAuthor", fields: [authorId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "case_messages_author_id_users_id_fk")
+
+  @@index([quoteRequestId, createdAt], map: "case_messages_request_idx")
+  @@index([shipmentId], map: "case_messages_shipment_idx")
+  @@map("case_messages")
+  @@schema("public")
+}
+
+enum MessageAuthor {
+  customer
+  staff
+
+  @@map("message_author")
+  @@schema("public")
+}
+
+/// Contact form enquiries (persisted before any confirmation is shown).
+model ContactEnquiry {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reference         String    @unique(map: "contact_enquiries_reference_key")
+  name              String
+  email             String
+  phone             String?
+  topic             String
+  message           String
+  relatedReference  String?   @map("related_reference")
+  locale            AppLocale
+  status            String    @default("NEW")
+  privacyAcceptedAt DateTime  @map("privacy_accepted_at") @db.Timestamptz(6)
+  idempotencyKey    String    @unique(map: "contact_enquiries_idempotency_key_key") @map("idempotency_key") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@index([status, createdAt(sort: Desc)], map: "contact_enquiries_status_created_idx")
+  @@map("contact_enquiries")
+  @@schema("public")
+}
+
+/// One row per scheduled job execution.
+model JobRun {
+  id         BigInt    @id @default(autoincrement())
+  job        String
+  startedAt  DateTime  @default(now()) @map("started_at") @db.Timestamptz(6)
+  finishedAt DateTime? @map("finished_at") @db.Timestamptz(6)
+  ok         Boolean?
+  summary    Json      @default("{}") @db.JsonB
+  error      String?
+
+  @@index([job, startedAt(sort: Desc)], map: "job_runs_job_started_idx")
+  @@map("job_runs")
   @@schema("public")
 }

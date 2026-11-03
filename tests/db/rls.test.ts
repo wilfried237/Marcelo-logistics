@@ -105,7 +105,8 @@ describe("row level security and authorisation (executed against PostgreSQL)", (
 
   it("10. public tracking returns only allowlisted fields and public events", async () => {
     const [{ result }] = await asAnon<{ result: Record<string, unknown> }>(t.client, "select public.public_track_shipment('mlbbbbbbbbbb') as result");
-    expect(Object.keys(result).sort()).toEqual(["etaFrom", "etaTo", "events", "reference", "serviceCode", "status"]);
+    // Deliberate allowlist: route countries and delivery time were added for the tracking page (2026-11-04).
+    expect(Object.keys(result).sort()).toEqual(["deliveredAt", "destination", "etaFrom", "etaTo", "events", "origin", "reference", "serviceCode", "status"]);
     expect(result.etaFrom).toBeNull(); // ETA not approved for customers
     const events = result.events as Record<string, unknown>[];
     expect(events).toHaveLength(1);
