@@ -7,8 +7,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { BrandMark } from "@/components/brand/illustrations";
-import { BrandName } from "./brand-name";
+import { Logo } from "@/components/brand/logo";
 
 type MenuLink = { href: string; label: string; description: string };
 
@@ -160,9 +159,8 @@ export function SiteHeader({ showAccount = false }: { showAccount?: boolean }) {
 
       {/* Main bar */}
       <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-6 px-4 md:px-6">
-        <Link href="/" className="flex min-w-0 items-center gap-2.5 text-foreground">
-          <BrandMark className="h-9 w-11 shrink-0" />
-          <BrandName className="truncate text-base font-bold tracking-tight sm:text-lg" />
+        <Link href="/" className="flex shrink-0 items-center rounded-sm">
+          <Logo priority className="h-11 w-auto sm:h-[3.25rem]" />
         </Link>
 
         <nav aria-label={th("mainNav")} className="hidden h-full items-center lg:flex">
@@ -193,9 +191,8 @@ export function SiteHeader({ showAccount = false }: { showAccount?: boolean }) {
             </SheetTrigger>
             <SheetContent side="right" className="w-[min(22rem,100vw)] gap-0 overflow-y-auto">
               <SheetHeader className="border-b">
-                <SheetTitle className="flex items-center gap-2">
-                  <BrandMark className="h-7 w-9" />
-                  <BrandName />
+                <SheetTitle>
+                  <Logo className="h-10 w-auto" />
                 </SheetTitle>
               </SheetHeader>
               <div className="border-b p-4">

@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
-import { LogOut, PackageSearch } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { BrandName } from "@/components/layout/brand-name";
+import { Logo } from "@/components/brand/logo";
 import { logoutAction } from "@/app/[locale]/(auth)/actions";
 import { AreaNav, type AreaNavItem } from "./area-nav";
 
@@ -31,9 +31,8 @@ export async function AreaShell({
           {tn("skipToContent")}
         </a>
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
-          <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold">
-            <PackageSearch className="h-6 w-6 shrink-0 text-primary" aria-hidden />
-            <BrandName className="hidden truncate sm:inline" />
+          <Link href="/" className="flex min-w-0 items-center gap-3 font-semibold">
+            <Logo className="h-10 w-auto shrink-0" />
             <span className="rounded bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">{title}</span>
           </Link>
           <div className="flex items-center gap-3">

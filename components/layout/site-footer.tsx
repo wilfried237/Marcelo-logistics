@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { Logo } from "@/components/brand/logo";
 import { BrandName } from "./brand-name";
 
 function Column({ title, links }: { title: string; links: { href: string; label: string }[] }) {
@@ -25,9 +26,7 @@ export function SiteFooter() {
     <footer className="bg-ink text-ink-foreground">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 md:px-6 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div className="space-y-3">
-          <p className="text-lg font-bold">
-            <BrandName />
-          </p>
+          <Logo variant="reversed" className="h-16 w-auto" />
           <p className="max-w-xs text-sm text-ink-muted">{t("header.corridor")}</p>
           <p className="max-w-xs text-sm text-ink-muted">{t("footer.pendingDetails")}</p>
         </div>

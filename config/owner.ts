@@ -22,10 +22,12 @@ export type ContactChannel = {
 export const ownerConfig = {
   brand: {
     /**
-     * Existing logo file. It reads "MARCHELO LOGISTICS CARGO", so showing it would
-     * choose the business name. Hidden until the owner approves it (B-01, A-01).
+     * Logo vectorised from public/LOGO.png (public/brand/*.svg; see components/brand/logo.tsx).
+     * In use on every page at the developer's instruction of 2026-11-04 (A-01). It still
+     * reads "MARCHELO LOGISTICS CARGO" while the business name is "Marchelo Logistics"
+     * (B-01): the owner should confirm the artwork or supply an updated version.
      */
-    logo: { src: "/LOGO.png", width: 500, height: 500, approved: false }, // {{NEEDS_OWNER}} A-01
+    logo: { src: "/brand/marchelo-logo.svg", reversedSrc: "/brand/marchelo-logo-reversed.svg", markSrc: "/brand/marchelo-mark.svg", width: 2528, height: 1360, approved: true },
   },
 
   contact: {

@@ -34,6 +34,22 @@ test.describe("public pages", () => {
     expect((await page.goto("/en/terms"))?.status()).toBe(404);
   });
 
+  test("the vector logo appears in the header and footer, and on the branded 404 page", async ({ page }) => {
+    await page.goto("/en");
+    const logos = page.locator("img[src^='/brand/']");
+    await expect(page.locator("header img[alt='Marchelo Logistics']")).toBeVisible();
+    await expect(page.locator("footer img[src='/brand/marchelo-logo-reversed.svg']")).toBeVisible();
+    for (const img of await logos.all()) {
+      await img.scrollIntoViewIfNeeded(); // the footer logo is lazy-loaded
+      await expect.poll(() => img.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    }
+    expect((await page.request.get("/icon.svg")).status()).toBe(200);
+    expect((await page.goto("/fr/does-not-exist"))?.status()).toBe(404);
+    await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+    await expect(page.getByRole("img", { name: "Marchelo Logistics" })).toBeVisible();
+    await expect(page.locator("h1")).toHaveText("Page introuvable");
+  });
+
   test("security headers are present", async ({ request }) => {
     const response = await request.get("/en");
     const headers = response.headers();

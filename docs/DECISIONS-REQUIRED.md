@@ -29,7 +29,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 | L-01 ★ | Terms and conditions of carriage | Release (terms page hidden) |
 | L-02 ★ | Privacy notice: controller identity and contact | Release |
 | L-03 ◆ | Document and data retention periods | Enabling uploads; automatic deletion |
-| A-01 ★ | Logo approval | Release (logo hidden) |
+| A-01 ✓ | Logo in use on every page (2026-11-04); artwork wording vs name to confirm | — |
 | A-02 | Photographs | Visual quality only |
 | R-01 ◆ | Vercel and Supabase account ownership and EU region | Preview deployment, database |
 | R-02 ✓ | Migrations applied automatically on production deployments (approved 2026-11-03) | — |
@@ -190,9 +190,9 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 ### A-01 ★ Logo approval
 - **Decision needed:** is `public/LOGO.png` (reads "MARCHELO LOGISTICS CARGO") the official logo? Is there a vector (SVG) version?
 - **If delayed:** a neutral icon and text are used; the launch build (`RELEASE_BUILD=true`) fails.
-- **Affected:** `config/owner.ts` → `brand.logo.approved`.
+- **Affected:** `config/owner.ts` → `brand.logo`; `public/brand/*.svg`.
 - **Development can continue:** yes.
-- **Answer:**
+- **Answer (2026-11-04, developer instruction):** use the logo on every page. It was vectorised from `public/LOGO.png` by colour-separated tracing (its own black #010101 and blue #0796da): `public/brand/marchelo-logo.svg` (header, portal/staff areas, 404/error pages), `marchelo-logo-reversed.svg` (white instead of black, for the dark footer) and `marchelo-mark.svg` (symbol only; the favicon). **Still open:** the artwork reads “MARCHELO LOGISTICS CARGO” while the business name is “Marchelo Logistics” (B-01). The owner should confirm this artwork or supply the designer’s original vector file, which would replace the traced version.
 
 ### A-02 Photographs
 - **Status (2026-11-03):** the two photos supplied with the project (`assets/photos/yard-loading-container.jpeg`, `assets/photos/side-loader-container.jpeg`, previously `public/work1.jpeg` and `work2.jpeg`) are now used on the home, services, about, how-it-works and shipping-guide pages, at the developer’s request. No stock photography is used; the other images are original illustrations drawn for the site.
