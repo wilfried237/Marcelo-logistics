@@ -37,6 +37,7 @@ const input = () => ({
   contact: { name: "Real Stack", email: `real.${randomUUID().slice(0, 6)}@example.test` },
   locale: "fr",
   idempotencyKey: randomUUID(),
+  privacyAccepted: true,
   website: "",
 });
 

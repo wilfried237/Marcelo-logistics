@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { retentionPolicy } from "@/config/retention";
 import { isDatabaseConfigured, isStorageConfigured } from "@/lib/config/env";
 import { getDb } from "@/lib/db/client";
-import { checkCronAuth } from "@/lib/services/jobs";
+import { checkCronAuth, runJob } from "@/lib/services/jobs";
 import { runRetention } from "@/lib/services/retention";
 import { supabaseDocumentStorage } from "@/lib/storage/supabase-storage";
 
@@ -22,11 +22,14 @@ export async function GET(request: NextRequest) {
 
   const execute = request.nextUrl.searchParams.get("mode") === "execute";
   try {
-    const result = await runRetention(getDb(), supabaseDocumentStorage(), {
-      policy: retentionPolicy,
-      execute,
-      executionEnabled: process.env.RETENTION_EXECUTION_ENABLED === "true",
-    });
+    const db = getDb();
+    const result = await runJob(db, execute ? "retention-execute" : "retention-dry-run", async () =>
+      ({ ...(await runRetention(db, supabaseDocumentStorage(), {
+        policy: retentionPolicy,
+        execute,
+        executionEnabled: process.env.RETENTION_EXECUTION_ENABLED === "true",
+      })) }) as Record<string, unknown>,
+    ) as Awaited<ReturnType<typeof runRetention>>;
     if ("refused" in result) return NextResponse.json({ code: result.reason.toUpperCase() }, { status: 409, headers: NO_STORE });
     console.info(`[cron] retention ${result.mode}: ${result.documentsEligible} eligible, ${result.documentsDeleted} deleted, ${result.documentsFailed} failed`);
     return NextResponse.json(result, { headers: NO_STORE });

@@ -339,7 +339,9 @@
     "not_offered": "This route is not offered online. Please contact us.",
     "password_too_short": "Use at least 12 characters.",
     "password_mismatch": "The passwords do not match.",
-    "consent_required": "Please confirm to continue."
+    "consent_required": "Please confirm to continue.",
+    "too_short": "Please write a little more (at least 10 characters).",
+    "invalid_reference": "Enter a reference in the form QRXXXXXX or MLXXXXXXXXXX."
   },
   "quoteForm": {
     "steps": {
@@ -389,8 +391,8 @@
       "title": "Request received",
       "body": "Your quote request has been saved. Your reference is {reference}.",
       "next": "What happens next: our team reviews your request and contacts you with a quote. Keep your reference for any questions.",
-      "emailSent": "We have also sent a confirmation to your email address.",
-      "emailNotSent": "We could not send a confirmation email, but your request is saved.",
+      "emailSent": "A confirmation email is on its way to your email address.",
+      "emailNotSent": "Your request is saved. Email confirmations are not active yet, so please keep your reference.",
       "another": "Send another request"
     },
     "errors": {
@@ -401,7 +403,9 @@
       "route_not_offered": "This route is not offered online yet.",
       "server_error": "Your request was not saved because of a technical problem. Your details are still here; please try again later."
     },
-    "routeLabel": "Route"
+    "routeLabel": "Route",
+    "phoneHint": "Include the country code, for example +353 89 123 4567 or +237 6 95 73 90 33.",
+    "consentLabel": "I have read how my information will be used to prepare my quote."
   },
   "trackPage": {
     "invalid": "This does not look like a shipment reference. References start with ML followed by 10 letters or digits.",
@@ -414,7 +418,9 @@
     "noEvents": "No progress has been recorded yet.",
     "historyTitle": "Progress",
     "timezoneNote": "Times are shown in Irish time (Europe/Dublin).",
-    "help": "Questions about your shipment? Contact us with your reference."
+    "help": "Questions about your shipment? Contact us with your reference.",
+    "route": "Route",
+    "deliveredAt": "Delivered"
   },
   "portal": {
     "nav": {
@@ -493,7 +499,9 @@
       "shipments": "Shipments",
       "customers": "Customers",
       "users": "Users and roles",
-      "audit": "Audit log"
+      "audit": "Audit log",
+      "enquiries": "Enquiries",
+      "notifications": "Notifications"
     },
     "title": "Staff area",
     "dashboardIntro": "Work queue for quote requests and shipments.",
@@ -574,6 +582,114 @@
       "action": "Action",
       "entity": "Record",
       "system": "System"
+    },
+    "calc": {
+      "hint": "Enter each charge as staff-agreed. Amounts are calculated exactly and checked again on the server and in the database before the quotation is sent.",
+      "lines": "Quotation lines",
+      "kind": "Type",
+      "charge": "Charge",
+      "discount": "Discount",
+      "tax": "Tax",
+      "taxDefault": "VAT",
+      "description": "Description",
+      "rate": "Rate",
+      "quantity": "Quantity",
+      "unitPrice": "Unit price ({currency})",
+      "lineAmount": "Line amount",
+      "remove": "Remove",
+      "addCharge": "Add a charge",
+      "addDiscount": "Add a discount",
+      "addTax": "Add tax",
+      "noTax": "Tax lines are unavailable until the VAT presentation is approved (decision P-03). State the tax treatment in the inclusions or exclusions.",
+      "charges": "Charges",
+      "discounts": "Discounts",
+      "subtotal": "Subtotal",
+      "total": "Total",
+      "confirm": "Send this quotation for {total}? The customer will receive it by email and it cannot be edited afterwards.",
+      "errors": {
+        "no_lines": "Add at least one line.",
+        "too_many_lines": "A quotation can have at most 50 lines.",
+        "no_charge": "Add at least one charge.",
+        "invalid_quantity": "Line {line}: enter a quantity greater than 0 (up to 3 decimals).",
+        "invalid_amount": "Line {line}: enter a valid price (no negative amounts; XAF has no decimals).",
+        "invalid_description": "Line {line}: enter a description (up to 200 characters).",
+        "tax_not_allowed": "Line {line}: this tax rate is not approved.",
+        "subtotal_not_positive": "Discounts cannot reach or exceed the charges.",
+        "total_too_large": "The total is too large."
+      }
+    },
+    "case": {
+      "communication": "Communication",
+      "noMessages": "No messages yet.",
+      "kinds": {
+        "note": "Internal note",
+        "info_request": "Information requested",
+        "customer_reply": "Customer reply",
+        "issue_report": "Customer reported an issue"
+      },
+      "noteLabel": "Internal note",
+      "noteHint": "Visible to staff only. Never shown or sent to the customer.",
+      "addNote": "Add note",
+      "noteAdded": "Note added.",
+      "infoLabel": "What information do you need?",
+      "infoHint": "The customer sees this message and receives it by email; the request moves to “Awaiting customer”.",
+      "requestInfo": "Request information",
+      "infoRequested": "Information requested. The customer has been notified.",
+      "assignment": "Assignment",
+      "assignee": "Assigned to",
+      "unassigned": "Unassigned",
+      "assign": "Save",
+      "privacyAccepted": "Privacy notice acknowledged on {date}.",
+      "privacyNotRecorded": "No privacy acknowledgement recorded (request submitted before it was required).",
+      "emails": "Emails",
+      "noEmails": "No emails for this request yet.",
+      "shipmentMessages": "Notes and customer reports"
+    },
+    "list": {
+      "search": "Search",
+      "searchPlaceholder": "Reference, name or email",
+      "assigned": "Assignment",
+      "assignedAny": "Anyone",
+      "assignedMe": "Assigned to me",
+      "assignedNone": "Unassigned",
+      "sort": "Sort",
+      "newest": "Newest first",
+      "oldest": "Oldest first"
+    },
+    "enquiries": {
+      "intro": "Messages sent through the contact form.",
+      "none": "No enquiries yet.",
+      "status": "Status",
+      "update": "Update",
+      "statuses": {
+        "NEW": "New",
+        "IN_PROGRESS": "In progress",
+        "CLOSED": "Closed"
+      },
+      "topics": {
+        "quote": "A quote",
+        "shipment": "A shipment",
+        "general": "Something else"
+      }
+    },
+    "notifications": {
+      "intro": "Every email the platform has queued, with its delivery status, and the scheduled job runs.",
+      "problems": "{count, plural, one {# email needs attention} other {# emails need attention}} (failed, bounced or rejected).",
+      "emails": "Emails",
+      "jobs": "Scheduled jobs",
+      "noJobs": "No job has run yet.",
+      "running": "Running",
+      "ok": "Completed",
+      "failed": "Failed",
+      "columns": {
+        "created": "Queued",
+        "template": "Email",
+        "audience": "For",
+        "status": "Status",
+        "attempts": "Attempts",
+        "sent": "Sent",
+        "event": "Last provider event"
+      }
     }
   },
   "aboutPage": {
@@ -627,29 +743,177 @@
     "retry": "Try again"
   },
   "emails": {
-    "greeting": "Hello {name},",
-    "signoff": "Kind regards,",
-    "team": "The team",
-    "ack": {
-      "subject": "We received your quote request {reference}",
-      "body": "Thank you. We have received your quote request. Your reference is {reference}.",
-      "next": "Our team will review your request and contact you with a quote. No price has been calculated automatically."
+    "common": {
+      "greeting": "Hello {name},",
+      "signoff": "Kind regards,",
+      "team": "The Marchelo Logistics team",
+      "reference": "Reference",
+      "route": "Route",
+      "service": "Service",
+      "status": "Status",
+      "automated": "This is an automated message about your request with Marchelo Logistics. To contact us, use the contact page on our website.",
+      "tagline": "Shipping between Ireland and Cameroon",
+      "viewOnline": "View online"
     },
-    "quote": {
-      "subject": "Your quote {reference} is ready",
-      "body": "Our team has prepared a quote for your request {reference}.",
-      "amount": "Amount: {amount}",
-      "validUntil": "Valid until: {date}",
-      "cta": "View and respond to your quote"
+    "quote_received": {
+      "subject": "We have received your quote request {reference}",
+      "heading": "Your request has been received",
+      "body": "Thank you for your request. Our team will review it and prepare a quotation for your shipment. Nothing is charged automatically.",
+      "next": "Keep this reference. You will need it if you contact us about this request.",
+      "cta": "View your request"
     },
-    "shipment": {
-      "subject": "Update on shipment {reference}",
-      "body": "There is a new update on your shipment {reference}: {milestone}.",
+    "quote_under_review": {
+      "subject": "Your request {reference} is being reviewed",
+      "heading": "Your request is being reviewed",
+      "body": "A member of our team is now reviewing your request. We will contact you if we need more information.",
+      "cta": "View your request"
+    },
+    "info_requested": {
+      "subject": "We need more information for {reference}",
+      "heading": "We need a few more details",
+      "body": "To prepare an accurate quotation, our team needs more information about your shipment:",
+      "cta": "Reply with the information"
+    },
+    "quote_issued": {
+      "subject": "Your quotation {reference} is ready",
+      "heading": "Your quotation is ready",
+      "body": "We have prepared a quotation for your shipment. Please review the breakdown below.",
+      "validUntil": "This quotation is valid until {date}.",
+      "cta": "Review and respond"
+    },
+    "quote_updated": {
+      "subject": "Your quotation {reference} has been updated",
+      "heading": "Your quotation has been updated",
+      "body": "We have updated the quotation for your shipment. It replaces the previous version. Please review the breakdown below.",
+      "validUntil": "This quotation is valid until {date}.",
+      "cta": "Review and respond"
+    },
+    "quote_expiring": {
+      "subject": "Your quotation {reference} expires soon",
+      "heading": "Your quotation expires soon",
+      "body": "Your quotation is valid until {date}. If you would like to go ahead, please respond before then.",
+      "cta": "Review and respond"
+    },
+    "quote_expired": {
+      "subject": "Your quotation {reference} has expired",
+      "heading": "Your quotation has expired",
+      "body": "The validity date of your quotation has passed. If you would still like to ship, contact us and we will review your request.",
+      "cta": "View your request"
+    },
+    "quote_accepted": {
+      "subject": "Thank you: quotation {reference} accepted",
+      "heading": "You have accepted the quotation",
+      "body": "Thank you. Our team will now arrange your shipment and confirm the next steps, including how and when your goods are handed over.",
+      "cta": "View your request"
+    },
+    "quote_declined": {
+      "subject": "Quotation {reference} declined",
+      "heading": "You have declined the quotation",
+      "body": "We have recorded your decision. If you change your mind or want to discuss your shipment, please contact us.",
+      "cta": "View your request"
+    },
+    "shipment_confirmed": {
+      "subject": "Your shipment is confirmed: tracking reference {shipment}",
+      "heading": "Your shipment is confirmed",
+      "body": "Your shipment has been booked. Use the tracking reference below to follow each recorded step online.",
+      "trackingLabel": "Tracking reference",
       "cta": "Track your shipment"
     },
-    "staffNew": {
-      "subject": "New quote request {reference}",
-      "body": "A new quote request {reference} has been submitted ({service})."
+    "shipment_update": {
+      "subject": "Shipment {shipment}: {milestone}",
+      "heading": "Your shipment has been updated",
+      "body": "New status: {milestone}.",
+      "locationLine": "Location: {location}",
+      "cta": "Track your shipment"
+    },
+    "shipment_delivered": {
+      "subject": "Shipment {shipment} has been delivered",
+      "heading": "Your shipment has been delivered",
+      "body": "Your shipment has been recorded as delivered. Thank you for shipping with Marchelo Logistics.",
+      "cta": "View the tracking history"
+    },
+    "contact_received": {
+      "subject": "We have received your message {reference}",
+      "heading": "Thank you for contacting us",
+      "body": "We have received your message and our team will reply as soon as possible."
+    },
+    "breakdown": {
+      "title": "Quotation breakdown",
+      "description": "Description",
+      "quantity": "Qty",
+      "unitPrice": "Unit price",
+      "amount": "Amount",
+      "subtotal": "Subtotal",
+      "tax": "Tax",
+      "total": "Total",
+      "includes": "Included",
+      "excludes": "Not included"
+    },
+    "staff": {
+      "common": {
+        "actionRequired": "Action required",
+        "event": "Event",
+        "reference": "Reference",
+        "customer": "Customer",
+        "when": "Time",
+        "open": "Open in the staff area",
+        "footer": "Internal notification from the Marchelo Logistics platform. Do not forward to customers."
+      },
+      "staff_new_request": {
+        "subject": "New quote request {reference}",
+        "heading": "New quote request",
+        "body": "A new {service} request has been submitted ({route}).",
+        "action": "Review the request and start the quotation."
+      },
+      "staff_customer_message": {
+        "subject": "Customer message on {reference}",
+        "heading": "The customer sent a message",
+        "body": "The customer added information to {reference}.",
+        "bodyIssue": "The customer reported an issue with shipment {shipment}.",
+        "action": "Read the message and reply or update the request."
+      },
+      "staff_quote_accepted": {
+        "subject": "Quotation {reference} accepted: create the shipment",
+        "heading": "Quotation accepted",
+        "body": "The customer accepted the quotation for {reference}.",
+        "action": "Create the shipment and contact the customer about handing over the goods."
+      },
+      "staff_quote_declined": {
+        "subject": "Quotation {reference} declined",
+        "heading": "Quotation declined",
+        "body": "The customer declined the quotation for {reference}.",
+        "action": "No action is required unless you want to follow up."
+      },
+      "staff_shipment_exception": {
+        "subject": "Shipment {shipment}: {reason}",
+        "heading": "Shipment needs attention",
+        "body": "Shipment {shipment} was marked {reason}.",
+        "action": "Check the shipment and keep the customer informed."
+      },
+      "staff_contact": {
+        "subject": "New contact enquiry {reference}",
+        "heading": "New contact enquiry",
+        "body": "A new enquiry about \"{topic}\" was submitted.",
+        "action": "Reply to the customer."
+      },
+      "staff_role_changed": {
+        "subject": "Security: a user role was changed",
+        "heading": "User role changed",
+        "body": "The role of {user} changed from {from} to {to}.",
+        "action": "Check that this change was intended."
+      },
+      "staff_email_failure": {
+        "subject": "Email delivery problem: {template}",
+        "heading": "An email could not be delivered",
+        "body": "The \"{template}\" email for {reference} ended with status {status}.",
+        "action": "Contact the customer another way and check the email configuration."
+      },
+      "staff_job_failure": {
+        "subject": "Scheduled job failed: {job}",
+        "heading": "A scheduled job failed",
+        "body": "The job \"{job}\" failed: {error}",
+        "action": "Check the job runs and the server logs."
+      }
     }
   },
   "nav2": {
@@ -747,5 +1011,102 @@
     "window": "Between the {from, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} and the {to, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} of each month",
     "routeLabel": "{origin} → {destination}",
     "askExact": "Ask us for the exact date when you request your quote."
+  },
+  "quoteView": {
+    "title": "Your request {reference}",
+    "intro": "Hello {name}. This private page shows the latest information about your request.",
+    "status": "Status",
+    "statusHelp": {
+      "SUBMITTED": "We have received your request. A member of our team will review it shortly.",
+      "UNDER_REVIEW": "Our team is reviewing your request.",
+      "AWAITING_CUSTOMER": "We need more information from you. Please read our message below and reply.",
+      "QUOTED": "Your quotation is ready. Review it below and accept or decline it.",
+      "ACCEPTED": "You accepted the quotation. Our team will contact you about the next steps.",
+      "DECLINED": "You declined the quotation. Contact us if you change your mind.",
+      "EXPIRED": "The quotation has expired. Contact us and we will review your request.",
+      "CANCELLED": "This request has been cancelled."
+    },
+    "quoteTitle": "Your quotation",
+    "shipmentReady": "Your shipment has been booked. Tracking reference:",
+    "messagesTitle": "Messages",
+    "fromTeam": "Marchelo Logistics",
+    "fromYou": "You",
+    "noMessages": "No messages yet.",
+    "replyLabel": "Send a message to our team",
+    "replyLabelInfo": "Your reply with the requested information",
+    "replyHint": "Our team will be notified. Please do not include payment card details.",
+    "sendReply": "Send",
+    "replySent": "Thank you. Your message has been sent to our team.",
+    "reference": "Reference",
+    "service": "Service",
+    "route": "Route",
+    "submitted": "Submitted",
+    "privateLink": "This page is private. Anyone with the link can view it and respond, so please do not share it.",
+    "accept": "Accept the quotation",
+    "decline": "Decline",
+    "confirmAccept": "Yes, accept",
+    "confirmDecline": "Yes, decline",
+    "acceptConsequence": "By accepting, you ask us to arrange this shipment at the quoted price. Nothing is charged automatically; our team will contact you.",
+    "declineConsequence": "The quotation will be closed. You can contact us later if you change your mind.",
+    "accepted": "Thank you. You have accepted the quotation; our team will contact you.",
+    "declined": "You have declined the quotation.",
+    "issueTitle": "Report a problem",
+    "issueLabel": "Describe the problem with this shipment",
+    "issueHint": "Our team will be notified and will contact you.",
+    "sendIssue": "Send report",
+    "issueSent": "Thank you. Our team has been notified.",
+    "errors": {
+      "rateLimited": "Too many attempts. Please wait a few minutes and try again.",
+      "notAvailable": "This action is no longer available for this request.",
+      "expired": "This quotation has expired. Contact us and we will review your request.",
+      "notFound": "This link is not valid.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "breakdown": {
+      "single": "Shipping",
+      "caption": "Quotation breakdown",
+      "description": "Description",
+      "quantity": "Qty",
+      "unitPrice": "Unit price",
+      "amount": "Amount",
+      "subtotal": "Subtotal",
+      "tax": "Tax",
+      "total": "Total",
+      "validUntil": "Valid until {date}.",
+      "includes": "Included",
+      "excludes": "Not included"
+    }
+  },
+  "contactForm": {
+    "title": "Send us a message",
+    "channels": "Other ways to reach us",
+    "successTitle": "Message received",
+    "successBody": "Thank you. Your reference is {reference}. Our team will reply as soon as possible.",
+    "emailSent": "A confirmation is on its way to your email address.",
+    "emailNotSent": "Email confirmations are not active yet, so please keep your reference.",
+    "another": "Send another message",
+    "name": "Your name",
+    "email": "Email address",
+    "phone": "Phone number",
+    "phoneHint": "Include the country code, for example +353 or +237.",
+    "optional": "optional",
+    "topic": "What is it about?",
+    "topics": {
+      "quote": "A quote",
+      "shipment": "A shipment",
+      "general": "Something else"
+    },
+    "reference": "Quote or tracking reference",
+    "referenceHint": "If your message is about an existing request or shipment.",
+    "message": "Your message",
+    "privacy": "I have read how my information will be used to answer my message (<link>privacy notice</link>).",
+    "sending": "Sending…",
+    "send": "Send message",
+    "errors": {
+      "rateLimited": "Too many messages from this connection. Please try again later.",
+      "unavailable": "The contact form is not available yet.",
+      "invalid": "Please check the highlighted fields.",
+      "generic": "Your message could not be sent. Please try again."
+    }
   }
 }

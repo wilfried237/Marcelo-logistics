@@ -29,3 +29,45 @@ export function checkCronAuth(authorization: string | null, secret: string | und
   if (given.length !== expected.length) return "unauthorised";
   return timingSafeEqual(given, expected) ? "ok" : "unauthorised";
 }
+
+/**
+ * Runs a scheduled job and records it in job_runs (start, end, outcome, summary).
+ * A failure is logged without customer data and queues ONE staff alert per job
+ * per day (outbox key), then rethrows so the route reports the failure.
+ */
+export async function runJob<T extends Record<string, unknown>>(db: Database, job: string, fn: () => Promise<T>): Promise<T> {
+  const run = await db.jobRun.create({ data: { job }, select: { id: true } });
+  try {
+    const summary = await fn();
+    await db.jobRun.update({ where: { id: run.id }, data: { finishedAt: new Date(), ok: true, summary: JSON.parse(JSON.stringify(summary)) } });
+    return summary;
+  } catch (error) {
+    const message = (error instanceof Error ? `${error.name}: ${error.message}` : "unknown error").slice(0, 1000);
+    await db.jobRun.update({ where: { id: run.id }, data: { finishedAt: new Date(), ok: false, error: message } }).catch(() => undefined);
+    const day = new Date().toISOString().slice(0, 10);
+    await db.$executeRaw`select public.app_enqueue_email('staff_job_failure', 'staff', 'job_runs', ${String(run.id)}, ${`staff_job_failure:${job}:${day}`}, null, 'en'::public.app_locale,
+      ${JSON.stringify({ job, error: message.slice(0, 300) })}::jsonb)`.catch(() => undefined);
+    throw error;
+  }
+}
+
+/**
+ * Queues "quotation expires soon" reminders when configured
+ * (ownerConfig.notifications.quoteExpiryReminderHours; null = disabled).
+ * One reminder per quote (outbox key), so repeated runs never send twice.
+ */
+export async function queueExpiryReminders(db: Database, hours: number | null): Promise<{ reminders: number }> {
+  if (!hours || hours <= 0) return { reminders: 0 };
+  const rows = await db.$queryRaw<{ n: number }[]>`
+    with due as (
+      select distinct on (r.id) r.id as request_id, q.id as quote_id, c.email, r.locale
+        from public.quote_requests r
+        join public.quotes q on q.quote_request_id = r.id and q.sent_at is not null
+        join public.customers c on c.id = r.customer_id
+       where r.status = 'QUOTED' and q.valid_until > now() and q.valid_until <= now() + make_interval(hours => ${hours})
+       order by r.id, q.sent_at desc)
+    select count(*)::int as n from due,
+      lateral (select public.app_enqueue_email('quote_expiring', 'customer', 'quote_requests', due.request_id::text,
+        'quote_expiring:' || due.quote_id, due.email, due.locale, jsonb_build_object('quoteId', due.quote_id))) x`;
+  return { reminders: Number(rows[0]?.n ?? 0) };
+}

@@ -10,6 +10,11 @@ export interface PublicTracking {
   reference: string;
   serviceCode: ServiceCode;
   status: ShipmentStatus;
+  /** Route countries (ISO 3166-1 alpha-2). */
+  origin: string;
+  destination: string;
+  /** Time of the public "delivered" event, when recorded. */
+  deliveredAt: string | null;
   etaFrom: string | null;
   etaTo: string | null;
   events: { milestone: MilestoneCode; location: string | null; occurredAt: string; noteEn: string | null; noteFr: string | null }[];

@@ -45,13 +45,17 @@ const contactSchema = z
   .object({
     name: requiredText(120),
     email: z.string().trim().toLowerCase().max(254, "too_long").pipe(z.email("invalid_email")),
+    /** International format with country code, e.g. +353 89 123 4567 or +237 6 95 73 90 33. */
     phone: z
       .string()
       .trim()
+      .min(1, "required")
       .max(32, "too_long")
-      .regex(/^\+?[0-9 ()-]{5,32}$/, "invalid_phone")
-      .optional()
-      .or(z.literal("").transform(() => undefined)),
+      .regex(/^\+[1-9][0-9 ()-]{6,30}$/, "invalid_phone")
+      .refine((v) => {
+        const digits = v.replace(/\D/g, "").length;
+        return digits >= 8 && digits <= 15;
+      }, "invalid_phone"),
   })
   .strict();
 
@@ -63,6 +67,8 @@ const baseFields = {
   contact: contactSchema,
   locale: z.enum(LOCALES),
   idempotencyKey: z.uuid("invalid"),
+  /** Privacy notice acknowledged (recorded with the request). */
+  privacyAccepted: z.literal(true, { error: "consent_required" }),
   /** Honeypot: must stay empty. Checked separately so bots get no hint. */
   website: z.string().max(200).optional(),
 };
@@ -104,6 +110,61 @@ export const sendQuoteInputSchema = z.object({
   exclusions: z.string().trim().max(2000, "too_long").default(""),
   validUntil: z.iso.date("invalid"),
 });
+
+export const QUOTE_LINE_KINDS = ["charge", "discount", "tax"] as const;
+
+export const quoteLineInputSchema = z
+  .object({
+    kind: z.enum(QUOTE_LINE_KINDS),
+    description: requiredText(200),
+    quantity: z.string().trim().max(12, "too_long").optional(),
+    unitPrice: z.string().trim().max(20, "too_long").optional(),
+    rateBp: z.coerce.number({ error: "invalid" }).int("invalid").min(0, "invalid").max(10_000, "invalid").optional(),
+  })
+  .strict();
+
+/** Staff quotation, priced line by line; totals are computed on the server (lib/domain/pricing.ts). */
+export const issueQuoteInputSchema = z
+  .object({
+    requestId: z.uuid(),
+    currency: z.enum(CURRENCIES),
+    lines: z.array(quoteLineInputSchema).min(1, "required").max(50, "too_many"),
+    inclusions: z.string().trim().max(2000, "too_long").default(""),
+    exclusions: z.string().trim().max(2000, "too_long").default(""),
+    validUntil: z.iso.date("invalid"),
+  })
+  .strict();
+export type IssueQuoteInput = z.infer<typeof issueQuoteInputSchema>;
+
+export const caseMessageBodySchema = z.string().trim().min(1, "required").max(4000, "too_long");
+
+export const contactInputSchema = z
+  .object({
+    name: requiredText(120),
+    email: z.string().trim().toLowerCase().max(254, "too_long").pipe(z.email("invalid_email")),
+    phone: z
+      .string()
+      .trim()
+      .max(32, "too_long")
+      .regex(/^\+[1-9][0-9 ()-]{6,30}$/, "invalid_phone")
+      .optional()
+      .or(z.literal("").transform(() => undefined)),
+    topic: z.enum(["quote", "shipment", "general"]),
+    relatedReference: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^(QR[A-Z2-7]{6}|ML[A-Z2-7]{10})$/, "invalid_reference")
+      .optional()
+      .or(z.literal("").transform(() => undefined)),
+    message: z.string().trim().min(10, "too_short").max(4000, "too_long"),
+    locale: z.enum(LOCALES),
+    idempotencyKey: z.uuid("invalid"),
+    privacyAccepted: z.literal(true, { error: "consent_required" }),
+    /** Honeypot. */
+    website: z.string().max(200).optional(),
+  })
+  .strict();
 
 export const shipmentEventInputSchema = z.object({
   shipmentId: z.uuid(),

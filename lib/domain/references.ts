@@ -5,6 +5,7 @@ export const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
 export const QUOTE_REFERENCE_PATTERN = /^QR[A-Z2-7]{6}$/;
 export const SHIPMENT_REFERENCE_PATTERN = /^ML[A-Z2-7]{10}$/;
+export const CONTACT_REFERENCE_PATTERN = /^CE[A-Z2-7]{6}$/;
 
 function randomBase32(length: number): string {
   let out = "";
@@ -25,6 +26,11 @@ export function generateQuoteReference(): string {
  */
 export function generateShipmentReference(): string {
   return `ML${randomBase32(10)}`;
+}
+
+/** "CE" + 6 random base32 characters for contact enquiries. */
+export function generateContactReference(): string {
+  return `CE${randomBase32(6)}`;
 }
 
 /** Normalise user input: trim, uppercase, drop spaces and dashes. */

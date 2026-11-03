@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isDatabaseConfigured } from "@/lib/config/env";
 import { getDb } from "@/lib/db/client";
-import { checkCronAuth, expireQuotes } from "@/lib/services/jobs";
+import { checkCronAuth, expireQuotes, runJob } from "@/lib/services/jobs";
 
 export const dynamic = "force-dynamic";
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
   if (auth !== "ok") return NextResponse.json({ code: "UNAUTHORISED" }, { status: 401, headers: NO_STORE });
   if (!isDatabaseConfigured()) return NextResponse.json({ code: "DATABASE_NOT_CONFIGURED" }, { status: 503, headers: NO_STORE });
   try {
-    const result = await expireQuotes(getDb());
+    const db = getDb();
+    const result = await runJob(db, "expire-quotes", () => expireQuotes(db));
     console.info(`[cron] expire-quotes: ${result.expired} request(s) expired`);
     return NextResponse.json(result, { headers: NO_STORE });
   } catch (error) {

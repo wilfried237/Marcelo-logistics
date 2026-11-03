@@ -51,8 +51,16 @@ describe("quote lifecycle", () => {
 
   it("rejects skipping review and going backwards", () => {
     expect(canTransition("SUBMITTED", "QUOTED")).toBe(false);
-    expect(canTransition("QUOTED", "UNDER_REVIEW")).toBe(false);
     expect(canTransition("ACCEPTED", "QUOTED")).toBe(false);
+    expect(canTransition("ACCEPTED", "UNDER_REVIEW")).toBe(false);
+    expect(canTransition("DECLINED", "UNDER_REVIEW")).toBe(false);
+  });
+
+  it("lets staff revise a sent quote or re-quote after expiry (2026-11-04)", () => {
+    expect(canTransition("QUOTED", "UNDER_REVIEW")).toBe(true);
+    expect(canTransition("EXPIRED", "UNDER_REVIEW")).toBe(true);
+    expect(actorMayTransition("staff", "QUOTED", "UNDER_REVIEW")).toBe(true);
+    expect(actorMayTransition("customer", "QUOTED", "UNDER_REVIEW")).toBe(false);
   });
 
   it("restricts who may perform each transition", () => {

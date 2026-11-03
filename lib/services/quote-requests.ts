@@ -1,4 +1,4 @@
-import { isRouteOffered } from "@/config/owner";
+import { isRouteOffered, ownerConfig } from "@/config/owner";
 import { quoteSubmissionStatus } from "@/lib/config/env";
 import { withSystem, withUser } from "@/lib/db/context";
 import { domainErrorCode, isUniqueViolation, type DomainErrorCode } from "@/lib/db/errors";
@@ -7,9 +7,10 @@ import type { Prisma } from "@/lib/generated/prisma/client";
 import { assertStaff, type AppUser } from "@/lib/auth/types";
 import type { QuoteStatus } from "@/lib/domain/enums";
 import { actorMayTransition } from "@/lib/domain/quote-lifecycle";
-import { fieldErrors, quoteRequestInputSchema, sendQuoteInputSchema, transitionInputSchema } from "@/lib/domain/quote-schema";
+import { fieldErrors, issueQuoteInputSchema, quoteRequestInputSchema, sendQuoteInputSchema, transitionInputSchema } from "@/lib/domain/quote-schema";
+import { Prisma as PrismaNs } from "@/lib/generated/prisma/client";
+import { calculateQuote, formatQuantity } from "@/lib/domain/pricing";
 import { MAX_REFERENCE_ATTEMPTS, QUOTE_REFERENCE_PATTERN, generateQuoteReference, normaliseReference } from "@/lib/domain/references";
-import { toMinorUnits } from "@/lib/domain/money";
 import { QUOTE_LIMITS, hashKey, rateLimitHit } from "./rate-limit";
 
 // ---------------------------------------------------------------------------
@@ -92,6 +93,7 @@ export async function submitQuoteRequest(
               locale: input.locale,
               idempotencyKey: input.idempotencyKey,
               submittedBy: ctx.user?.id ?? null,
+              privacyAcceptedAt: new Date(),
             },
             select: { id: true, reference: true },
           });
@@ -160,9 +162,27 @@ export async function getCustomerQuoteRequest(db: Database, user: AppUser, rawRe
       select: { ...requestSummary, items: true, notes: true, cancellationReason: true },
     });
     if (!request) return null;
-    const sent = await tx.quote.findMany({ where: { quoteRequestId: request.id, sentAt: { not: null } }, select: sentQuoteSelect, orderBy: { sentAt: "desc" } });
+    const sent = await tx.quote.findMany({
+      where: { quoteRequestId: request.id, sentAt: { not: null } },
+      select: { ...sentQuoteSelect, lines: { orderBy: { position: "asc" }, select: { position: true, kind: true, description: true, quantity: true, unitAmountMinor: true, rateBp: true, lineTotalMinor: true } } },
+      orderBy: { sentAt: "desc" },
+    });
     const shipment = sent.length ? await tx.shipment.findFirst({ where: { quoteId: { in: sent.map((q) => q.id) } }, select: { reference: true } }) : null;
-    return { ...request, quotes: sent.map(toQuoteView), shipmentReference: shipment?.reference ?? null };
+    // RLS returns only messages visible to the customer (never internal notes).
+    const messages = await tx.caseMessage.findMany({
+      where: { quoteRequestId: request.id, internal: false },
+      select: { id: true, authorKind: true, kind: true, body: true, createdAt: true },
+      orderBy: { createdAt: "asc" },
+    });
+    return {
+      ...request,
+      quotes: sent.map(({ lines, ...q }) => ({
+        ...toQuoteView(q),
+        lines: lines.map((l) => ({ ...l, quantity: formatQuantity(BigInt(l.quantity.mul(1000).toFixed(0))), unitAmountMinor: Number(l.unitAmountMinor), lineTotalMinor: Number(l.lineTotalMinor) })),
+      })),
+      shipmentReference: shipment?.reference ?? null,
+      messages,
+    };
   });
 }
 
@@ -186,13 +206,35 @@ export async function respondToQuote(db: Database, user: AppUser, rawReference: 
 // Staff operations (role checked here AND by RLS/triggers)
 // ---------------------------------------------------------------------------
 
-export async function listQuoteRequestsForStaff(db: Database, user: AppUser, filter: { status?: QuoteStatus } = {}) {
+export interface StaffQuoteFilter {
+  status?: QuoteStatus;
+  /** Reference, customer name or email (case-insensitive, partial). */
+  q?: string;
+  sort?: "newest" | "oldest";
+  assigned?: "me" | "unassigned";
+}
+
+export async function listQuoteRequestsForStaff(db: Database, user: AppUser, filter: StaffQuoteFilter = {}) {
   assertStaff(user);
+  const q = filter.q?.trim().slice(0, 120);
+  const where: Prisma.QuoteRequestWhereInput = {
+    ...(filter.status ? { status: filter.status } : {}),
+    ...(filter.assigned === "me" ? { assignedTo: user.id } : filter.assigned === "unassigned" ? { assignedTo: null } : {}),
+    ...(q
+      ? {
+          OR: [
+            { reference: { contains: normaliseReference(q) } },
+            { customer: { name: { contains: q, mode: "insensitive" } } },
+            { customer: { email: { contains: q.toLowerCase() } } },
+          ],
+        }
+      : {}),
+  };
   const rows = await withUser(db, user.id, (tx) =>
     tx.quoteRequest.findMany({
-      where: filter.status ? { status: filter.status } : undefined,
-      select: { ...requestSummary, customer: { select: { name: true, email: true } } },
-      orderBy: { createdAt: "desc" },
+      where,
+      select: { ...requestSummary, assignedTo: true, customer: { select: { name: true, email: true } } },
+      orderBy: { createdAt: filter.sort === "oldest" ? "asc" : "desc" },
       take: 200,
     }),
   );
@@ -218,11 +260,22 @@ export async function getQuoteRequestForStaff(db: Database, user: AppUser, rawRe
         notes: true,
         locale: true,
         cancellationReason: true,
+        assignedTo: true,
+        privacyAcceptedAt: true,
         customer: { select: { id: true, name: true, email: true, phone: true, preferredLocale: true, userId: true } },
       },
     });
     if (!request) return null;
-    const requestQuotes = await tx.quote.findMany({ where: { quoteRequestId: request.id }, select: sentQuoteSelect, orderBy: { createdAt: "desc" } });
+    const requestQuotes = await tx.quote.findMany({
+      where: { quoteRequestId: request.id },
+      select: { ...sentQuoteSelect, lines: { orderBy: { position: "asc" }, select: { position: true, kind: true, description: true, quantity: true, unitAmountMinor: true, rateBp: true, lineTotalMinor: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+    const messages = await tx.caseMessage.findMany({
+      where: { quoteRequestId: request.id },
+      select: { id: true, authorKind: true, internal: true, kind: true, body: true, createdAt: true, shipmentId: true },
+      orderBy: { createdAt: "asc" },
+    });
     const shipment = requestQuotes.length
       ? await tx.shipment.findFirst({ where: { quoteId: { in: requestQuotes.map((q) => q.id) } }, select: { reference: true } })
       : null;
@@ -240,9 +293,13 @@ export async function getQuoteRequestForStaff(db: Database, user: AppUser, rawRe
       customerPhone: customer.phone,
       customerLocale: customer.preferredLocale,
       customerHasAccount: customer.userId !== null,
-      quotes: requestQuotes.map(toQuoteView),
+      quotes: requestQuotes.map(({ lines, ...q }) => ({
+        ...toQuoteView(q),
+        lines: lines.map((l) => ({ ...l, quantity: formatQuantity(BigInt(l.quantity.mul(1000).toFixed(0))), unitAmountMinor: Number(l.unitAmountMinor), lineTotalMinor: Number(l.lineTotalMinor) })),
+      })),
       shipmentReference: shipment?.reference ?? null,
       history,
+      messages,
     };
   });
 }
@@ -272,49 +329,76 @@ export async function transitionQuoteRequest(db: Database, user: AppUser, raw: u
   }
 }
 
-/** Creates a quote entered manually by staff and sends it (request -> QUOTED) atomically. */
-export async function sendQuote(
+/**
+ * Issues a staff-priced quotation atomically: the quote, its lines, sending and
+ * the request's move to QUOTED happen in one transaction. Totals are computed
+ * here with integer arithmetic and verified again by the database when the quote
+ * is sent (app_quote_lines_total). The customer email is queued by the database
+ * in the same transaction (outbox).
+ */
+export async function issueQuote(
   db: Database,
   user: AppUser,
   raw: unknown,
-): Promise<StaffActionResult<{ quoteId: string; reference: string; notify: { email: string; name: string; locale: "en" | "fr" } }>> {
+): Promise<StaffActionResult<{ quoteId: string; reference: string; totalMinor: string }>> {
   assertStaff(user);
-  const parsed = sendQuoteInputSchema.safeParse(raw);
+  const parsed = issueQuoteInputSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, code: "invalid", fieldErrors: fieldErrors(parsed.error) };
   const input = parsed.data;
-  const amountMinor = toMinorUnits(input.amount, input.currency);
-  if (!amountMinor) return { ok: false, code: "invalid", fieldErrors: { amount: "invalid" } };
+  const calc = calculateQuote(input.lines, input.currency, ownerConfig.pricing.taxRatesBp);
+  if (!calc.ok) {
+    const where = "line" in calc.error ? `lines.${calc.error.line - 1}` : "lines";
+    return { ok: false, code: "invalid", fieldErrors: { [where]: calc.error.code } };
+  }
   const validUntil = new Date(`${input.validUntil}T23:59:59Z`);
   if (validUntil.getTime() <= Date.now()) return { ok: false, code: "invalid", fieldErrors: { validUntil: "in_past" } };
 
   try {
     return await withUser(db, user.id, async (tx) => {
-      const request = await tx.quoteRequest.findUnique({
-        where: { id: input.requestId },
-        select: { id: true, reference: true, status: true, customer: { select: { email: true, name: true, preferredLocale: true } } },
-      });
+      const request = await tx.quoteRequest.findUnique({ where: { id: input.requestId }, select: { id: true, reference: true, status: true } });
       if (!request) return { ok: false, code: "not_found" } as const;
       const quote = await tx.quote.create({
         data: {
           quoteRequestId: request.id,
-          amountMinor: BigInt(amountMinor),
+          amountMinor: calc.value.totalMinor,
           currency: input.currency,
           inclusions: input.inclusions,
           exclusions: input.exclusions,
           validUntil,
           createdBy: user.id,
-          sentAt: new Date(),
         },
         select: { id: true },
       });
+      await tx.quoteLineItem.createMany({
+        data: calc.value.lines.map((l) => ({
+          quoteId: quote.id,
+          position: l.position,
+          kind: l.kind,
+          description: l.description,
+          quantity: new PrismaNs.Decimal(formatQuantity(l.quantityThousandths)),
+          unitAmountMinor: l.unitAmountMinor,
+          rateBp: l.rateBp,
+          lineTotalMinor: l.lineTotalMinor,
+        })),
+      });
+      // Sending: the database re-verifies every line and the total here.
+      await tx.quote.update({ where: { id: quote.id }, data: { sentAt: new Date() }, select: { id: true } });
       const moved = await tx.quoteRequest.updateMany({ where: { id: request.id, status: request.status }, data: { status: "QUOTED" } });
       if (moved.count !== 1) throw new Error("invalid_quote_transition");
-      return {
-        ok: true,
-        data: { quoteId: quote.id, reference: request.reference, notify: { email: request.customer.email, name: request.customer.name, locale: request.customer.preferredLocale } },
-      } as const;
+      return { ok: true, data: { quoteId: quote.id, reference: request.reference, totalMinor: calc.value.totalMinor.toString() } } as const;
     });
   } catch (error) {
     return { ok: false, code: domainErrorCode(error) };
   }
+}
+
+/** Single-amount quotation (one charge line); kept for simple quotes and existing callers. */
+export async function sendQuote(db: Database, user: AppUser, raw: unknown): Promise<StaffActionResult<{ quoteId: string; reference: string; totalMinor: string }>> {
+  assertStaff(user);
+  const parsed = sendQuoteInputSchema.safeParse(raw);
+  if (!parsed.success) return { ok: false, code: "invalid", fieldErrors: fieldErrors(parsed.error) };
+  const { amount, ...rest } = parsed.data;
+  const result = await issueQuote(db, user, { ...rest, lines: [{ kind: "charge", description: "Shipping", quantity: "1", unitPrice: amount }] });
+  if (!result.ok && Object.keys(result.fieldErrors ?? {}).some((k) => k.startsWith("lines"))) return { ok: false, code: "invalid", fieldErrors: { amount: "invalid" } };
+  return result;
 }

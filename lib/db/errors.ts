@@ -17,6 +17,9 @@ export const DOMAIN_ERROR_CODES = [
   "last_admin",
   "not_found",
   "document_owner_not_found",
+  "quote_total_mismatch",
+  "invalid_shipment_transition",
+  "assignee_not_staff",
 ] as const;
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number] | "conflict" | "invalid_data" | "permission_denied" | "unknown";
 

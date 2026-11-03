@@ -339,7 +339,9 @@
     "not_offered": "Ce trajet n’est pas proposé en ligne. Veuillez nous contacter.",
     "password_too_short": "Utilisez au moins 12 caractères.",
     "password_mismatch": "Les mots de passe ne correspondent pas.",
-    "consent_required": "Veuillez confirmer pour continuer."
+    "consent_required": "Veuillez confirmer pour continuer.",
+    "too_short": "Merci d’en écrire un peu plus (au moins 10 caractères).",
+    "invalid_reference": "Saisissez une référence au format QRXXXXXX ou MLXXXXXXXXXX."
   },
   "quoteForm": {
     "steps": {
@@ -389,8 +391,8 @@
       "title": "Demande reçue",
       "body": "Votre demande de devis a été enregistrée. Votre référence est {reference}.",
       "next": "Prochaine étape : notre équipe examine votre demande et vous contacte avec un devis. Conservez votre référence pour toute question.",
-      "emailSent": "Nous avons également envoyé une confirmation à votre adresse e-mail.",
-      "emailNotSent": "Nous n’avons pas pu envoyer d’e-mail de confirmation, mais votre demande est bien enregistrée.",
+      "emailSent": "Un e-mail de confirmation est en route vers votre adresse.",
+      "emailNotSent": "Votre demande est enregistrée. Les confirmations par e-mail ne sont pas encore actives : conservez votre référence.",
       "another": "Envoyer une autre demande"
     },
     "errors": {
@@ -401,7 +403,9 @@
       "route_not_offered": "Ce trajet n’est pas encore proposé en ligne.",
       "server_error": "Votre demande n’a pas été enregistrée à cause d’un problème technique. Vos informations sont toujours là ; veuillez réessayer plus tard."
     },
-    "routeLabel": "Trajet"
+    "routeLabel": "Trajet",
+    "phoneHint": "Indiquez l’indicatif du pays, par exemple +353 89 123 4567 ou +237 6 95 73 90 33.",
+    "consentLabel": "J’ai pris connaissance de l’utilisation de mes informations pour préparer mon devis."
   },
   "trackPage": {
     "invalid": "Ceci ne ressemble pas à une référence d’envoi. Les références commencent par ML suivi de 10 lettres ou chiffres.",
@@ -414,7 +418,9 @@
     "noEvents": "Aucun avancement n’a encore été enregistré.",
     "historyTitle": "Avancement",
     "timezoneNote": "Les heures sont indiquées à l’heure irlandaise (Europe/Dublin).",
-    "help": "Des questions sur votre envoi ? Contactez-nous en indiquant votre référence."
+    "help": "Des questions sur votre envoi ? Contactez-nous en indiquant votre référence.",
+    "route": "Trajet",
+    "deliveredAt": "Livré"
   },
   "portal": {
     "nav": {
@@ -493,7 +499,9 @@
       "shipments": "Envois",
       "customers": "Clients",
       "users": "Utilisateurs et rôles",
-      "audit": "Journal d’audit"
+      "audit": "Journal d’audit",
+      "enquiries": "Demandes de contact",
+      "notifications": "Notifications"
     },
     "title": "Espace du personnel",
     "dashboardIntro": "File de travail des demandes de devis et des envois.",
@@ -574,6 +582,114 @@
       "action": "Action",
       "entity": "Enregistrement",
       "system": "Système"
+    },
+    "calc": {
+      "hint": "Saisissez chaque frais convenu. Les montants sont calculés exactement et vérifiés à nouveau par le serveur et la base de données avant l’envoi du devis.",
+      "lines": "Lignes du devis",
+      "kind": "Type",
+      "charge": "Frais",
+      "discount": "Remise",
+      "tax": "Taxe",
+      "taxDefault": "TVA",
+      "description": "Description",
+      "rate": "Taux",
+      "quantity": "Quantité",
+      "unitPrice": "Prix unitaire ({currency})",
+      "lineAmount": "Montant de la ligne",
+      "remove": "Supprimer",
+      "addCharge": "Ajouter des frais",
+      "addDiscount": "Ajouter une remise",
+      "addTax": "Ajouter une taxe",
+      "noTax": "Les lignes de taxe sont indisponibles tant que la présentation de la TVA n’est pas validée (décision P-03). Précisez le traitement fiscal dans les inclusions ou exclusions.",
+      "charges": "Frais",
+      "discounts": "Remises",
+      "subtotal": "Sous-total",
+      "total": "Total",
+      "confirm": "Envoyer ce devis pour {total} ? Le client le recevra par e-mail et il ne pourra plus être modifié.",
+      "errors": {
+        "no_lines": "Ajoutez au moins une ligne.",
+        "too_many_lines": "Un devis peut comporter au maximum 50 lignes.",
+        "no_charge": "Ajoutez au moins des frais.",
+        "invalid_quantity": "Ligne {line} : saisissez une quantité supérieure à 0 (3 décimales maximum).",
+        "invalid_amount": "Ligne {line} : saisissez un prix valide (pas de montant négatif ; le XAF n’a pas de décimales).",
+        "invalid_description": "Ligne {line} : saisissez une description (200 caractères maximum).",
+        "tax_not_allowed": "Ligne {line} : ce taux de taxe n’est pas validé.",
+        "subtotal_not_positive": "Les remises ne peuvent pas atteindre ou dépasser les frais.",
+        "total_too_large": "Le total est trop élevé."
+      }
+    },
+    "case": {
+      "communication": "Échanges",
+      "noMessages": "Aucun message pour l’instant.",
+      "kinds": {
+        "note": "Note interne",
+        "info_request": "Informations demandées",
+        "customer_reply": "Réponse du client",
+        "issue_report": "Problème signalé par le client"
+      },
+      "noteLabel": "Note interne",
+      "noteHint": "Visible uniquement par le personnel. Jamais montrée ni envoyée au client.",
+      "addNote": "Ajouter la note",
+      "noteAdded": "Note ajoutée.",
+      "infoLabel": "De quelles informations avez-vous besoin ?",
+      "infoHint": "Le client voit ce message et le reçoit par e-mail ; la demande passe en « En attente du client ».",
+      "requestInfo": "Demander des informations",
+      "infoRequested": "Informations demandées. Le client a été prévenu.",
+      "assignment": "Attribution",
+      "assignee": "Attribuée à",
+      "unassigned": "Non attribuée",
+      "assign": "Enregistrer",
+      "privacyAccepted": "Notice de confidentialité acceptée le {date}.",
+      "privacyNotRecorded": "Aucune acceptation enregistrée (demande antérieure à cette exigence).",
+      "emails": "E-mails",
+      "noEmails": "Aucun e-mail pour cette demande.",
+      "shipmentMessages": "Notes et signalements du client"
+    },
+    "list": {
+      "search": "Rechercher",
+      "searchPlaceholder": "Référence, nom ou e-mail",
+      "assigned": "Attribution",
+      "assignedAny": "Tout le monde",
+      "assignedMe": "Attribuées à moi",
+      "assignedNone": "Non attribuées",
+      "sort": "Tri",
+      "newest": "Plus récentes d’abord",
+      "oldest": "Plus anciennes d’abord"
+    },
+    "enquiries": {
+      "intro": "Messages envoyés via le formulaire de contact.",
+      "none": "Aucune demande pour l’instant.",
+      "status": "Statut",
+      "update": "Mettre à jour",
+      "statuses": {
+        "NEW": "Nouvelle",
+        "IN_PROGRESS": "En cours",
+        "CLOSED": "Clôturée"
+      },
+      "topics": {
+        "quote": "Un devis",
+        "shipment": "Un envoi",
+        "general": "Autre chose"
+      }
+    },
+    "notifications": {
+      "intro": "Tous les e-mails mis en file par la plateforme, avec leur statut de livraison, et les exécutions des tâches planifiées.",
+      "problems": "{count, plural, one {# e-mail nécessite votre attention} other {# e-mails nécessitent votre attention}} (échec, rebond ou rejet).",
+      "emails": "E-mails",
+      "jobs": "Tâches planifiées",
+      "noJobs": "Aucune tâche exécutée pour l’instant.",
+      "running": "En cours",
+      "ok": "Terminée",
+      "failed": "Échec",
+      "columns": {
+        "created": "Mis en file",
+        "template": "E-mail",
+        "audience": "Pour",
+        "status": "Statut",
+        "attempts": "Tentatives",
+        "sent": "Envoyé",
+        "event": "Dernier événement du fournisseur"
+      }
     }
   },
   "aboutPage": {
@@ -627,29 +743,177 @@
     "retry": "Réessayer"
   },
   "emails": {
-    "greeting": "Bonjour {name},",
-    "signoff": "Cordialement,",
-    "team": "L’équipe",
-    "ack": {
-      "subject": "Nous avons reçu votre demande de devis {reference}",
-      "body": "Merci. Nous avons bien reçu votre demande de devis. Votre référence est {reference}.",
-      "next": "Notre équipe va examiner votre demande et vous contacter avec un devis. Aucun prix n’a été calculé automatiquement."
+    "common": {
+      "greeting": "Bonjour {name},",
+      "signoff": "Cordialement,",
+      "team": "L’équipe Marchelo Logistics",
+      "reference": "Référence",
+      "route": "Trajet",
+      "service": "Service",
+      "status": "Statut",
+      "automated": "Ceci est un message automatique concernant votre demande auprès de Marchelo Logistics. Pour nous contacter, utilisez la page de contact de notre site.",
+      "tagline": "Expéditions entre l’Irlande et le Cameroun",
+      "viewOnline": "Voir en ligne"
     },
-    "quote": {
+    "quote_received": {
+      "subject": "Nous avons bien reçu votre demande de devis {reference}",
+      "heading": "Votre demande a bien été reçue",
+      "body": "Merci pour votre demande. Notre équipe va l’examiner et préparer un devis pour votre envoi. Rien n’est facturé automatiquement.",
+      "next": "Conservez cette référence. Elle vous sera utile si vous nous contactez au sujet de cette demande.",
+      "cta": "Voir votre demande"
+    },
+    "quote_under_review": {
+      "subject": "Votre demande {reference} est en cours d’examen",
+      "heading": "Votre demande est en cours d’examen",
+      "body": "Un membre de notre équipe examine maintenant votre demande. Nous vous contacterons si nous avons besoin de précisions.",
+      "cta": "Voir votre demande"
+    },
+    "info_requested": {
+      "subject": "Nous avons besoin de précisions pour {reference}",
+      "heading": "Nous avons besoin de quelques précisions",
+      "body": "Pour préparer un devis précis, notre équipe a besoin d’informations complémentaires sur votre envoi :",
+      "cta": "Répondre avec les informations"
+    },
+    "quote_issued": {
       "subject": "Votre devis {reference} est prêt",
-      "body": "Notre équipe a préparé un devis pour votre demande {reference}.",
-      "amount": "Montant : {amount}",
-      "validUntil": "Valable jusqu’au : {date}",
-      "cta": "Consulter votre devis et y répondre"
+      "heading": "Votre devis est prêt",
+      "body": "Nous avons préparé un devis pour votre envoi. Veuillez consulter le détail ci-dessous.",
+      "validUntil": "Ce devis est valable jusqu’au {date}.",
+      "cta": "Consulter et répondre"
     },
-    "shipment": {
-      "subject": "Mise à jour de l’envoi {reference}",
-      "body": "Nouvelle mise à jour pour votre envoi {reference} : {milestone}.",
+    "quote_updated": {
+      "subject": "Votre devis {reference} a été mis à jour",
+      "heading": "Votre devis a été mis à jour",
+      "body": "Nous avons mis à jour le devis de votre envoi. Il remplace la version précédente. Veuillez consulter le détail ci-dessous.",
+      "validUntil": "Ce devis est valable jusqu’au {date}.",
+      "cta": "Consulter et répondre"
+    },
+    "quote_expiring": {
+      "subject": "Votre devis {reference} expire bientôt",
+      "heading": "Votre devis expire bientôt",
+      "body": "Votre devis est valable jusqu’au {date}. Si vous souhaitez donner suite, merci de répondre avant cette date.",
+      "cta": "Consulter et répondre"
+    },
+    "quote_expired": {
+      "subject": "Votre devis {reference} a expiré",
+      "heading": "Votre devis a expiré",
+      "body": "La date de validité de votre devis est dépassée. Si vous souhaitez toujours expédier, contactez-nous et nous réexaminerons votre demande.",
+      "cta": "Voir votre demande"
+    },
+    "quote_accepted": {
+      "subject": "Merci : devis {reference} accepté",
+      "heading": "Vous avez accepté le devis",
+      "body": "Merci. Notre équipe va maintenant organiser votre envoi et vous confirmer les prochaines étapes, notamment la manière et le moment de la remise de vos marchandises.",
+      "cta": "Voir votre demande"
+    },
+    "quote_declined": {
+      "subject": "Devis {reference} refusé",
+      "heading": "Vous avez refusé le devis",
+      "body": "Nous avons enregistré votre décision. Si vous changez d’avis ou souhaitez discuter de votre envoi, contactez-nous.",
+      "cta": "Voir votre demande"
+    },
+    "shipment_confirmed": {
+      "subject": "Votre envoi est confirmé : référence de suivi {shipment}",
+      "heading": "Votre envoi est confirmé",
+      "body": "Votre envoi a été réservé. Utilisez la référence de suivi ci-dessous pour suivre chaque étape enregistrée en ligne.",
+      "trackingLabel": "Référence de suivi",
       "cta": "Suivre votre envoi"
     },
-    "staffNew": {
-      "subject": "Nouvelle demande de devis {reference}",
-      "body": "Une nouvelle demande de devis {reference} a été envoyée ({service})."
+    "shipment_update": {
+      "subject": "Envoi {shipment} : {milestone}",
+      "heading": "Votre envoi a été mis à jour",
+      "body": "Nouveau statut : {milestone}.",
+      "locationLine": "Lieu : {location}",
+      "cta": "Suivre votre envoi"
+    },
+    "shipment_delivered": {
+      "subject": "L’envoi {shipment} a été livré",
+      "heading": "Votre envoi a été livré",
+      "body": "Votre envoi a été enregistré comme livré. Merci d’avoir choisi Marchelo Logistics.",
+      "cta": "Voir l’historique de suivi"
+    },
+    "contact_received": {
+      "subject": "Nous avons bien reçu votre message {reference}",
+      "heading": "Merci de nous avoir contactés",
+      "body": "Nous avons bien reçu votre message et notre équipe vous répondra dans les meilleurs délais."
+    },
+    "breakdown": {
+      "title": "Détail du devis",
+      "description": "Description",
+      "quantity": "Qté",
+      "unitPrice": "Prix unitaire",
+      "amount": "Montant",
+      "subtotal": "Sous-total",
+      "tax": "Taxe",
+      "total": "Total",
+      "includes": "Inclus",
+      "excludes": "Non inclus"
+    },
+    "staff": {
+      "common": {
+        "actionRequired": "Action required",
+        "event": "Event",
+        "reference": "Reference",
+        "customer": "Customer",
+        "when": "Time",
+        "open": "Open in the staff area",
+        "footer": "Internal notification from the Marchelo Logistics platform. Do not forward to customers."
+      },
+      "staff_new_request": {
+        "subject": "New quote request {reference}",
+        "heading": "New quote request",
+        "body": "A new {service} request has been submitted ({route}).",
+        "action": "Review the request and start the quotation."
+      },
+      "staff_customer_message": {
+        "subject": "Customer message on {reference}",
+        "heading": "The customer sent a message",
+        "body": "The customer added information to {reference}.",
+        "bodyIssue": "The customer reported an issue with shipment {shipment}.",
+        "action": "Read the message and reply or update the request."
+      },
+      "staff_quote_accepted": {
+        "subject": "Quotation {reference} accepted: create the shipment",
+        "heading": "Quotation accepted",
+        "body": "The customer accepted the quotation for {reference}.",
+        "action": "Create the shipment and contact the customer about handing over the goods."
+      },
+      "staff_quote_declined": {
+        "subject": "Quotation {reference} declined",
+        "heading": "Quotation declined",
+        "body": "The customer declined the quotation for {reference}.",
+        "action": "No action is required unless you want to follow up."
+      },
+      "staff_shipment_exception": {
+        "subject": "Shipment {shipment}: {reason}",
+        "heading": "Shipment needs attention",
+        "body": "Shipment {shipment} was marked {reason}.",
+        "action": "Check the shipment and keep the customer informed."
+      },
+      "staff_contact": {
+        "subject": "New contact enquiry {reference}",
+        "heading": "New contact enquiry",
+        "body": "A new enquiry about \"{topic}\" was submitted.",
+        "action": "Reply to the customer."
+      },
+      "staff_role_changed": {
+        "subject": "Security: a user role was changed",
+        "heading": "User role changed",
+        "body": "The role of {user} changed from {from} to {to}.",
+        "action": "Check that this change was intended."
+      },
+      "staff_email_failure": {
+        "subject": "Email delivery problem: {template}",
+        "heading": "An email could not be delivered",
+        "body": "The \"{template}\" email for {reference} ended with status {status}.",
+        "action": "Contact the customer another way and check the email configuration."
+      },
+      "staff_job_failure": {
+        "subject": "Scheduled job failed: {job}",
+        "heading": "A scheduled job failed",
+        "body": "The job \"{job}\" failed: {error}",
+        "action": "Check the job runs and the server logs."
+      }
     }
   },
   "nav2": {
@@ -747,5 +1011,102 @@
     "window": "Entre le {from} et le {to} de chaque mois",
     "routeLabel": "{origin} → {destination}",
     "askExact": "Demandez-nous la date exacte lors de votre demande de devis."
+  },
+  "quoteView": {
+    "title": "Votre demande {reference}",
+    "intro": "Bonjour {name}. Cette page privée présente les dernières informations sur votre demande.",
+    "status": "Statut",
+    "statusHelp": {
+      "SUBMITTED": "Nous avons bien reçu votre demande. Un membre de notre équipe va l’examiner prochainement.",
+      "UNDER_REVIEW": "Notre équipe examine votre demande.",
+      "AWAITING_CUSTOMER": "Nous avons besoin d’informations complémentaires. Lisez notre message ci-dessous et répondez-nous.",
+      "QUOTED": "Votre devis est prêt. Consultez-le ci-dessous puis acceptez-le ou refusez-le.",
+      "ACCEPTED": "Vous avez accepté le devis. Notre équipe vous contactera pour les prochaines étapes.",
+      "DECLINED": "Vous avez refusé le devis. Contactez-nous si vous changez d’avis.",
+      "EXPIRED": "Le devis a expiré. Contactez-nous et nous réexaminerons votre demande.",
+      "CANCELLED": "Cette demande a été annulée."
+    },
+    "quoteTitle": "Votre devis",
+    "shipmentReady": "Votre envoi a été réservé. Référence de suivi :",
+    "messagesTitle": "Messages",
+    "fromTeam": "Marchelo Logistics",
+    "fromYou": "Vous",
+    "noMessages": "Aucun message pour l’instant.",
+    "replyLabel": "Envoyer un message à notre équipe",
+    "replyLabelInfo": "Votre réponse avec les informations demandées",
+    "replyHint": "Notre équipe sera prévenue. N’indiquez pas de données de carte bancaire.",
+    "sendReply": "Envoyer",
+    "replySent": "Merci. Votre message a été transmis à notre équipe.",
+    "reference": "Référence",
+    "service": "Service",
+    "route": "Trajet",
+    "submitted": "Envoyée le",
+    "privateLink": "Cette page est privée. Toute personne disposant du lien peut la consulter et y répondre : ne la partagez pas.",
+    "accept": "Accepter le devis",
+    "decline": "Refuser",
+    "confirmAccept": "Oui, j’accepte",
+    "confirmDecline": "Oui, je refuse",
+    "acceptConsequence": "En acceptant, vous nous demandez d’organiser cet envoi au prix indiqué. Rien n’est facturé automatiquement ; notre équipe vous contactera.",
+    "declineConsequence": "Le devis sera clôturé. Vous pourrez nous contacter plus tard si vous changez d’avis.",
+    "accepted": "Merci. Vous avez accepté le devis ; notre équipe va vous contacter.",
+    "declined": "Vous avez refusé le devis.",
+    "issueTitle": "Signaler un problème",
+    "issueLabel": "Décrivez le problème rencontré avec cet envoi",
+    "issueHint": "Notre équipe sera prévenue et vous contactera.",
+    "sendIssue": "Envoyer le signalement",
+    "issueSent": "Merci. Notre équipe a été prévenue.",
+    "errors": {
+      "rateLimited": "Trop de tentatives. Patientez quelques minutes puis réessayez.",
+      "notAvailable": "Cette action n’est plus disponible pour cette demande.",
+      "expired": "Ce devis a expiré. Contactez-nous et nous réexaminerons votre demande.",
+      "notFound": "Ce lien n’est pas valide.",
+      "generic": "Une erreur est survenue. Veuillez réessayer."
+    },
+    "breakdown": {
+      "single": "Expédition",
+      "caption": "Détail du devis",
+      "description": "Description",
+      "quantity": "Qté",
+      "unitPrice": "Prix unitaire",
+      "amount": "Montant",
+      "subtotal": "Sous-total",
+      "tax": "Taxe",
+      "total": "Total",
+      "validUntil": "Valable jusqu’au {date}.",
+      "includes": "Inclus",
+      "excludes": "Non inclus"
+    }
+  },
+  "contactForm": {
+    "title": "Envoyez-nous un message",
+    "channels": "Autres moyens de nous joindre",
+    "successTitle": "Message reçu",
+    "successBody": "Merci. Votre référence est {reference}. Notre équipe vous répondra dans les meilleurs délais.",
+    "emailSent": "Une confirmation est en route vers votre adresse e-mail.",
+    "emailNotSent": "Les confirmations par e-mail ne sont pas encore actives : conservez votre référence.",
+    "another": "Envoyer un autre message",
+    "name": "Votre nom",
+    "email": "Adresse e-mail",
+    "phone": "Numéro de téléphone",
+    "phoneHint": "Indiquez l’indicatif du pays, par exemple +353 ou +237.",
+    "optional": "facultatif",
+    "topic": "À quel sujet ?",
+    "topics": {
+      "quote": "Un devis",
+      "shipment": "Un envoi",
+      "general": "Autre chose"
+    },
+    "reference": "Référence de devis ou de suivi",
+    "referenceHint": "Si votre message concerne une demande ou un envoi existant.",
+    "message": "Votre message",
+    "privacy": "J’ai pris connaissance de l’utilisation de mes informations pour répondre à mon message (<link>notice de confidentialité</link>).",
+    "sending": "Envoi…",
+    "send": "Envoyer le message",
+    "errors": {
+      "rateLimited": "Trop de messages depuis cette connexion. Veuillez réessayer plus tard.",
+      "unavailable": "Le formulaire de contact n’est pas encore disponible.",
+      "invalid": "Veuillez vérifier les champs signalés.",
+      "generic": "Votre message n’a pas pu être envoyé. Veuillez réessayer."
+    }
   }
 }

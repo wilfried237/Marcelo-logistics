@@ -36,6 +36,7 @@ const validInput = (overrides: Record<string, unknown> = {}) => ({
   contact: { name: "Ada Example", email: "Ada@Example.test", phone: "+353 1 234 5678" },
   locale: "en",
   idempotencyKey: randomUUID(),
+  privacyAccepted: true,
   website: "",
   ...overrides,
 });
@@ -99,13 +100,13 @@ describe("quote submission", () => {
   it("rejects routes that are not offered", async () => {
     const result = await submitQuoteRequest(db, validInput({ destinationCountry: "FR" }), { user: null, clientId: "1.1.1.5" }, AVAILABLE);
     expect(result).toMatchObject({ ok: false, code: "route_not_offered" });
-    const sameCountry = await submitQuoteRequest(db, validInput({ originCountry: "IE", destinationCountry: "IE", contact: { name: "Same", email: "same.country@example.test", phone: "" } }), { user: null, clientId: "1.1.1.6" }, AVAILABLE);
+    const sameCountry = await submitQuoteRequest(db, validInput({ originCountry: "IE", destinationCountry: "IE", contact: { name: "Same", email: "same.country@example.test", phone: "+353 89 000 0000" } }), { user: null, clientId: "1.1.1.6" }, AVAILABLE);
     expect(sameCountry).toMatchObject({ ok: false, code: "route_not_offered" });
   });
 
   it("accepts both monthly routes: Ireland to Cameroon and Cameroon to Ireland", async () => {
     // Own addresses, so the per-email rate limit shared by the other tests is untouched.
-    const contact = (name: string) => ({ name, email: `${name}@example.test`, phone: "" });
+    const contact = (name: string) => ({ name, email: `${name}@example.test`, phone: "+353 89 000 0000" });
     const outbound = await submitQuoteRequest(db, validInput({ originCountry: "IE", destinationCountry: "CM", contact: contact("outbound") }), { user: null, clientId: "1.1.1.7" }, AVAILABLE);
     const inbound = await submitQuoteRequest(db, validInput({ originCountry: "CM", destinationCountry: "IE", contact: contact("inbound") }), { user: null, clientId: "1.1.1.8" }, AVAILABLE);
     expect(outbound).toMatchObject({ ok: true });
@@ -139,14 +140,14 @@ describe("quote submission", () => {
 
   it("enforces persistent rate limits per client", async () => {
     const results = [];
-    for (let i = 0; i < 6; i++) results.push(await submitQuoteRequest(db, validInput({ contact: { name: "R", email: `r${i}@example.test` } }), { user: null, clientId: "9.9.9.9" }, AVAILABLE));
+    for (let i = 0; i < 6; i++) results.push(await submitQuoteRequest(db, validInput({ contact: { name: "R", email: `r${i}@example.test`, phone: "+353 89 000 0000" } }), { user: null, clientId: "9.9.9.9" }, AVAILABLE));
     expect(results.slice(0, 5).every((r) => r.ok)).toBe(true);
     expect(results[5]).toEqual({ ok: false, code: "rate_limited" });
   });
 
   it("enforces rate limits per email address across clients", async () => {
     const results = [];
-    for (let i = 0; i < 6; i++) results.push(await submitQuoteRequest(db, validInput({ contact: { name: "E", email: "same@example.test" } }), { user: null, clientId: `8.8.8.${i}` }, AVAILABLE));
+    for (let i = 0; i < 6; i++) results.push(await submitQuoteRequest(db, validInput({ contact: { name: "E", email: "same@example.test", phone: "+353 89 000 0000" } }), { user: null, clientId: `8.8.8.${i}` }, AVAILABLE));
     expect(results[5]).toEqual({ ok: false, code: "rate_limited" });
   });
 
@@ -203,7 +204,7 @@ describe("staff review, manual quote, acceptance, shipment and tracking", () => 
     expect(await sendQuote(db, staff, { requestId, amount: "450.505", currency: "EUR", validUntil })).toMatchObject({ ok: false, code: "invalid" });
     expect(await sendQuote(db, staff, { requestId, amount: "10.50", currency: "XAF", validUntil })).toMatchObject({ ok: false, fieldErrors: { amount: "invalid" } });
     const sent = await sendQuote(db, staff, { requestId, amount: "450.50", currency: "EUR", inclusions: "Sea freight", exclusions: "Duties", validUntil });
-    expect(sent).toMatchObject({ ok: true, data: { reference, notify: { email: "a@example.test" } } });
+    expect(sent).toMatchObject({ ok: true, data: { reference, totalMinor: "45050" } });
     const view = await getCustomerQuoteRequest(db, customerA, reference);
     expect(view).toMatchObject({ status: "QUOTED", quotes: [{ amountMinor: 45050, currency: "EUR" }] });
     const staffView = await getQuoteRequestForStaff(db, staff, reference);

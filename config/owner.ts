@@ -58,6 +58,23 @@ export const ownerConfig = {
     ],
   },
 
+  pricing: {
+    /**
+     * Tax (VAT) rates staff may apply, in basis points (2300 = 23 %). Empty until
+     * the VAT presentation is approved (P-03): tax lines are then unavailable and
+     * staff state the tax treatment in the inclusions/exclusions text.
+     */
+    taxRatesBp: [] as number[],
+  },
+
+  notifications: {
+    /**
+     * Hours before a quotation's validity date when the customer gets a reminder.
+     * null = no reminders (not approved). Example: 48.
+     */
+    quoteExpiryReminderHours: null as number | null,
+  },
+
   legal: {
     /** Terms and conditions are never published until approved (L-01). */
     termsApproved: false, // {{NEEDS_OWNER}} L-01

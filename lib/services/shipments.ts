@@ -86,7 +86,7 @@ export async function getShipmentForStaff(db: Database, user: AppUser, rawRefere
       select: {
         ...shipmentSelect,
         customer: { select: { name: true, email: true, preferredLocale: true } },
-        quote: { select: { quoteRequest: { select: { reference: true } } } },
+        quote: { select: { quoteRequest: { select: { id: true, reference: true } } } },
       },
     });
     if (!shipment) return null;
@@ -98,6 +98,7 @@ export async function getShipmentForStaff(db: Database, user: AppUser, rawRefere
       customerEmail: customer.email,
       customerLocale: customer.preferredLocale,
       quoteReference: quote.quoteRequest.reference,
+      quoteRequestId: quote.quoteRequest.id,
       events: events.map(toEventView),
     };
   });
