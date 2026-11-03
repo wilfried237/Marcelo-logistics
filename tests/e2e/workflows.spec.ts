@@ -29,6 +29,11 @@ test.describe("quote request (submission disabled by default)", () => {
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page.getByText("Enter a valid email address, like name@example.com.")).toBeVisible();
     await page.getByLabel("Email").fill("test@example.test");
+    // Phone with country code and the privacy acknowledgement are required.
+    await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page.getByLabel(/Phone/)).toHaveAttribute("aria-invalid", "true");
+    await page.getByLabel(/Phone/).fill("+353 89 123 4567");
+    await page.getByLabel(/I have read how my information/).check();
     await page.getByRole("button", { name: "Continue" }).click();
 
     await expect(page.getByRole("heading", { name: "Check your request" })).toBeVisible();

@@ -34,7 +34,7 @@ const input = () => ({
   originCountry: "IE",
   destinationCountry: "CM",
   items: [{ description: "Barrel of clothes", quantity: "1" }],
-  contact: { name: "Real Stack", email: `real.${randomUUID().slice(0, 6)}@example.test` },
+  contact: { name: "Real Stack", email: `real.${randomUUID().slice(0, 6)}@example.test`, phone: "+353 89 123 4567" },
   locale: "fr",
   idempotencyKey: randomUUID(),
   privacyAccepted: true,
