@@ -37,6 +37,15 @@ Browser ──► proxy.ts (Next.js 16 proxy, formerly middleware; Node.js runti
 | Storage | `lib/storage/` | Private bucket adapter (service role after checks) |
 | UI | `components/app/` (shared), `components/{admin,quote,tracking,services,contact,layout}` | Accessible building blocks; Server Components by default |
 
+## Email and notifications (2026-11-04)
+```
+business change (server action) ──► transaction ──► trigger app_notify_* ──► email_deliveries (PENDING)
+                                                 commit
+response sent ──► after(): processOutbox ──► render from current records ──► Resend (idempotency key)
+daily cron /api/cron/process-emails ──► retries FAILED (backoff) ──► DEAD + staff alert after 5 attempts
+Resend webhook (signed) ──► DELIVERED / BOUNCED / COMPLAINED (+ staff alert)
+```
+
 ## Key design decisions
 1. **Defence in depth for authorisation.** Guards in layouts and pages, role assertions in services, and RLS, column grants and triggers in PostgreSQL. App queries for signed-in users run under RLS (`withUser`).
 2. **Database-enforced workflow.** Quote transitions, sent/valid-quote requirements, shipment creation from accepted quotes, immutable fields and audit records are enforced by triggers, so no code path can skip them.

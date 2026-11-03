@@ -119,3 +119,20 @@ The retention policy has **no periods** (`approved: false`, all periods `null`) 
 ## Test coverage (executed)
 - `tests/db/*.test.ts`: PGlite (PostgreSQL 17 in WebAssembly) served over the Postgres wire protocol (`@electric-sql/pglite-socket`), so the **real Prisma Client** runs against it, with `tests/db/supabase-stub.sql` emulating `auth.users`, `auth.uid()` and the API roles.
 - `tests/supabase/*.test.ts`: the **real local Supabase stack** (GoTrue Auth, PostgREST, Storage, Postgres 17). See [TESTING.md](./TESTING.md).
+
+## Backend MVP migration (20261104000000_backend_mvp)
+| Table / change | Purpose |
+|---|---|
+| `quote_line_items` | Staff-entered lines (charge, discount, tax at an approved rate). Integer minor units, quantity `numeric(12,3)`. Verified by `app_quote_lines_total` when the quote is sent; immutable afterwards |
+| `case_messages` | Internal notes, information requests, customer replies, shipment issue reports. Append-only, author from the session, RLS hides notes from customers |
+| `quote_requests.assigned_to`, `privacy_accepted_at` | Assignment (staff only) and recorded privacy acknowledgement |
+| `contact_enquiries` | Contact form (reference `CE` + 6 base32), audited with personal fields redacted |
+| `job_runs` | One row per scheduled job run |
+| `email_deliveries` (extended) | Outbox: audience, payload, attempts, next attempt, lock, provider events; new statuses SENDING, DELIVERED, BOUNCED, COMPLAINED, DEAD |
+| Triggers `*_notify` | Queue the right emails in the same transaction as the business change |
+| `app_shipment_transition_allowed` | Shipment lifecycle (delivered and cancelled are final) |
+| `app_link_respond_to_quote` | Accept/decline through a verified signed link (server only) |
+| `public_track_shipment` | Adds route countries and delivery time |
+| Quote lifecycle | Staff may revise a sent quote (QUOTED → UNDER_REVIEW) or re-quote after expiry |
+
+Status: applied and tested on the local Supabase stack and PGlite. **Not applied to the hosted project**: it is applied automatically by the next production deployment of `master`, which needs your approval (see DEPLOYMENT.md).

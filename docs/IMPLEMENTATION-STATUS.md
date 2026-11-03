@@ -66,3 +66,20 @@ See [DECISIONS-REQUIRED.md](./DECISIONS-REQUIRED.md). Block a **public release**
 3. Enable quote submission on the preview once email and a reviewer are in place.
 4. Replace `{{NEEDS_OWNER}}` values as answers arrive (`npm run check:owner`).
 5. FR copy review by a fluent speaker.
+
+## Backend MVP completion (2026-11-04, branch `feat/backend-mvp-completion`, not pushed)
+Audit before the work: [BACKEND-AUDIT.md](./BACKEND-AUDIT.md).
+
+| Area | Status | Evidence |
+|---|---|---|
+| Quote requests | ✅ Phone with country code and privacy acknowledgement required and recorded; both routes | integration + journey A |
+| Staff case management | ✅ Search (reference/name/email), status/assignment filters, sorting, internal notes, information requests, assignment, conversation and email history | integration + journey B |
+| Pricing | ✅ Line items, discounts, tax only at approved rates (none yet, P-03), BigInt arithmetic, recomputed on the server and verified by the database at sending | 11 unit + integration (tampering) + journey B |
+| Customer responses | ✅ Portal (account) and signed links (no account): view, accept, decline, reply | integration + journey C |
+| Shipments | ✅ Created from accepted quotes; transition rules (delivered/cancelled final) in DB and UI; internal notes; customer issue reports | integration + journey D |
+| Tracking | ✅ Route and delivery time added; internal events and notes never exposed | RLS test + journey E |
+| Email | ✅ Outbox in the business transaction, immediate delivery after the response, retry job, 5 attempts then DEAD + staff alert, signed webhooks; 13 customer templates (EN/FR) + 9 staff alerts, HTML + plain text; branded Supabase reset/invite templates | 13 outbox tests, all-template rendering test, journeys A-F with mock provider |
+| Contact form | ✅ Persisted before success, honeypot, rate limits, confirmation + staff alert | integration + journey F |
+| Jobs | ✅ Expiry, email processing, retention (dry run); runs recorded; failures alert staff once a day; optional expiry reminders (off) | integration + journey F |
+| Documents | ⏸ Unchanged: uploads disabled until L-03 | — |
+| Real providers | ⏸ Resend not tested (no verified domain, C-02). Supabase hosted DB connected earlier (4 migrations); **this phase's migration is not applied to it** (awaiting approval) | — |

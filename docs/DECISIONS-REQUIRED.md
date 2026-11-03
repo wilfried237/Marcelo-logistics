@@ -108,6 +108,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Answer:**
 
 ### P-03 Currencies, VAT presentation and quote validity
+- **Implementation note (2026-11-04):** staff now build quotes line by line (charges, discounts). Tax lines are switched off until approved rates are listed in `config/owner.ts` → `pricing.taxRatesBp` (e.g. `[2300]` for 23 %).
 - **Decision needed:** currencies you quote in (EUR, XAF, both); whether quotes are shown including or excluding VAT; default validity period (e.g. 14 days).
 - **If delayed:** staff may choose EUR or XAF per quote; validity is entered per quote; the VAT treatment is written in the inclusions/exclusions text.
 - **Affected:** staff quote form, quote display.
@@ -231,3 +232,8 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 |---|---|---|
 | Business name | Brief: "Marcel Logistics" · Live site and logo: "Marchelo Logistics (Cargo)" · Old code: "Machelo" | Resolved 2026-11-03: "Marchelo Logistics" (B-01). The logo still reads "…LOGISTICS CARGO" and stays hidden until A-01 |
 | Contact email | Gmail address in old code vs. branded domain on the live site | C-01 |
+
+## Additions (2026-11-04, backend MVP)
+- **N-01 Quote expiry reminders:** should customers get an email before a quotation expires, and how long before (e.g. 48 hours)? Built and tested; **off** until answered (`notifications.quoteExpiryReminderHours`).
+- **N-02 Staff notification inbox:** the address(es) for internal alerts (`STAFF_NOTIFICATION_EMAIL`, comma-separated). Linked to P-01/C-02. Until set, alerts are recorded but not sent.
+- **N-03 Delivery speed of emails on the Hobby plan:** emails go out immediately after each action; failed ones are retried by a daily job (Hobby limit). A Pro plan allows retries every few minutes.

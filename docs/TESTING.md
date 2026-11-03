@@ -57,3 +57,17 @@ node scripts/verify-local-journeys.mjs
 npx supabase stop                   # when finished
 ```
 Auth emails sent by the local stack are captured by its Inbucket/Mailpit inbox (`http://127.0.0.1:54324`), never delivered.
+
+## Backend MVP suites (2026-11-04)
+| Suite | Runs against | Result |
+|---|---|---|
+| `npm test` (unit 11 files, database 4, integration 6) | Node + PGlite; email provider mocked in-process | **210 passed** |
+| `npm run test:supabase` | real local Supabase (Docker) | **14 passed** |
+| `npm run test:e2e` | production build, no services | **82 passed, 4 skipped** (viewport-specific) |
+| `npm run test:journeys` (new) | production build + **real local Supabase** + the app's real email code talking to a **local mock of the Resend API** (`tests/e2e-fullstack/mock-resend.mjs`; nothing leaves the machine) | **6 passed**: A request, B staff quotation, C acceptance via signed link, D shipment, E public tracking, F failures (provider outage, retry job, forged webhook, access control) |
+
+New test files: `tests/unit/pricing.test.ts`, `tests/integration/email.test.ts` (outbox, retries, concurrency, webhooks), `tests/integration/mvp-workflow.test.ts`, `tests/integration/email-previews.test.ts` (every template in EN/FR; set `EMAIL_PREVIEW_DIR` to write the HTML/text for review), `tests/e2e-fullstack/journeys.spec.ts`.
+
+Running the journeys: `npx supabase start …`, `npm run db:migrate`, `npm run db:seed`, `npm run build`, `npm run test:journeys` (refuses a non-local database).
+
+**Not tested against real providers:** Resend delivery, SPF/DKIM, real webhooks (no domain or account yet, C-02).

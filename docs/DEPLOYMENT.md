@@ -68,3 +68,11 @@ Verified locally on 2026-11-03: on an empty Supabase database the step applied a
 - Since 2026-11-03 a Vercel **production** build (on its `vercel.app` URL) succeeds while owner decisions are pending: the build log lists every unresolved `{{NEEDS_OWNER}}` marker, visitors see the neutral fallbacks, and `robots.txt` blocks indexing.
 - The **launch** build for the business domain must set `RELEASE_BUILD=true` in Vercel's Production environment. That build **fails** while any marker remains, and it is the only build that allows search indexing. Set it only with launch approval (R-03).
 - The domain cut-over from WordPress needs a migration plan: URLs and redirects, email records on the domain, and DNS ownership. Out of scope until approved.
+
+## Backend MVP: what to configure before merging (2026-11-04)
+1. **Approve the migration** `20261104000000_backend_mvp`: merging to `master` applies it to the production database on the next deployment.
+2. **Vercel environment (Production, and Preview if used):** `QUOTE_LINK_SECRET` (new, ≥ 32 random characters), `STAFF_NOTIFICATION_EMAIL` (your inbox, P-01), and when the Resend domain is verified (C-02): `ENABLE_TRANSACTIONAL_EMAIL=true`, `RESEND_API_KEY`, `EMAIL_FROM`, `RESEND_WEBHOOK_SECRET`. Full list: [ENVIRONMENT.md](./ENVIRONMENT.md).
+3. **Resend webhook:** endpoint `https://<site>/api/webhooks/resend`, events `email.delivered`, `email.bounced`, `email.complained`, `email.delivery_delayed`; copy its signing secret into `RESEND_WEBHOOK_SECRET`.
+4. **Supabase Auth email templates** (hosted): paste `supabase/templates/recovery.html` and `invite.html` into Authentication → Email Templates with the subjects from `supabase/config.toml`.
+5. **Crons** (`vercel.json`): quote expiry 03:15 UTC and email processing 03:45 UTC, daily (Hobby limit). Emails are also delivered immediately after each action; the daily job retries failures. On a Pro plan, run `/api/cron/process-emails` every 5–15 minutes.
+6. **Previews share production variables today:** a preview of this branch would run new code against the production database **before** its migration. Use a separate preview database or keep preview variables empty until the migration is applied.

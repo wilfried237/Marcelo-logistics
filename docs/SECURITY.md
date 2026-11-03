@@ -47,3 +47,17 @@ This is an engineering review, **not** a legal compliance assessment. GDPR oblig
 | G-7 | Quote expiry needed a schedule | **Closed in code**: protected cron endpoint + `vercel.json`. Needs `CRON_SECRET` on the deployment |
 | G-8 | No retention workflow | **Infrastructure in place** (dry run by default); no periods until L-03 is decided |
 | G-9 | This machine sets `NODE_TLS_REJECT_UNAUTHORIZED=0` | Open, owner action. Source found: the VS Code process environment (not the Windows registry or VS Code settings). Restart VS Code from a clean environment and check for the variable in shell profiles/launchers. No TLS override is committed in the repository |
+
+## Backend MVP controls (2026-11-04)
+| Area | Control | Verified by |
+|---|---|---|
+| Price integrity | Totals recomputed on the server from staff-entered lines; the database re-verifies every line and the total when the quote is sent; sent quotes and their lines are immutable; customers' UPDATE/DELETE are filtered out by RLS | mvp-workflow tests (tampering, customer attempt) |
+| Internal data | Internal notes are `internal = true` by constraint; RLS hides them from customers; `author_id` not granted to client roles; staff alerts never contain goods descriptions or message bodies | mvp-workflow, journeys B/C/E |
+| Signed quote links | HMAC-SHA256 (192-bit, `QUOTE_LINK_SECRET`), constant-time check, only customer-visible data, actions re-check status in the database, rate-limited, `noindex` and `no-referrer` | mvp-workflow, journey C (forged link → 404) |
+| Email outbox | Queued by triggers in the business transaction; idempotency keys to the provider; bounded retries; staff alert on permanent failure; staff inbox only from configuration | email tests, journey F |
+| Webhooks | Svix signature (HMAC-SHA256), 5-minute replay window, body limit 64 KB, no echo of input | email tests, journey F (forged → 401) |
+| Contact form | Server validation, honeypot, per-client and per-email limits, persisted before success | mvp-workflow, journey F |
+| Jobs | Bearer `CRON_SECRET` (timing-safe); every run recorded; failures alert staff once a day | integration, journey F |
+| Assignment | Only staff/admin can be assignees (database trigger); only staff can assign | mvp-workflow |
+
+Known limitation: under the portal's loading boundary, a customer opening another customer's request gets the "not found" page with HTTP **200** (soft 404). No data is exposed (journey F checks this). The admin area fixed the same issue with a route group; the portal can follow if a strict 404 is required.
