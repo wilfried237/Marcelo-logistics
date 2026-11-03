@@ -31,6 +31,9 @@ async function lookup(reference: string): Promise<TrackResult | { ok: false; cod
       reference: demo.reference,
       serviceCode: "barrels",
       status: "IN_TRANSIT",
+      origin: "IE",
+      destination: "CM",
+      deliveredAt: null,
       etaFrom: null,
       etaTo: null,
       events: [...demo.events].reverse().map((e) => ({ milestone: e.milestone as MilestoneCode, location: e.location, occurredAt: e.occurredAt, noteEn: null, noteFr: null })),
@@ -49,6 +52,7 @@ export default async function TrackResultPage({ params }: { params: Promise<{ lo
   const ts = await getTranslations("services");
   const tc = await getTranslations("common");
   const format = await getFormatter();
+  const country = (code: string) => new Intl.DisplayNames([locale], { type: "region" }).of(code) ?? code;
   const result = await lookup(reference);
 
   const errorMessage = !result.ok
@@ -68,7 +72,7 @@ export default async function TrackResultPage({ params }: { params: Promise<{ lo
               </h2>
               <p className="text-sm text-muted-foreground">{tt("shipment.status.tracking")}</p>
               <p className="font-mono text-xl font-semibold tracking-wider">{result.shipment.reference}</p>
-              <dl className="mt-5 grid gap-4 sm:grid-cols-3">
+              <dl className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
                   <dt className="text-sm text-muted-foreground">{t("statusLabel")}</dt>
                   <dd className="mt-1">
@@ -79,6 +83,18 @@ export default async function TrackResultPage({ params }: { params: Promise<{ lo
                   <dt className="text-sm text-muted-foreground">{tc("service")}</dt>
                   <dd className="mt-1 text-sm font-medium">{ts(`${result.shipment.serviceCode}.title`)}</dd>
                 </div>
+                <div>
+                  <dt className="text-sm text-muted-foreground">{t("route")}</dt>
+                  <dd className="mt-1 text-sm font-medium">
+                    {country(result.shipment.origin)} → {country(result.shipment.destination)}
+                  </dd>
+                </div>
+                {result.shipment.deliveredAt && (
+                  <div>
+                    <dt className="text-sm text-muted-foreground">{t("deliveredAt")}</dt>
+                    <dd className="mt-1 text-sm font-medium">{format.dateTime(new Date(result.shipment.deliveredAt), { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Dublin" })}</dd>
+                  </div>
+                )}
                 {result.shipment.etaFrom && result.shipment.etaTo && (
                   <div>
                     <dt className="text-sm text-muted-foreground">{t("eta")}</dt>

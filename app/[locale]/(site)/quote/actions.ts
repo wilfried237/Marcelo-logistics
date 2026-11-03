@@ -1,10 +1,10 @@
 "use server";
 
 import { headers } from "next/headers";
-import { quoteSubmissionStatus } from "@/lib/config/env";
+import { getEmailTransport, quoteSubmissionStatus } from "@/lib/config/env";
 import { getDb } from "@/lib/db/client";
 import { getCurrentUser } from "@/lib/auth/session";
-import { notifyQuoteRequestReceived } from "@/lib/email/notifications";
+import { deliverQueuedEmailsSoon } from "@/lib/email/dispatch";
 import { submitQuoteRequest, type SubmitFailure } from "@/lib/services/quote-requests";
 
 export type QuoteActionResult =
@@ -26,14 +26,8 @@ export async function submitQuoteAction(input: unknown): Promise<QuoteActionResu
   const result = await submitQuoteRequest(db, input, { user, clientId: await clientIdentifier() }, availability);
   if (!result.ok) return { ok: false, code: result.code, fieldErrors: result.fieldErrors };
 
-  // The request is committed at this point. Email is best effort and reported truthfully.
-  let emailSent = false;
-  try {
-    const service = (input as { service?: string }).service ?? "";
-    const outcome = await notifyQuoteRequestReceived(db, { requestId: result.requestId, reference: result.reference, service, ...result.notify });
-    emailSent = outcome === "sent" || outcome === "already_sent";
-  } catch (error) {
-    console.error("acknowledgement email failed", error instanceof Error ? error.name : "unknown");
-  }
-  return { ok: true, reference: result.reference, emailSent };
+  // The request and its acknowledgement email were committed together (outbox).
+  // Delivery happens right after this response; the scheduled job retries failures.
+  deliverQueuedEmailsSoon();
+  return { ok: true, reference: result.reference, emailSent: getEmailTransport().kind === "resend" };
 }

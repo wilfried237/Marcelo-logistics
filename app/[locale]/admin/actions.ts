@@ -11,9 +11,10 @@ import { isAdmin, isStaff, type AppUser } from "@/lib/auth/types";
 import { USER_ROLES } from "@/lib/domain/enums";
 import { dublinLocalToIso } from "@/lib/domain/time";
 import type { ActionState } from "@/components/app/action-form";
-import { notifyQuoteIssued, notifyShipmentUpdate } from "@/lib/email/notifications";
-import { getQuoteRequestForStaff, sendQuote, transitionQuoteRequest, type StaffActionResult } from "@/lib/services/quote-requests";
-import { addShipmentEvent, createShipmentForRequest, getShipmentForStaff, setShipmentEventVisibility, updateShipment } from "@/lib/services/shipments";
+import { deliverQueuedEmailsSoon } from "@/lib/email/dispatch";
+import { issueQuote, transitionQuoteRequest, type StaffActionResult } from "@/lib/services/quote-requests";
+import { addInternalNote, assignRequest, requestInformation, setContactStatus } from "@/lib/services/cases";
+import { addShipmentEvent, createShipmentForRequest, setShipmentEventVisibility, updateShipment } from "@/lib/services/shipments";
 import { setUserRole } from "@/lib/services/users";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -29,12 +30,18 @@ async function context(fd: FormData, requireAdmin = false) {
 
 /** Translates a service result into an ActionState with localized messages. */
 async function toState(locale: string, result: StaffActionResult<unknown>, okMessage: string): Promise<ActionState> {
-  if (result.ok) return { status: "ok", message: okMessage };
+  if (result.ok) {
+    deliverQueuedEmailsSoon();
+    return { status: "ok", message: okMessage };
+  }
   const tv = await getTranslations({ locale, namespace: "validation" });
   const tc = await getTranslations({ locale, namespace: "common" });
   const fieldErrors = result.fieldErrors ? Object.fromEntries(Object.entries(result.fieldErrors).map(([k, v]) => [k, tv(v as "required")])) : undefined;
   const known: Record<string, string> = {
     invalid_quote_transition: tc("notAllowed"),
+    invalid_shipment_transition: tc("notAllowed"),
+    quote_total_mismatch: tc("genericError"),
+    assignee_not_staff: tc("notAllowed"),
     permission_denied: tc("notAllowed"),
     forbidden: tc("notAllowed"),
   };
@@ -54,37 +61,67 @@ export async function transitionAction(_prev: ActionState, fd: FormData): Promis
   return toState(locale, result, t("applied"));
 }
 
-export async function sendQuoteAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
+/**
+ * Issues a line-item quotation. Lines arrive as JSON from the calculator; the
+ * server recomputes every amount (the browser preview is never trusted) and the
+ * database verifies the totals again when the quote is sent.
+ */
+export async function issueQuoteAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
   const { locale, user } = await context(fd);
   if (!user) return denied(locale);
   const t = await getTranslations({ locale, namespace: "admin.quote" });
-  const db = getDb();
-  const result = await sendQuote(db, user, {
+  let lines: unknown;
+  try {
+    lines = JSON.parse(String(fd.get("lines") ?? "[]"));
+  } catch {
+    lines = [];
+  }
+  const result = await issueQuote(getDb(), user, {
     requestId: fd.get("requestId"),
-    amount: fd.get("amount"),
     currency: fd.get("currency"),
+    lines,
     inclusions: fd.get("inclusions") ?? "",
     exclusions: fd.get("exclusions") ?? "",
     validUntil: fd.get("validUntil"),
   });
-  if (!result.ok) return toState(locale, result, "");
   revalidatePath(`/${locale}/admin`, "layout");
-  const data = result.data!;
-  const request = await getQuoteRequestForStaff(db, user, data.reference);
-  const quote = request?.quotes.find((q) => q.id === data.quoteId);
-  let emailed = false;
-  if (quote) {
-    const outcome = await notifyQuoteIssued(db, {
-      quoteId: data.quoteId,
-      reference: data.reference,
-      ...data.notify,
-      amountMinor: quote.amountMinor,
-      currency: quote.currency,
-      validUntil: new Date(quote.validUntil),
-    }).catch(() => "failed" as const);
-    emailed = outcome === "sent" || outcome === "already_sent";
-  }
-  return { status: "ok", message: emailed ? t("sent") : t("sentNotEmailed") };
+  return toState(locale, result, t("sent"));
+}
+
+export async function addNoteAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  const { locale, user } = await context(fd);
+  if (!user) return denied(locale);
+  const t = await getTranslations({ locale, namespace: "admin.case" });
+  const result = await addInternalNote(getDb(), user, { requestId: fd.get("requestId"), body: fd.get("body"), shipmentId: fd.get("shipmentId") ?? undefined });
+  revalidatePath(`/${locale}/admin`, "layout");
+  return toState(locale, result, t("noteAdded"));
+}
+
+export async function requestInfoAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  const { locale, user } = await context(fd);
+  if (!user) return denied(locale);
+  const t = await getTranslations({ locale, namespace: "admin.case" });
+  const result = await requestInformation(getDb(), user, { requestId: fd.get("requestId"), body: fd.get("body") });
+  revalidatePath(`/${locale}/admin`, "layout");
+  return toState(locale, result, t("infoRequested"));
+}
+
+export async function assignAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  const { locale, user } = await context(fd);
+  if (!user) return denied(locale);
+  const tc = await getTranslations({ locale, namespace: "common" });
+  const result = await assignRequest(getDb(), user, { requestId: fd.get("requestId"), assigneeId: fd.get("assigneeId") });
+  revalidatePath(`/${locale}/admin`, "layout");
+  return toState(locale, result, tc("saved"));
+}
+
+export async function contactStatusAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  const { locale, user } = await context(fd);
+  if (!user) return denied(locale);
+  const tc = await getTranslations({ locale, namespace: "common" });
+  const result = await setContactStatus(getDb(), user, fd.get("id"), fd.get("status"));
+  revalidatePath(`/${locale}/admin/enquiries`);
+  return toState(locale, result, tc("saved"));
 }
 
 export async function createShipmentAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
@@ -118,7 +155,6 @@ export async function addEventAction(_prev: ActionState, fd: FormData): Promise<
   const tv = await getTranslations({ locale, namespace: "validation" });
   const occurredAt = dublinLocalToIso(String(fd.get("occurredAt") ?? ""));
   if (!occurredAt) return { status: "error", message: tv("invalid"), fieldErrors: { occurredAt: tv("invalid") } };
-  const db = getDb();
   const input = {
     shipmentId: fd.get("shipmentId"),
     milestone: fd.get("milestone"),
@@ -128,21 +164,7 @@ export async function addEventAction(_prev: ActionState, fd: FormData): Promise<
     noteFr: fd.get("noteFr") ?? "",
     public: bool(fd, "public"),
   };
-  const result = await addShipmentEvent(db, user, input);
-  if (result.ok && input.public) {
-    const reference = String(fd.get("reference") ?? "");
-    const shipment = await getShipmentForStaff(db, user, reference);
-    if (shipment) {
-      await notifyShipmentUpdate(db, {
-        eventKey: `${shipment.id}:${String(input.milestone)}:${occurredAt}`,
-        reference: shipment.reference,
-        milestone: String(input.milestone),
-        email: shipment.customerEmail,
-        name: shipment.customerName,
-        locale: shipment.customerLocale,
-      }).catch(() => undefined);
-    }
-  }
+  const result = await addShipmentEvent(getDb(), user, input);
   revalidatePath(`/${locale}/admin`, "layout");
   return toState(locale, result, t("recorded"));
 }

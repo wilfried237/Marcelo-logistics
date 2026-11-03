@@ -36,6 +36,7 @@ type FormValues = {
   items: ItemValues[];
   notes: string;
   contact: { name: string; email: string; phone: string };
+  privacyAccepted: boolean;
   website: string;
 };
 
@@ -45,7 +46,7 @@ const STEP_FIELDS: Record<(typeof STEPS)[number], string[]> = {
   service: ["service"],
   route: ["originCountry", "destinationCountry", "destinationCity"],
   items: ["items", "notes"],
-  contact: ["contact"],
+  contact: ["contact", "privacyAccepted"],
   review: [],
 };
 
@@ -74,6 +75,7 @@ function toPayload(values: FormValues, locale: string, idempotencyKey: string) {
     contact: { name: values.contact.name, email: values.contact.email, phone: values.contact.phone },
     locale,
     idempotencyKey,
+    privacyAccepted: values.privacyAccepted,
     website: values.website,
   };
 }
@@ -116,6 +118,7 @@ export function QuoteWizard({
       items: [{ ...EMPTY_ITEM }],
       notes: "",
       contact: { name: "", email: "", phone: "" },
+      privacyAccepted: false,
       website: "",
     },
   });
@@ -381,9 +384,25 @@ export function QuoteWizard({
               <FormField id="contact.email" label={t("email")} error={err("contact.email")}>
                 {(p) => <Input {...p} {...register("contact.email")} type="email" autoComplete="email" maxLength={254} className={inputClassName} />}
               </FormField>
-              <FormField id="contact.phone" label={t("phone")} optionalLabel={tc("optional")} error={err("contact.phone")}>
-                {(p) => <Input {...p} {...register("contact.phone")} type="tel" autoComplete="tel" maxLength={32} className={inputClassName} />}
+              <FormField id="contact.phone" label={t("phone")} hint={t("phoneHint")} error={err("contact.phone")}>
+                {(p) => <Input {...p} {...register("contact.phone")} type="tel" autoComplete="tel" maxLength={32} placeholder="+353 …" className={inputClassName} />}
               </FormField>
+              <div className="space-y-1 sm:col-span-2">
+                <label className="flex items-start gap-3 text-sm">
+                  <input type="checkbox" {...register("privacyAccepted")} className="mt-1 h-4 w-4" aria-describedby={errors.privacyAccepted ? "privacy-error" : undefined} />
+                  <span>
+                    {t("consentLabel")}{" "}
+                    <Link href="/privacy" className="font-medium text-primary underline-offset-4 hover:underline">
+                      {t("privacyLink")}
+                    </Link>
+                  </span>
+                </label>
+                {errors.privacyAccepted && (
+                  <p id="privacy-error" className="text-sm font-medium text-destructive">
+                    {err("privacyAccepted")}
+                  </p>
+                )}
+              </div>
             </div>
           </fieldset>
         )}

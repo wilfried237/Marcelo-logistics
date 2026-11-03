@@ -28,8 +28,10 @@ export default async function AdminLayout({ children, params }: { children: Reac
     { href: "/admin", label: t("nav.dashboard") },
     { href: "/admin/quotes", label: t("nav.quotes") },
     { href: "/admin/shipments", label: t("nav.shipments") },
+    { href: "/admin/enquiries", label: t("nav.enquiries") },
     { href: "/admin/customers", label: t("nav.customers") },
     { href: "/admin/audit", label: t("nav.audit") },
+    { href: "/admin/notifications", label: t("nav.notifications") },
     ...(user.role === "admin" ? [{ href: "/admin/users", label: t("nav.users") }] : []),
   ];
   return (

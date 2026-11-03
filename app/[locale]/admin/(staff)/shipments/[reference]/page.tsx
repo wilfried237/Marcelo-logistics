@@ -4,7 +4,8 @@ import { Link } from "@/i18n/navigation";
 import { getDb } from "@/lib/db/client";
 import { pageStaff } from "@/lib/auth/page-user";
 import { getShipmentForStaff } from "@/lib/services/shipments";
-import { AddEventForm, EventVisibilityToggle, UpdateShipmentForm } from "@/components/admin/admin-forms";
+import { AddEventForm, EventVisibilityToggle, NoteForm, UpdateShipmentForm } from "@/components/admin/admin-forms";
+import { listShipmentMessages } from "@/lib/services/cases";
 import { PageHeader } from "@/components/app/page-header";
 import { ShipmentStatusBadge } from "@/components/app/status-badge";
 
@@ -27,6 +28,8 @@ export default async function AdminShipmentDetail({ params }: { params: Promise<
   const tc = await getTranslations("common");
   const ts = await getTranslations("services");
   const format = await getFormatter();
+  const tcase = await getTranslations("admin.case");
+  const messages = await listShipmentMessages(getDb(), user, shipment.id);
 
   return (
     <div className="space-y-6">
@@ -89,6 +92,26 @@ export default async function AdminShipmentDetail({ params }: { params: Promise<
             </li>
           ))}
         </ul>
+      </section>
+      <section aria-labelledby="case" className="rounded-xl border bg-card p-5 md:p-6">
+        <h2 id="case" className="mb-4 text-lg font-semibold">
+          {tcase("shipmentMessages")}
+        </h2>
+        {messages.length ? (
+          <ol className="mb-6 space-y-3">
+            {messages.map((m) => (
+              <li key={m.id} className={`border-l-4 p-3 text-sm ${m.internal ? "border-warning bg-warning-soft" : "border-brand bg-secondary"}`}>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {tcase(`kinds.${m.kind}` as "kinds.note")} · {format.dateTime(new Date(m.createdAt), { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Dublin" })}
+                </p>
+                <p className="mt-1 whitespace-pre-line">{m.body}</p>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="mb-6 text-sm text-muted-foreground">{tcase("noMessages")}</p>
+        )}
+        <NoteForm locale={locale} requestId={shipment.quoteRequestId} shipmentId={shipment.id} />
       </section>
     </div>
   );

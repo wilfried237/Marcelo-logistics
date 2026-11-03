@@ -10,6 +10,9 @@ import { PageHeader } from "@/components/app/page-header";
 import { ItemsList } from "@/components/app/record-lists";
 import { QuoteStatusBadge } from "@/components/app/status-badge";
 import { RespondToQuote } from "./respond";
+import { QuoteBreakdown } from "@/components/app/quote-breakdown";
+import { MessageForm } from "@/components/quote/case-forms";
+import { replyAction } from "../../actions";
 
 export default async function PortalQuoteDetail({ params }: { params: Promise<{ locale: string; reference: string }> }) {
   const { locale, reference } = await params;
@@ -23,6 +26,7 @@ export default async function PortalQuoteDetail({ params }: { params: Promise<{ 
   const ts = await getTranslations("services");
   const tc = await getTranslations("common");
   const format = await getFormatter();
+  const tv = await getTranslations("quoteView");
   const current = request.quotes[0];
   const stillValid = current && new Date(current.validUntil) > new Date();
 
@@ -42,28 +46,7 @@ export default async function PortalQuoteDetail({ params }: { params: Promise<{ 
         </h2>
         {current ? (
           <div className="mt-4 space-y-4">
-            <dl className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <dt className="text-sm text-muted-foreground">{t("amount")}</dt>
-                <dd className="text-2xl font-bold">{formatMoney(current.amountMinor, current.currency, locale)}</dd>
-              </div>
-              <div>
-                <dt className="text-sm text-muted-foreground">{t("validUntil")}</dt>
-                <dd className="font-medium">{format.dateTime(new Date(current.validUntil), { dateStyle: "long" })}</dd>
-              </div>
-              {current.inclusions && (
-                <div>
-                  <dt className="text-sm text-muted-foreground">{t("inclusions")}</dt>
-                  <dd className="whitespace-pre-line">{current.inclusions}</dd>
-                </div>
-              )}
-              {current.exclusions && (
-                <div>
-                  <dt className="text-sm text-muted-foreground">{t("exclusions")}</dt>
-                  <dd className="whitespace-pre-line">{current.exclusions}</dd>
-                </div>
-              )}
-            </dl>
+            <QuoteBreakdown quote={current} locale={locale} />
             {request.status === "QUOTED" && stillValid && (
               <RespondToQuote locale={locale} reference={request.reference} amount={formatMoney(current.amountMinor, current.currency, locale)} />
             )}
@@ -79,6 +62,36 @@ export default async function PortalQuoteDetail({ params }: { params: Promise<{ 
               {t("shipmentLink", { reference: request.shipmentReference })}
             </Link>
           </p>
+        )}
+      </section>
+
+      <section aria-labelledby="messages" className="space-y-4">
+        <h2 id="messages" className="text-xl font-semibold">
+          {tv("messagesTitle")}
+        </h2>
+        {request.messages.length ? (
+          <ol className="space-y-3">
+            {request.messages.map((m) => (
+              <li key={m.id} className={`border-l-4 p-4 ${m.authorKind === "staff" ? "border-brand bg-secondary" : "border-border bg-card"}`}>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {m.authorKind === "staff" ? tv("fromTeam") : tv("fromYou")} · {format.dateTime(new Date(m.createdAt), { dateStyle: "medium", timeStyle: "short" })}
+                </p>
+                <p className="mt-1 whitespace-pre-line">{m.body}</p>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="text-muted-foreground">{tv("noMessages")}</p>
+        )}
+        {request.status !== "CANCELLED" && request.status !== "DECLINED" && (
+          <MessageForm
+            action={replyAction}
+            locale={locale}
+            hidden={{ reference: request.reference }}
+            label={request.status === "AWAITING_CUSTOMER" ? tv("replyLabelInfo") : tv("replyLabel")}
+            hint={tv("replyHint")}
+            submit={tv("sendReply")}
+          />
         )}
       </section>
 
