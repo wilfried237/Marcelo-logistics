@@ -17,6 +17,7 @@
     "check:i18n": "node scripts/check-i18n.mjs",
     "check:owner": "node scripts/check-owner-placeholders.mjs",
     "check:security": "node scripts/check-security.mjs",
+    "illustrations:build": "node scripts/illustrations/build.mjs",
     "check": "npm run typecheck && npm run lint && npm run check:i18n && npm run check:security && npm test",
     "db:generate": "prisma generate",
     "db:migrate": "node scripts/db-migrate.mjs",

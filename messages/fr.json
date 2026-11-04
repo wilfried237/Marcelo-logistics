@@ -932,10 +932,16 @@
     "guide": "Guide d’expédition"
   },
   "media": {
-    "yardLoadingAlt": "Deux membres de l’équipe déplacent des ballots emballés, des caisses et des sacs de marchandises entre un conteneur maritime et un véhicule, dans un dépôt.",
-    "yardLoadingCaption": "Préparation des marchandises au dépôt",
-    "sideLoaderAlt": "Un camion à grue latérale soulève un conteneur maritime.",
-    "sideLoaderCaption": "Manutention d’un conteneur avec une grue latérale"
+    "containerShipAlt": "Vue aérienne d’un porte-conteneurs chargé de conteneurs empilés, naviguant sur une mer d’un bleu profond.",
+    "portUnloadingAlt": "Vue aérienne d’un porte-conteneurs amarré à un terminal, avec une grue au-dessus du navire et des rangées de conteneurs sur le quai.",
+    "portUnloadingCaption": "Déchargement de conteneurs dans un terminal portuaire",
+    "airFreighterAlt": "Un avion cargo blanc stationné sur l’aire de trafic d’un aéroport, avec un escalier en place.",
+    "airFreighterCaption": "Un avion cargo sur l’aire de trafic",
+    "warehouseAlt": "Des personnes marchent dans l’allée centrale d’un grand entrepôt bordé de rayonnages à palettes orange.",
+    "warehouseCaption": "Les marchandises sont stockées et triées en entrepôt avant et après le voyage",
+    "portPanoramaAlt": "Un port à conteneurs au bord de la mer, avec des grues qui travaillent sur un navire et des digues au loin.",
+    "portPanoramaCaption": "La plupart du fret international voyage par la mer et passe par des ports à conteneurs comme celui-ci",
+    "credit": "Photo : {name} sur Unsplash"
   },
   "howItWorks": {
     "title": "Comment ça marche",
@@ -1108,5 +1114,27 @@
       "invalid": "Veuillez vérifier les champs signalés.",
       "generic": "Votre message n’a pas pu être envoyé. Veuillez réessayer."
     }
+  },
+  "illustrations": {
+    "requestQuote": "Un client remplit un formulaire de demande de devis sur un ordinateur portable.",
+    "teamReview": "Un membre de notre équipe, avec un casque, examine une demande à son bureau.",
+    "quoteReceived": "Un client reçoit un devis sur son téléphone, validé par une coche.",
+    "handover": "Un client remet un colis à un membre de l’équipe en gilet haute visibilité, à côté d’un conteneur maritime.",
+    "containerLoading": "Un manutentionnaire en gilet haute visibilité fait entrer un fût et un carton dans un conteneur maritime.",
+    "tracking": "Un client suit un envoi sur son téléphone : un trajet entre deux repères et une barre de progression des étapes franchies.",
+    "receiveParcel": "Une personne tient le colis qu’elle vient de recevoir, devant sa porte.",
+    "supportChat": "Un client discute avec un membre de notre équipe équipé d’un casque.",
+    "packParcel": "Une personne range des vêtements pliés dans un carton, un rouleau d’adhésif à la main.",
+    "routeMap": "L’Irlande et le Cameroun reliés par deux trajets en pointillés, l’un par avion, l’autre par bateau, dans les deux sens.",
+    "connections": "Deux personnes dans deux pays différents, reliées par une ligne en pointillés le long de laquelle voyage un colis.",
+    "serviceParcels": "Des colis en carton scotchés, avec des étiquettes d’adresse, et une enveloppe.",
+    "serviceBarrels": "Des fûts d’expédition empilés à côté d’un carton étiqueté.",
+    "serviceAir": "Un avion cargo et des conteneurs de fret aérien sur un chariot.",
+    "serviceSea": "Un porte-conteneurs en mer.",
+    "serviceVehicle": "Une voiture qui monte une rampe pour entrer dans un conteneur maritime.",
+    "serviceCommercial": "Un chariot élévateur à côté d’une palette de cartons.",
+    "guidePacking": "Un carton ouvert avec des affaires pliées à l’intérieur et du calage autour.",
+    "guideLabelling": "Un carton avec une étiquette d’adresse bien lisible, des flèches « haut » et un marqueur.",
+    "guideList": "Un porte-bloc avec la liste du contenu, à côté d’un carton fermé."
   }
 }

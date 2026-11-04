@@ -932,10 +932,16 @@
     "guide": "Shipping guide"
   },
   "media": {
-    "yardLoadingAlt": "Two team members moving wrapped bales, crates and bags of goods between a shipping container and a vehicle in a yard.",
-    "yardLoadingCaption": "Preparing goods for shipment in the yard",
-    "sideLoaderAlt": "A side-loader truck lifting a shipping container with its crane arms.",
-    "sideLoaderCaption": "Moving a container with a side-loader"
+    "containerShipAlt": "Aerial view of a container ship loaded with stacked containers, sailing on deep blue water.",
+    "portUnloadingAlt": "Aerial view of a container ship moored at a terminal, with a crane over the ship and rows of containers on the quay.",
+    "portUnloadingCaption": "Containers being unloaded at a container terminal",
+    "airFreighterAlt": "A white cargo aircraft parked on an airport apron with boarding stairs in place.",
+    "airFreighterCaption": "A cargo aircraft on the apron",
+    "warehouseAlt": "People walking along the central aisle of a large warehouse lined with orange pallet racking.",
+    "warehouseCaption": "Goods are stored and sorted in warehouses before and after the journey",
+    "portPanoramaAlt": "A container port beside the open sea, with cranes working a ship and breakwaters in the distance.",
+    "portPanoramaCaption": "Most international cargo travels by sea, through container ports like this one",
+    "credit": "Photo: {name} on Unsplash"
   },
   "howItWorks": {
     "title": "How it works",
@@ -1108,5 +1114,27 @@
       "invalid": "Please check the highlighted fields.",
       "generic": "Your message could not be sent. Please try again."
     }
+  },
+  "illustrations": {
+    "requestQuote": "A customer at a laptop filling in a quote request form.",
+    "teamReview": "A member of our team, wearing a headset, reviews a request at a desk.",
+    "quoteReceived": "A customer holding a phone receives a quote, marked with a tick.",
+    "handover": "A customer hands a parcel to a team member in a high-visibility vest beside a shipping container.",
+    "containerLoading": "A worker in a high-visibility vest wheels a barrel and a box into a shipping container.",
+    "tracking": "A customer follows a shipment on a phone: a route between two map pins and a progress bar of completed steps.",
+    "receiveParcel": "A person holds a parcel they have just received at their front door.",
+    "supportChat": "A customer talks with a member of our team wearing a headset.",
+    "packParcel": "A person packs folded clothes into a cardboard box, with a roll of tape in hand.",
+    "routeMap": "Ireland and Cameroon linked by two dashed routes, one by air and one by sea, running in both directions.",
+    "connections": "Two people in different countries, linked by a dashed line along which a parcel travels.",
+    "serviceParcels": "Taped cardboard parcels with address labels, and an envelope.",
+    "serviceBarrels": "Shipping barrels stacked beside a labelled box.",
+    "serviceAir": "A cargo aircraft with air freight containers on a dolly.",
+    "serviceSea": "A container ship at sea.",
+    "serviceVehicle": "A car driving up a ramp into a shipping container.",
+    "serviceCommercial": "A forklift beside a pallet of boxes.",
+    "guidePacking": "An open box with folded items inside and padding around it.",
+    "guideLabelling": "A box with a clearly written address label, “this way up” arrows and a marker pen.",
+    "guideList": "A clipboard with a checklist of contents next to a sealed box."
   }
 }

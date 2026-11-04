@@ -74,13 +74,24 @@ test.describe("public pages", () => {
     expect(violations).toEqual([]);
   });
 
-  test("home page shows the real operation photos with descriptive alt text", async ({ page }) => {
-    await page.goto("/en");
-    const photos = page.locator("figure img[alt]:not([alt=''])");
-    await expect(photos).toHaveCount(2);
-    for (const img of await photos.all()) {
-      await img.scrollIntoViewIfNeeded();
-      await expect.poll(() => img.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  test("photos and illustrations load, keep their aspect ratio and have descriptive alt text", async ({ page }) => {
+    for (const path of ["/en", "/fr/services", "/en/how-it-works", "/en/about", "/en/shipping-guide", "/en/contact", "/en/track"]) {
+      await page.goto(path);
+      const visuals = page.locator("main img[src*='/images/'], main img[src*='_next/image']");
+      expect(await visuals.count(), path).toBeGreaterThan(0);
+      for (const img of await visuals.all()) {
+        if (!(await img.isVisible())) continue; // e.g. the contact illustration is hidden below md on the home page
+        await img.scrollIntoViewIfNeeded();
+        expect((await img.getAttribute("alt"))?.length ?? 0, `${path}: alt text`).toBeGreaterThan(10);
+        await expect.poll(() => img.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+        // Rendered size follows the intrinsic ratio unless the image is deliberately cropped (object-cover).
+        const { ratio, natural, cover } = await img.evaluate((el) => {
+          const i = el as HTMLImageElement;
+          const r = i.getBoundingClientRect();
+          return { ratio: r.width / r.height, natural: i.naturalWidth / i.naturalHeight, cover: getComputedStyle(i).objectFit === "cover" };
+        });
+        if (!cover) expect(Math.abs(ratio - natural), `${path}: distorted image`).toBeLessThan(0.05);
+      }
     }
   });
 

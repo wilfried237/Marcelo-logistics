@@ -2,7 +2,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { PageBanner } from "@/components/app/page-banner";
-import { PHOTOS, Photo } from "@/components/brand/photos";
+import { PHOTOS, Photo, photoProps } from "@/components/brand/photos";
+import { Illustration } from "@/components/brand/illustration";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -10,17 +11,25 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return { title: t("title"), description: t("intro") };
 }
 
-/** Only facts from the project brief; company history waits for the owner (B-02). */
+/**
+ * Only facts from the project brief; company history waits for the owner (B-02).
+ * The photograph shows the industry, not our premises, and no people are
+ * presented as our staff.
+ */
 export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("aboutPage");
   const nav = await getTranslations("nav");
   const media = await getTranslations("media");
+  const ill = await getTranslations("illustrations");
   return (
     <>
       <PageBanner title={t("title")} description={t("intro")} />
-      <div className="mx-auto grid max-w-7xl items-start gap-12 px-4 py-14 md:px-6 md:py-16 lg:grid-cols-[3fr_2fr]">
+      <div className="mx-auto max-w-7xl px-4 pt-14 md:px-6 md:pt-16">
+        <Photo {...photoProps(media, PHOTOS.portPanorama)} sizes="(min-width: 1280px) 1248px, 100vw" className="rounded-none border" imageClassName="aspect-[16/9] md:aspect-[21/9]" />
+      </div>
+      <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-14 md:px-6 md:py-16 lg:grid-cols-[3fr_2fr]">
         <section>
           <h2 className="text-3xl font-bold tracking-tight">{t("howWeWorkTitle")}</h2>
           <p className="mt-3 text-lg text-muted-foreground">{t("howWeWork")}</p>
@@ -34,10 +43,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
             </Button>
           </div>
         </section>
-        <div className="grid gap-6">
-          <Photo src={PHOTOS.yardLoading.src} alt={media(PHOTOS.yardLoading.altKey)} caption={media(PHOTOS.yardLoading.captionKey)} sizes="(min-width: 1024px) 40vw, 100vw" className="rounded-none border" imageClassName="aspect-[4/3]" />
-          <Photo src={PHOTOS.sideLoader.src} alt={media(PHOTOS.sideLoader.altKey)} caption={media(PHOTOS.sideLoader.captionKey)} sizes="(min-width: 1024px) 300px, 100vw" className="w-full max-w-xs rounded-none border" imageClassName="aspect-square" />
-        </div>
+        <Illustration name="connections" alt={ill("connections")} className="mx-auto max-w-md" />
       </div>
     </>
   );
