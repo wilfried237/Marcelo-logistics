@@ -70,12 +70,14 @@ Verified locally on 2026-11-03: on an empty Supabase database the step applied a
 - The domain cut-over from WordPress needs a migration plan: URLs and redirects, email records on the domain, and DNS ownership. Out of scope until approved.
 
 ## Backend MVP: what to configure before merging (2026-11-04)
-1. **Approve the migration** `20261104000000_backend_mvp`: merging to `master` applies it to the production database on the next deployment.
+1. **Approve the migrations**, in this order: `20261104000000_backend_mvp`, then `20261104000100_outbox_legacy_rows`. Pushing to `master` applies both to the production database during the next production build (see the runbook below).
 2. **Vercel environment (Production, and Preview if used):** `QUOTE_LINK_SECRET` (new, ≥ 32 random characters), `STAFF_NOTIFICATION_EMAIL` (your inbox, P-01), and when the Resend domain is verified (C-02): `ENABLE_TRANSACTIONAL_EMAIL=true`, `RESEND_API_KEY`, `EMAIL_FROM`, `RESEND_WEBHOOK_SECRET`. Full list: [ENVIRONMENT.md](./ENVIRONMENT.md).
 3. **Resend webhook:** endpoint `https://<site>/api/webhooks/resend`, events `email.delivered`, `email.bounced`, `email.complained`, `email.delivery_delayed`; copy its signing secret into `RESEND_WEBHOOK_SECRET`.
-4. **Supabase Auth email templates** (hosted): paste `supabase/templates/recovery.html` and `invite.html` into Authentication → Email Templates with the subjects from `supabase/config.toml`.
+4. **Supabase Auth email templates** (hosted): paste `supabase/templates/confirmation.html` (Confirm sign up), `invite.html` (Invite user) and `recovery.html` (Reset password) into Authentication → Email Templates, with the subjects from `supabase/config.toml`. Their links use `token_hash`, so the Site URL and redirect URLs must match `SITE_URL` (see the registration switch-on).
 5. **Crons** (`vercel.json`): quote expiry 03:15 UTC and email processing 03:45 UTC, daily (Hobby limit). Emails are also delivered immediately after each action; the daily job retries failures. On a Pro plan, run `/api/cron/process-emails` every 5–15 minutes.
-6. **Previews share production variables today:** a preview of this branch would run new code against the production database **before** its migration. **Do not push this branch or deploy Preview** until Preview has its own database or none (see ENVIRONMENT.md → Per Vercel environment).
+6. **Preview isolation (verified 2026-11-04):** Preview has no Supabase or database variables, no preview deployments exist, and the Ignored Build Step builds production only. Still: push only `master`, never this feature branch.
+7. **`SITE_URL` (Production)** is `https://marcelo-logistics.vercel.app`, not the official domain. Before email or registration is switched on, the owner chooses the canonical host (`marchelo-logistics.com` or `www`), then `SITE_URL`, the Supabase Auth Site URL and redirect URLs are changed together (needs approval).
+8. **First administrator:** production has no accounts yet (pre-check 2026-11-04). After the migration, bootstrap the first admin (DATABASE.md) before staff can use the admin area.
 
 ## Migration runbook: backend MVP (`20261104000000_backend_mvp` + `20261104000100_outbox_legacy_rows`)
 Status: reviewed and rehearsed locally; **not applied to the hosted database**. It needs the owner's explicit approval.
@@ -95,16 +97,40 @@ Status: reviewed and rehearsed locally; **not applied to the hosted database**. 
 
 Evidence: `tests/db/upgrade-rehearsal.test.ts` builds the production state (first 4 migrations + data written by the previous version, including its email rows), applies the two migrations and checks that every existing row is unchanged, legacy emails are closed, in-flight quotes can still be accepted, tracking works, and a second run changes nothing. The **previous application version runs correctly on the new schema**: `master`'s own test suite passed against it (83 of 86; the 3 failures assert the old schema itself: table list, transition table, tracking field list).
 
-### Before (read-only checks, Supabase SQL editor)
+### Preparation versus approval
+| Step | Kind |
+|---|---|
+| Read-only pre-checks | Preparation (approved and run 2026-11-04, results below) |
+| Backups | **Needs the owner**: dashboard backup is the owner's; a logical dump reads the database but writes files containing personal data |
+| Applying the migrations (option A or B) | **Needs explicit approval** |
+| Push to `master` | **Needs explicit approval**: deploys to production on the official domain |
+| Post-checks | After the migration; read-only |
+| Rollback (app or schema) | **Needs explicit approval** |
+
+### Before (read-only checks)
+Run in the Supabase SQL editor, or with a read-only session (`set session characteristics as transaction read only`):
 ```sql
-select migration_name, finished_at, rolled_back_at from _prisma_migrations order by started_at; -- exactly the 4, all finished
+select migration_name, checksum, finished_at, rolled_back_at, logs is not null as has_logs from _prisma_migrations order by started_at; -- exactly the 4, all finished, no logs
 select status, split_part(idempotency_key, ':', 1) as kind, count(*) from public.email_deliveries group by 1, 2 order by 1, 2;
+select count(*) from public.email_deliveries where recipient is null;                 -- must be 0
 select status, count(*) from public.shipments group by 1;
 select status, count(*) from public.quote_requests group by 1;
+select count(*) from public.shipments s left join public.quotes q on q.id = s.quote_id
+  left join public.quote_requests r on r.id = q.quote_request_id where r.id is null;   -- must be 0
+select count(*) from pg_stat_activity where datname = current_database() and xact_start < now() - interval '1 minute'; -- 0 before applying
 ```
-**Backup** (both, kept offline and encrypted; they contain personal data):
+
+**Results on production (2026-11-04, read-only session, target confirmed identical to Vercel Production's `DIRECT_URL`):**
+- PostgreSQL 17.6, database size 11 MB, no long-running transactions.
+- `_prisma_migrations`: the 4 expected migrations, all finished, none rolled back, no error logs, **checksums identical to the repository**. Pending: `20261104000000_backend_mvp`, `20261104000100_outbox_legacy_rows`. None of their tables, columns or types exist yet (no partial application).
+- **No data:** 0 Auth users, 0 profiles and customers, 0 quote requests, quotes, shipments, events, documents, audit rows and email rows; 1 rate-limit row.
+- **No schema drift:** columns (95), indexes (30), triggers (20), functions (21, bodies identical), policies (19), RLS flags and enums match a database built from the 4 committed migrations.
+- Consequence: the migrations touch no customer data; migration 2 has nothing to close.
+
+**Backup** (still required, even with an empty database: it records the exact pre-upgrade state). Both, kept offline and encrypted:
 1. Supabase → Database → Backups: confirm a recent backup exists (and note the PITR point if the plan has it).
-2. Logical dump from a trusted machine with the session-pooler URL: `npx supabase db dump --db-url "$DIRECT_URL" -f schema.sql` and `npx supabase db dump --db-url "$DIRECT_URL" --data-only -f data.sql`. Check that both files are non-empty.
+2. Logical dump from a trusted machine with the session-pooler URL: `npx supabase db dump --db-url "$DIRECT_URL" -f schema.sql` and `npx supabase db dump --db-url "$DIRECT_URL" --data-only -f data.sql`. Check that both files are non-empty; never commit them.
+3. Restoring: Supabase dashboard restore (whole project), or `psql "$DIRECT_URL" -f schema.sql` then `-f data.sql` into an **empty** database. A restore replaces everything written after the backup.
 
 ### Apply (choose one; both need approval)
 - **A. With the deployment** (current design): merge to `master` → the Vercel production build runs `next build`, then `prisma migrate deploy`, then the deployment is promoted. If the migration fails, the build fails and the previous deployment stays live.
@@ -116,7 +142,7 @@ select migration_name, finished_at from _prisma_migrations order by started_at; 
 select count(*) from public.email_deliveries where status in ('PENDING', 'FAILED') and idempotency_key ~ '^(ack|staff-new|quote-issued|shipment-update):'; -- 0
 select public.public_track_shipment('<an existing reference>'); -- includes origin/destination
 ```
-Then the smoke tests (DEPLOYMENT checklist) and `/api/cron/process-emails` with the bearer secret (expect `claimed` ≥ 0, no errors).
+Then: bootstrap the first administrator (production has no accounts), the smoke tests on the official domain (public pages EN/FR, `/en/track`, sign-in), and `/api/cron/process-emails` with the bearer secret (expect `claimed` ≥ 0, no errors). Email stays off, so queued emails are recorded as skipped.
 
 ### Recovery
 1. **Migration failed part-way:** the SQL is idempotent. Fix the cause, `npx prisma migrate resolve --rolled-back 20261104000000_backend_mvp` (or the failed one), and deploy again; it completes the remaining statements.

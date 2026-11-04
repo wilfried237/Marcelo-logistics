@@ -37,15 +37,22 @@ Every variable the application reads, where it is used, and what each environmen
 - `notifications.quoteExpiryReminderHours`: hours before expiry for a reminder email; **null** (off) until approved.
 
 ## Per Vercel environment (2026-11-04)
-### Current state (names only, read with `vercel env ls`; no values were read)
-All 19 variables target **Preview and Production together**: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `DIRECT_URL`, `SHADOW_DATABASE_URL`, `SEED_USER_PASSWORD`, `SITE_URL`, `CRON_SECRET`, `RETENTION_EXECUTION_ENABLED`, `RATE_LIMIT_SALT`, `EMAIL_DEV_LOG`, the six `ENABLE_*` flags and `RELEASE_BUILD`. Nothing targets Development. No integration `POSTGRES_*` variables.
+### Verified state (2026-11-04, read-only: `vercel env ls` and the Vercel API)
+Values were never printed. Flags were read individually; secrets were compared in memory only where Vercel allows reading them.
 
-Problems:
-1. **Preview uses the production database and Auth project.** Any pushed branch gets a preview deployment, so a preview of this branch would run new code against the production database (whose schema it does not match yet) and could write production data. **Do not deploy Preview until this is fixed.**
-2. `SHADOW_DATABASE_URL` and `SEED_USER_PASSWORD` are local-only and should not exist in Vercel.
-3. Missing for the backend MVP: `QUOTE_LINK_SECRET`, `STAFF_NOTIFICATION_EMAIL`; after C-02: `RESEND_API_KEY`, `EMAIL_FROM`, `RESEND_WEBHOOK_SECRET`.
+| Variable | Production | Preview |
+|---|---|---|
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `DIRECT_URL` | set (Production only) | **not set** |
+| `SITE_URL` | set: `https://marcelo-logistics.vercel.app` (**not yet the official domain**, see DEPLOYMENT.md) | not set |
+| `CRON_SECRET`, `RATE_LIMIT_SALT` | set, ≥ 32 characters (verified) | set, own variable, type *Sensitive* |
+| `QUOTE_LINK_SECRET` | set, type *Sensitive* | set, own variable, type *Sensitive* |
+| `ENABLE_*` (6), `EMAIL_DEV_LOG`, `RETENTION_EXECUTION_ENABLED`, `RELEASE_BUILD` | all `false` (verified) | all `false` (verified) |
+| `STAFF_NOTIFICATION_EMAIL`, `RESEND_API_KEY`, `EMAIL_FROM`, `RESEND_WEBHOOK_SECRET` | not set | not set |
+| `SHADOW_DATABASE_URL`, `SEED_USER_PASSWORD` | removed | removed |
 
-Nothing was changed in Vercel: every change below needs the owner's approval.
+Project settings (verified): production branch `master`; Ignored Build Step builds **production only** (`if [ "$VERCEL_ENV" == "production" ]; then exit 1; else exit 0; fi`), so pushes to other branches create no deployment; Deployment Protection on all deployments except custom domains; no Preview deployments exist (the 7 older ones, built while Preview shared Production's variables, were deleted). Domains `marchelo-logistics.com` and `www.marchelo-logistics.com` are attached to Production and resolve to Vercel.
+
+**Not verified:** whether the *Sensitive* values (all three Preview secrets and Production `QUOTE_LINK_SECRET`) are ≥ 32 characters and different from Production: Vercel never returns Sensitive values. Replacing the Preview values with freshly generated ones would make this certain; that needs the owner's approval.
 
 ### Required configuration
 | Variable | Production | Preview | Development (Vercel) |
@@ -64,4 +71,4 @@ Nothing was changed in Vercel: every change below needs the owner's approval.
 | `RELEASE_BUILD` | `true` only for the approved launch (R-03) | `false` | — |
 | `SHADOW_DATABASE_URL`, `SEED_USER_PASSWORD`, `ALLOW_MIGRATE_HOST`, `RESEND_BASE_URL` | **never** | **never** | **never** |
 
-With the database variables unset, a preview runs in the same "not available" mode as before Supabase was connected (public pages only; no accounts, quotes or tracking). In Vercel: edit each shared variable, untick **Preview**, and add Preview-only values where the table says so.
+With the database variables unset, a preview would run in the same "not available" mode as before Supabase was connected (public pages only; no accounts, quotes or tracking). Today no preview is built at all (Ignored Build Step). Before allowing previews again, create a separate Supabase project for them and give Preview its own values.
