@@ -149,7 +149,7 @@ export default function HomePage({ params }: { params: Promise<{ locale: string 
       </section>
 
       <section aria-labelledby="guide-heading" className="bg-ink text-ink-foreground">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 md:px-6 md:py-20 lg:grid-cols-2">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 md:px-6 md:py-20 lg:grid-cols-2 lg:items-center">
           <div>
             <h2 id="guide-heading" className="text-3xl font-bold tracking-tight">
               {t("guide.heading")}
