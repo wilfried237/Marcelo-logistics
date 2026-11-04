@@ -20,7 +20,7 @@ test.describe("public pages", () => {
     });
   }
 
-  for (const path of ["/en", "/en/quote", "/en/track", "/en/login", "/en/faq", "/en/how-it-works", "/fr/shipping-guide", "/en/about"]) {
+  for (const path of ["/en", "/fr", "/en/services", "/fr/services", "/en/quote", "/en/track", "/en/login", "/en/faq", "/en/how-it-works", "/fr/shipping-guide", "/en/about", "/en/contact"]) {
     test(`${path} has no serious or critical accessibility violations`, async ({ page }) => {
       await page.goto(path);
       const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
