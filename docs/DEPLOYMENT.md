@@ -12,7 +12,7 @@ Every step below needs the owner's accounts and approval; none has been done.
 
 1. Owner creates or approves the Vercel and Supabase accounts and the region (R-01).
 2. **Supabase**
-   - Apply the migrations **only after approval** (R-02): backup, review, `npm run db:migrate` with `ALLOW_MIGRATE_HOST`; procedure in [DATABASE.md](./DATABASE.md#applying-to-supabase-after-approval-r-02).
+   - Apply the migrations **only after approval** (R-02): backup (deferred for the first release, see the migration runbook), review, `npm run db:migrate` with `ALLOW_MIGRATE_HOST`; procedure in [DATABASE.md](./DATABASE.md#applying-to-supabase-after-approval-r-02).
    - Authentication settings, matching `supabase/config.toml`: email provider on, minimum password length **12**, secure password change **on**; sign-ups and email confirmation per the [registration switch-on](#customer-registration-c-03-switch-on) (C-03: open registration).
    - URL configuration: Site URL = the site's URL; redirect allow-list `https://<host>/api/auth/callback**` only (the `**` allows the `?next=` query string; no other wildcards).
    - Custom SMTP stays unset until the Resend domain is verified (C-02); Supabase's built-in mailer is rate-limited and for testing only.
@@ -101,7 +101,7 @@ Evidence: `tests/db/upgrade-rehearsal.test.ts` builds the production state (firs
 | Step | Kind |
 |---|---|
 | Read-only pre-checks | Preparation (approved and run 2026-11-04, results below) |
-| Backups | **Needs the owner**: dashboard backup is the owner's; a logical dump reads the database but writes files containing personal data |
+| Backups | **Deferred by the owner (2026-11-05)** for the first release; see "Backup status" below. When resumed: dashboard backup is the owner's; a logical dump reads the database but writes files containing personal data |
 | Applying the migrations (option A or B) | **Needs explicit approval** |
 | Push to `master` | **Needs explicit approval**: deploys to production on the official domain |
 | Post-checks | After the migration; read-only |
@@ -127,10 +127,28 @@ select count(*) from pg_stat_activity where datname = current_database() and xac
 - **No schema drift:** columns (95), indexes (30), triggers (20), functions (21, bodies identical), policies (19), RLS flags and enums match a database built from the 4 committed migrations.
 - Consequence: the migrations touch no customer data; migration 2 has nothing to close.
 
-**Backup** (still required, even with an empty database: it records the exact pre-upgrade state). Both, kept offline and encrypted:
-1. Supabase → Database → Backups: confirm a recent backup exists (and note the PITR point if the plan has it).
-2. Logical dump from a trusted machine with the session-pooler URL: `npx supabase db dump --db-url "$DIRECT_URL" -f schema.sql` and `npx supabase db dump --db-url "$DIRECT_URL" --data-only -f data.sql`. Check that both files are non-empty; never commit them.
-3. Restoring: Supabase dashboard restore (whole project), or `psql "$DIRECT_URL" -f schema.sql` then `-f data.sql` into an **empty** database. A restore replaces everything written after the backup.
+### Backup status for the first release (owner decision, 2026-11-05)
+- **No manual production backup has been created.** No `supabase db dump` was run and no restore rehearsal was done.
+- **Why:** the project is brand new. The production database holds no customer or operational data (pre-check above: 0 users, 0 requests, quotes, shipments and emails; 1 rate-limit row), so a dump would record only the empty schema that the 4 committed migrations already describe.
+- **Accepted release risk:** the owner explicitly accepts proceeding with the first production deployment without a manual backup.
+- **Not verified:** whether the Supabase dashboard holds an automatic backup, and its time, depends on the plan; it was not checked.
+- **Revisit** before the site handles real customer information, and before any later significant database change: from then on, take the backup below before every production migration.
+
+### Backup procedure (for future use)
+Supabase's documented three-file backup, from a trusted machine, with the **session pooler** connection (port 5432). The connection string is a secret: do not paste it into shared shells or logs.
+```
+npx supabase db dump --db-url "$DIRECT_URL" -f roles.sql --role-only
+npx supabase db dump --db-url "$DIRECT_URL" -f schema.sql
+npx supabase db dump --db-url "$DIRECT_URL" -f data.sql --data-only --use-copy
+```
+- `roles.sql`: custom roles only (no passwords; Supabase's built-in roles are excluded).
+- `schema.sql`: the project's schemas (`public`: tables, functions, triggers, policies, grants); Supabase-managed schemas (`auth`, `storage`, …) are excluded because the platform recreates them.
+- `data.sql`: the data of all schemas, including `public` (with `_prisma_migrations`), `auth` (users) and `storage` (metadata only), as `COPY` statements.
+- **Not included:** files in Storage, Auth/SMTP/template settings, Vault secrets, Edge Functions.
+- Before the dump: Supabase → Database → Backups, note the newest scheduled backup (time, status) and the PITR window if the plan has one.
+- After the dump: check the three files are non-empty, record their SHA-256 sums, keep them offline, encrypted and access-restricted; never commit them.
+- **Restore** only into a new or empty project, never over production:
+  `psql --single-transaction --variable ON_ERROR_STOP=1 --file roles.sql --file schema.sql --command 'SET session_replication_role = replica' --file data.sql --dbname "<target connection>"`. A restore replaces everything written after the backup.
 
 ### Apply (choose one; both need approval)
 - **A. With the deployment** (current design): merge to `master` → the Vercel production build runs `next build`, then `prisma migrate deploy`, then the deployment is promoted. If the migration fails, the build fails and the previous deployment stays live.
@@ -144,13 +162,25 @@ select public.public_track_shipment('<an existing reference>'); -- includes orig
 ```
 Then: bootstrap the first administrator (production has no accounts), the smoke tests on the official domain (public pages EN/FR, `/en/track`, sign-in), and `/api/cron/process-emails` with the bearer secret (expect `claimed` ≥ 0, no errors). Email stays off, so queued emails are recorded as skipped.
 
+### How a failed migration behaves (verified 2026-11-05 on local PostgreSQL 17 with the real Prisma CLI)
+- Prisma applies **each migration file in one transaction**. A failure part-way leaves **no partial change**: no new tables, columns, functions or enum values, data untouched; `_prisma_migrations` records the migration as failed.
+- `prisma migrate deploy` then exits non-zero, `scripts/deploy-migrate.mjs` exits non-zero, `npm run build` fails, and Vercel does **not** promote the deployment: the previous version stays live on the unchanged schema.
+- Migration 1 can succeed and migration 2 fail: migration 1 stays applied, the deployment is not promoted, and the previous version keeps running on migration 1's schema (compatible, see below).
+- A failed migration blocks further deployments until it is resolved (step 1 below).
+
 ### Recovery
-1. **Migration failed part-way:** the SQL is idempotent. Fix the cause, `npx prisma migrate resolve --rolled-back 20261104000000_backend_mvp` (or the failed one), and deploy again; it completes the remaining statements.
+1. **Migration failed:** nothing was applied by the failed file. Fix the cause, run `npx prisma migrate resolve --rolled-back 20261104000000_backend_mvp` (or the failed one) against production (needs approval), then deploy again. Tested: the redeploy completes and the schema equals a clean upgrade.
 2. **Migration fine, new application faulty:** Vercel → Deployments → previous production deployment → **Instant Rollback**. Keep the schema (the previous version runs on it). While the old version runs, the database still queues emails that nobody sends; before re-deploying the new version, decide whether they should still go out, otherwise close them: `update public.email_deliveries set status = 'SKIPPED', error = 'held during rollback' where status = 'PENDING' and created_at < now() - interval '1 hour';`
 3. **Schema must be removed** (last resort): export the new tables first (`npx supabase db dump --db-url "$DIRECT_URL" --data-only -f mvp-data.sql`), roll the application back (step 2), then run `docs/runbooks/backend-mvp-rollback.sql`. Tested: it restores the exact pre-upgrade schema (columns, constraints, indexes, triggers, functions, policies, grants, RLS).
-4. **Data damaged:** restore the backup (Supabase restore or the dumps). Everything written after the backup is lost.
+4. **Data damaged:** restore a backup (Supabase restore or the dumps). **For the first release no manual backup exists** (see "Backup status"); only an automatic dashboard backup could help, and its existence was not verified.
 
-**Limitations:** PostgreSQL cannot remove enum values, so the 5 new email statuses remain after a rollback (unused, harmless). The rollback deletes the new tables' data (line items, notes, replies, contact enquiries, job runs) and assignments. Supabase Auth settings and email templates are dashboard settings, not covered by SQL; change them back by hand.
+**Limitations:**
+- **Vercel Instant Rollback reverts the application only, never the database.** After a rollback the previous version (`a3b9a9f`) runs on the **new** schema. This is supported: its own test suite passed against the new schema (83 of 86; the 3 failures assert the old schema's shape, not behaviour). Differences while it runs: shipments can no longer move out of Delivered/Cancelled; the database queues notification emails that the old version never sends (see step 2).
+- The schema rollback script is a separate, manual, approved step. It deletes the data of the new tables (line items, notes, replies, issue reports, contact enquiries, job runs) and request assignments; customers, staff, requests, quotes, shipments, events, documents and the audit log are kept (tested). It is safe on a database that was never upgraded or only partly upgraded (tested).
+- PostgreSQL cannot remove enum values: the 5 new email statuses remain after a rollback (unused, harmless).
+- Migration 2's data change (closing legacy email rows and removing a stored staff address) is not reversed by the rollback; production had no such rows.
+- Supabase Auth settings and email templates are dashboard settings, not covered by SQL; change them back by hand.
+- Without a manual backup, data written after the upgrade cannot be restored to an earlier point except from an automatic Supabase backup, if the plan provides one.
 
 ## Customer registration (C-03) switch-on
 Open registration is implemented and tested (local Supabase + journey G). In production, in this order:
