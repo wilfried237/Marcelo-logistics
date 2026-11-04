@@ -1,0 +1,31 @@
+<!doctype html>
+<!-- Supabase Auth "Confirm sign-up" template (Go template syntax). Language from the sign-up metadata (locale), English by default. -->
+<html lang="{{ if eq .Data.locale "fr" }}fr{{ else }}en{{ end }}">
+  <body style="margin:0;padding:24px 0;background:#f3f5f8;font-family:Inter,'Segoe UI',Helvetica,Arial,sans-serif;color:#1c2433">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-top:4px solid #0796da">
+            <tr><td style="padding:24px 32px 8px"><img src="{{ .SiteURL }}/brand/marchelo-logo-email.png" width="150" height="81" alt="Marchelo Logistics" /></td></tr>
+            <tr>
+              <td style="padding:8px 32px 24px">
+                {{ if eq .Data.locale "fr" }}
+                <h1 style="font-size:22px;line-height:30px;color:#0e1726;margin:8px 0 16px">Confirmez votre adresse e-mail</h1>
+                <p style="font-size:15px;line-height:24px">Merci de votre inscription sur Marchelo Logistics. Confirmez votre adresse e-mail pour activer votre compte.</p>
+                <p style="margin:24px 0"><a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email" style="background:#0b6fb3;color:#ffffff;padding:12px 22px;border-radius:4px;font-weight:600;text-decoration:none">Confirmer mon adresse e-mail</a></p>
+                <p style="font-size:13px;line-height:20px;color:#5b6577">Ce lien ne fonctionne qu’une seule fois. Si vous n’avez pas créé de compte, ignorez cet e-mail : aucun compte ne sera activé.</p>
+                {{ else }}
+                <h1 style="font-size:22px;line-height:30px;color:#0e1726;margin:8px 0 16px">Confirm your email address</h1>
+                <p style="font-size:15px;line-height:24px">Thank you for registering with Marchelo Logistics. Confirm your email address to activate your account.</p>
+                <p style="margin:24px 0"><a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email" style="background:#0b6fb3;color:#ffffff;padding:12px 22px;border-radius:4px;font-weight:600;text-decoration:none">Confirm my email address</a></p>
+                <p style="font-size:13px;line-height:20px;color:#5b6577">This link works once. If you did not create an account, ignore this email: no account will be activated.</p>
+                {{ end }}
+              </td>
+            </tr>
+            <tr><td style="background:#0e1726;padding:20px 32px;font-size:12px;line-height:18px;color:#c5ccd8">Marchelo Logistics · {{ if eq .Data.locale "fr" }}Expéditions entre l’Irlande et le Cameroun{{ else }}Shipping between Ireland and Cameroon{{ end }}</td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

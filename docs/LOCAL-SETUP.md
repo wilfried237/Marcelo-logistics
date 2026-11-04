@@ -40,7 +40,7 @@ npm run dev
 ```
 Demo logins: `demo.admin@`, `demo.staff@`, `demo.customer1@`, `demo.customer2@example.test`. The password is `SEED_USER_PASSWORD` if set, otherwise the local-only default in `scripts/seed.ts`. Auth emails are captured by the local inbox (`http://127.0.0.1:54324`), never delivered.
 
-Optional flags: `ENABLE_CUSTOMER_REGISTRATION=true` (also needs sign-ups enabled in `supabase/config.toml`, owner decision C-03), `ENABLE_DOCUMENT_UPLOADS=true` (private `customer-documents` bucket), `ENABLE_DEMO_DATA=true` (fictitious tracking reference `MLDEMO000001`, only when no database is configured).
+Optional flags: `ENABLE_CUSTOMER_REGISTRATION=true` (open registration, C-03; the local Supabase has sign-ups and email confirmation on, and confirmation emails appear in Mailpit at http://127.0.0.1:54324), `ENABLE_DOCUMENT_UPLOADS=true` (private `customer-documents` bucket), `ENABLE_DEMO_DATA=true` (fictitious tracking reference `MLDEMO000001`, only when no database is configured).
 
 Cron endpoints locally: set `CRON_SECRET` (32+ random characters) and call `curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/expire-quotes`. `/api/cron/retention` only reports (dry run).
 

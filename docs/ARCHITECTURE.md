@@ -46,6 +46,13 @@ daily cron /api/cron/process-emails ──► retries FAILED (backoff) ──►
 Resend webhook (signed) ──► DELIVERED / BOUNCED / COMPLAINED (+ staff alert)
 ```
 
+## Customer registration (C-03, 2026-11-04)
+```
+/register (flag on) ─► registerAction: Zod, consent, rate limits ─► supabase.auth.signUp (no session)
+Supabase Auth ─► confirmation email: /api/auth/callback?next=/<locale>/portal&token_hash=…&type=email
+callback ─► verifyOtp(token_hash) ─► session cookie ─► /portal      (role is always "customer": app_handle_new_user)
+```
+
 ## Key design decisions
 1. **Defence in depth for authorisation.** Guards in layouts and pages, role assertions in services, and RLS, column grants and triggers in PostgreSQL. App queries for signed-in users run under RLS (`withUser`).
 2. **Database-enforced workflow.** Quote transitions, sent/valid-quote requirements, shipment creation from accepted quotes, immutable fields and audit records are enforced by triggers, so no code path can skip them.

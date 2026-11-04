@@ -12,12 +12,12 @@
                 {{ if eq .Data.locale "fr" }}
                 <h1 style="font-size:22px;line-height:30px;color:#0e1726;margin:8px 0 16px">Votre compte Marchelo Logistics</h1>
                 <p style="font-size:15px;line-height:24px">Un compte a été créé pour vous sur la plateforme Marchelo Logistics. Choisissez votre mot de passe pour l’activer.</p>
-                <p style="margin:24px 0"><a href="{{ .ConfirmationURL }}" style="background:#0b6fb3;color:#ffffff;padding:12px 22px;border-radius:4px;font-weight:600;text-decoration:none">Activer mon compte</a></p>
+                <p style="margin:24px 0"><a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=invite" style="background:#0b6fb3;color:#ffffff;padding:12px 22px;border-radius:4px;font-weight:600;text-decoration:none">Activer mon compte</a></p>
                 <p style="font-size:13px;line-height:20px;color:#5b6577">Ce lien ne fonctionne qu’une seule fois. Si vous ne vous attendiez pas à cette invitation, ignorez cet e-mail.</p>
                 {{ else }}
                 <h1 style="font-size:22px;line-height:30px;color:#0e1726;margin:8px 0 16px">Your Marchelo Logistics account</h1>
                 <p style="font-size:15px;line-height:24px">An account has been created for you on the Marchelo Logistics platform. Choose your password to activate it.</p>
-                <p style="margin:24px 0"><a href="{{ .ConfirmationURL }}" style="background:#0b6fb3;color:#ffffff;padding:12px 22px;border-radius:4px;font-weight:600;text-decoration:none">Activate my account</a></p>
+                <p style="margin:24px 0"><a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=invite" style="background:#0b6fb3;color:#ffffff;padding:12px 22px;border-radius:4px;font-weight:600;text-decoration:none">Activate my account</a></p>
                 <p style="font-size:13px;line-height:20px;color:#5b6577">This link works once. If you were not expecting this invitation, ignore this email.</p>
                 {{ end }}
               </td>

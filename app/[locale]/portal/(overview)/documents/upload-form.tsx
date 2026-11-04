@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { ActionForm } from "@/components/app/action-form";
 import { FormField, selectClassName } from "@/components/app/form-field";
 import { SubmitButton } from "@/components/app/submit-button";
-import { uploadDocumentAction } from "../actions";
+import { uploadDocumentAction } from "../../actions";
 
 export function UploadDocumentForm({ locale, owners }: { locale: string; owners: { value: string; label: string }[] }) {
   const t = useTranslations("portal.documents");

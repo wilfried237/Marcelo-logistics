@@ -66,9 +66,28 @@ function trackedEnvFiles() {
   }
 }
 
+// The committed template may hold only empty values, "false" or the local site URL.
+// A real key, password or connection string there would be published with the repository.
+export function checkEnvExample(text) {
+  const allowed = /^(|false|true|http:\/\/localhost:3000)$/;
+  return text
+    .split(/\r?\n/)
+    .map((line, i) => [line, i + 1])
+    .filter(([line]) => /^[A-Z][A-Z0-9_]*=/.test(line) && !allowed.test(line.slice(line.indexOf("=") + 1).trim()))
+    .map(([line, n]) => `.env.example:${n}: ${line.slice(0, line.indexOf("="))} has a value; the template must contain placeholders only`);
+}
+
+function envExampleProblems() {
+  try {
+    return checkEnvExample(readFileSync(".env.example", "utf8"));
+  } catch {
+    return [];
+  }
+}
+
 function main() {
   const files = SOURCE_DIRS.flatMap((d) => walk(d)).concat(walk("messages")).map((f) => relative(".", f).replace(/\\/g, "/"));
-  const problems = [...checkClientImports(files), ...checkPublicSecretNames(files), ...checkBannedPhrases(files), ...trackedEnvFiles()];
+  const problems = [...checkClientImports(files), ...checkPublicSecretNames(files), ...checkBannedPhrases(files), ...trackedEnvFiles(), ...envExampleProblems()];
   if (problems.length) {
     console.error(`security: ${problems.length} problem(s)\n  - ${problems.join("\n  - ")}`);
     process.exit(1);

@@ -71,3 +71,20 @@ New test files: `tests/unit/pricing.test.ts`, `tests/integration/email.test.ts` 
 Running the journeys: `npx supabase start …`, `npm run db:migrate`, `npm run db:seed`, `npm run build`, `npm run test:journeys` (refuses a non-local database).
 
 **Not tested against real providers:** Resend delivery, SPF/DKIM, real webhooks (no domain or account yet, C-02).
+
+## Final verification run (2026-11-04)
+All against local or in-process services only (PGlite, local Supabase in Docker with its Mailpit, a local mock of the Resend API). Guards refuse non-local database or Supabase URLs; no test references a hosted endpoint.
+
+| Check | Result |
+|---|---|
+| `npm test`: unit 11 files, database 5, integration 6 | **219 passed** (incl. new `tests/db/upgrade-rehearsal.test.ts`: production-state upgrade + tested rollback) |
+| `npm run test:supabase` (real local Auth/PostgREST/Storage/Postgres + Mailpit) | **16 passed** (open registration: verification, cross-device link, no privilege escalation, duplicate sign-up) |
+| `npm run test:e2e` (production build, services blanked) | **82 passed, 4 skipped** (viewport-specific) |
+| `npm run test:journeys` A–G | **7 passed** (G: register → confirm by email link → portal; F now asserts real 404s) |
+| typecheck, lint, `check:i18n` (852 keys EN/FR), `check:security` (incl. `.env.example` guard), `check:owner` (8 markers, allowed until launch) | pass |
+| `npm run build` | pass (deploy-migrate skipped: not a Vercel production build) |
+| `prisma validate`, `npm run db:diff` | valid; no drift |
+| `npm audit` | 4 low (production deps), 16 moderate (dev only); unchanged |
+
+Isolation fix: the public E2E suite previously inherited `.env.local` through `next start`, so it only passed while the local stack was stopped. It now blanks the service variables (`playwright.config.ts`) and uses port 3300, never the journeys' 3200.
+Journeys clean up stale queued emails left by other local suites before starting (local database only).

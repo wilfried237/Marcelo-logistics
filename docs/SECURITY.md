@@ -60,4 +60,23 @@ This is an engineering review, **not** a legal compliance assessment. GDPR oblig
 | Jobs | Bearer `CRON_SECRET` (timing-safe); every run recorded; failures alert staff once a day | integration, journey F |
 | Assignment | Only staff/admin can be assignees (database trigger); only staff can assign | mvp-workflow |
 
-Known limitation: under the portal's loading boundary, a customer opening another customer's request gets the "not found" page with HTTP **200** (soft 404). No data is exposed (journey F checks this). The admin area fixed the same issue with a route group; the portal can follow if a strict 404 is required.
+**Fixed 2026-11-04:** a customer opening another customer's request or shipment used to get the "not found" page with HTTP 200 (soft 404), because the portal's loading boundary started the response before the page called `notFound()`. Detail pages now sit outside the loading boundary (`portal/(overview)` route group), so they return a real **404**; the same applies to staff opening an unknown reference. Regression test: journey F.
+
+## Customer registration (C-03)
+Owner decision 2026-11-04: open public registration. Controls, each verified against the real local Supabase Auth server:
+
+| Requirement | Control | Verified by |
+|---|---|---|
+| Email verification | Supabase `enable_confirmations = true`: no session at sign-up; sign-in refused until the emailed one-time link is used | `tests/supabase/auth-and-rls.test.ts` (open sign-up), journey G |
+| Cross-device links | Emails link to our `/api/auth/callback` with a `token_hash` (verified server-side with `verifyOtp`), not a PKCE code that only works in the starting browser; links are single use | same tests (reuse refused) |
+| Customer-only role | `app_handle_new_user` always creates role `customer`; any `role` in sign-up metadata is ignored; user-writable metadata changes nothing; clients cannot update `profiles.role` (column grant + trigger) | "cannot escalate privileges" test, journey G (admin area 404) |
+| Secure authentication | Passwords ≥ 12 characters (Auth + Zod), secure password change, generic errors, refresh-token revocation on sign-out | existing Auth tests |
+| No account enumeration | The register action answers "check your email" whether or not the address exists (Supabase's `user_already_exists` is mapped to the same answer); no second account; existing password unchanged | duplicate sign-up tests, journey G |
+| Rate limiting | App: 20 attempts per client per 10 min, **3 sign-ups per address per hour** (each sends an email), fail closed; Supabase Auth's own limits on top | `tests/integration/jobs.test.ts` |
+| Consent | Explicit checkbox, validated on the server | form validation |
+| Kill switch | `ENABLE_CUSTOMER_REGISTRATION=false` hides the form and refuses the action; Supabase sign-ups off refuses at the API | — |
+
+## Secrets in the repository (2026-11-04 check)
+- The owner's **working copy** of the tracked `.env.example` contained 10 real hosted values (Supabase keys, database URLs, secrets). They were **never committed**: every commit on every branch was searched for each value (database URLs by password) with no match. The values were moved unprinted to the git-ignored `.env.hosted.local`; `.env.example` is back to placeholders and `!.env.example` is restored in `.gitignore`.
+- New guard: `npm run check:security` fails if `.env.example` contains any value (unit-tested).
+- Recommendation: because those values sat in a tracked file in a working copy synchronised with VS Code, rotating the Supabase service-role key and the database password is cautious but optional; there is no evidence of exposure.

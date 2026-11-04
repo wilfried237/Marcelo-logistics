@@ -46,6 +46,19 @@ Pricing engine; outbox/retry/webhook; tokenised access; contact form; shipment t
 - **P-04**: customs duties: stated per quote in inclusions/exclusions.
 - **P-02**: per-service information: current defaults kept.
 - **C-01**: verified contact details: none, so email footers carry no phone/email.
-- **C-03**: registration stays invitation-only; customers without accounts use secure quote links.
+- **C-03**: ~~registration stays invitation-only~~ → **answered 2026-11-04: open registration** with email verification (implemented; see section 10). Customers without accounts can still use secure quote links.
 - **L-03**: retention: uploads and retention deletion stay disabled.
 - **T-02**: no estimated delivery dates are generated.
+
+## 10. Final verification and deployment-safety review (2026-11-04)
+| # | Finding | Severity | Resolution |
+|---|---|---|---|
+| V-1 | Registration was closed at three levels (Supabase `enable_signup = false`, no email confirmation, flag off) although C-03 is now "open". Auth emails used PKCE links that only work in the browser that started the flow | Functional | Opened with mandatory verification; confirmation template; `token_hash` links for confirmation, invitation and reset; per-address sign-up limit tightened to 3/hour. Tests: 3 real-stack Auth tests, rate-limit test, journey G |
+| V-2 | Soft 404 (HTTP 200) for another customer's request or shipment, and for staff opening unknown references | Low (no data exposed) | Detail pages moved outside the loading boundaries; strict 404 asserted in journey F |
+| V-3 | Legacy email rows (old inline sender) would be picked up by the new outbox: sent late, retried with incompatible shapes, staff rows sent to a stored address as "customer" mail | **High for the migration** | Follow-up migration `20261104000100_outbox_legacy_rows`; upgrade rehearsal test |
+| V-4 | Real hosted values in the working copy of the tracked `.env.example`; `!.env.example` removed from `.gitignore` | **High (not committed)** | Values moved unprinted to an ignored file, template restored, history scanned clean, guard added to `check:security` |
+| V-5 | Every Vercel variable targets Preview and Production: a preview would use the production database | **High** | Documented (ENVIRONMENT.md); no Vercel change made; do not push or deploy Preview until fixed |
+| V-6 | `SHADOW_DATABASE_URL` and `SEED_USER_PASSWORD` exist in Vercel | Low | Remove (owner) |
+| V-7 | Outbox drains the oldest due rows first, 10 per action: a large backlog delays new emails until it is cleared (seen locally with stale test rows) | Low in production | Legacy rows closed (V-3); daily cron drains 25 per run, so on Hobby a big outage backlog takes days; a Pro plan with a 5–15 minute schedule fixes it |
+| V-8 | Staff inbox | OK | Read only by `staffRecipients()`, used only for staff-audience rows, never stored, logged, shown or added to customer emails |
+| V-9 | Supabase's built-in mailer is not suitable for production sign-ups | Blocking for C-03 go-live | Custom SMTP (C-02) is a prerequisite in the switch-on checklist |

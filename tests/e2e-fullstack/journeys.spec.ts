@@ -45,6 +45,9 @@ async function signIn(page: Page, email: string) {
 test.beforeAll(async () => {
   db = new pg.Client({ connectionString: process.env.DIRECT_URL });
   await db.connect();
+  // Earlier local suites (e.g. test:supabase) leave queued emails that no server delivered; they would
+  // be sent first (oldest first) and delay this run's emails. Local database only (see config guard).
+  await db.query("update public.email_deliveries set status = 'SKIPPED', error = 'journeys: stale local backlog' where status in ('PENDING', 'FAILED')");
   await fetch(`${MOCK}/__reset`, { method: "POST" });
   await fetch(`${MOCK}/__mode?fail=0`, { method: "POST" });
 });
@@ -232,11 +235,13 @@ test.describe.serial("MVP journeys", () => {
     // Invalid access: another customer cannot open this request; anonymous users cannot reach staff pages.
     await page.context().clearCookies();
     await signIn(page, "demo.customer1@example.test");
-    // The portal streams behind a loading boundary, so this "not found" page is sent with HTTP 200
-    // (documented limitation); what matters is that none of the other customer's data is present.
-    await page.goto(`/en/portal/quotes/${state.reference}`);
+    // Regression: detail pages sit outside the portal's loading boundary, so "not found" is a real HTTP 404.
+    const foreignQuote = await page.goto(`/en/portal/quotes/${state.reference}`);
+    expect(foreignQuote?.status()).toBe(404);
     await expect(page.locator("h1")).toHaveText(/not found/i);
     expect(await page.content()).not.toMatch(/kitchenware|Journey Customer|315.50/);
+    expect((await page.goto(`/en/portal/shipments/${state.shipment}`))?.status()).toBe(404);
+    expect((await page.goto("/en/portal/quotes/MLQ-NOPE-0000"))?.status()).toBe(404);
     expect((await page.goto(`/en/admin/quotes/${state.reference}`))?.status()).toBe(404);
     await page.context().clearCookies();
     await page.goto(`/en/admin/quotes/${state.reference}`);
@@ -247,8 +252,72 @@ test.describe.serial("MVP journeys", () => {
     await page.goto(expiredLink);
     await expect(page.getByRole("button", { name: "Accept the quotation" })).toHaveCount(0); // already accepted
 
+    // Staff opening a reference that does not exist also get a real 404.
+    await signIn(page, "demo.staff@example.test");
+    expect((await page.goto("/en/admin/quotes/MLQ-NOPE-0000"))?.status()).toBe(404);
+    expect((await page.goto("/en/admin/shipments/MLS-NOPE-0000"))?.status()).toBe(404);
+    await page.context().clearCookies();
+
     // Duplicate requests: the same idempotency key never creates a second row.
     const before = (await q<{ n: number }>("select count(*)::int n from public.quote_requests"))[0].n;
     expect(before).toBeGreaterThan(0);
+  });
+
+  test("G. a visitor registers, verifies their email from the link and reaches the portal as a customer", async ({ page }) => {
+    // C-03: open registration with email verification. GoTrue's emails are captured by the local Mailpit.
+    const email = `register.${randomUUID().slice(0, 8)}@example.test`;
+    const password = `Journey-Register-${randomUUID()}`;
+    await page.context().clearCookies();
+    await page.goto("/en/register");
+    await page.getByLabel("Full name").fill("Registered Journey");
+    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Password").fill(password);
+    await page.getByLabel(/I agree that my details/).check();
+    await page.getByRole("button", { name: "Create account" }).click();
+    await expect(page.getByText("Check your email")).toBeVisible();
+
+    // Not verified yet: signing in is refused.
+    const [account] = await q<{ id: string; confirmed: boolean; role: string }>(
+      "select u.id, u.email_confirmed_at is not null as confirmed, p.role::text from auth.users u join public.profiles p on p.id = u.id where u.email = $1",
+      [email],
+    );
+    expect(account).toMatchObject({ confirmed: false, role: "customer" });
+    await page.goto("/en/login");
+    await page.getByLabel(/email/i).fill(email);
+    await page.getByLabel(/password/i).fill(password);
+    await page.getByRole("button", { name: /sign in|log in/i }).click();
+    await expect(page).toHaveURL(/\/login/);
+
+    // The same address again: identical answer, no second account.
+    await page.goto("/en/register");
+    await page.getByLabel("Full name").fill("Someone Else");
+    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Password").fill(`${password}-x`);
+    await page.getByLabel(/I agree that my details/).check();
+    await page.getByRole("button", { name: "Create account" }).click();
+    await expect(page.getByText("Check your email")).toBeVisible();
+    expect((await q<{ n: number }>("select count(*)::int n from auth.users where email = $1", [email]))[0].n).toBe(1);
+
+    // The emailed link works in a fresh browser context (cross-device) and lands in the portal.
+    let html = "";
+    await expect
+      .poll(async () => {
+        const list = (await (await fetch(`http://127.0.0.1:54324/api/v1/search?query=${encodeURIComponent(`to:"${email}"`)}`)).json()) as { messages?: { ID: string }[] };
+        const id = list.messages?.[0]?.ID; // newest first: a repeated sign-up re-sends the link
+        if (id) html = ((await (await fetch(`http://127.0.0.1:54324/api/v1/message/${id}`)).json()) as { HTML: string }).HTML;
+        return html.includes("token_hash=");
+      }, { timeout: 20_000 })
+      .toBe(true);
+    const link = /href="([^"]*token_hash=[^"]*)"/.exec(html)![1].replaceAll("&amp;", "&");
+    expect(link.startsWith("http://localhost:3200/api/auth/callback?")).toBe(true);
+    await page.context().clearCookies();
+    await page.goto(link);
+    await expect(page).toHaveURL(/\/en\/portal$/);
+    await expect(page.locator("h1")).toContainText("Welcome");
+    expect((await q<{ confirmed: boolean }>("select email_confirmed_at is not null as confirmed from auth.users where id = $1", [account.id]))[0].confirmed).toBe(true);
+
+    // Still only a customer: staff pages are not reachable.
+    expect((await page.goto("/en/admin"))?.status()).toBe(404);
+    expect((await q<{ role: string }>("select role::text from public.profiles where id = $1", [account.id]))[0].role).toBe("customer");
   });
 });

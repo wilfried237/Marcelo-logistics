@@ -103,7 +103,7 @@ The retention policy has **no periods** (`approved: false`, all periods `null`) 
 1. Create the project in the approved EU region. Note the **direct** connection string (port 5432) and the **pooled** one (port 6543).
 2. Review the SQL in `prisma/migrations/*/migration.sql`.
 3. Take a backup, then run `DIRECT_URL=… ALLOW_MIGRATE_HOST=<db host> npm run db:migrate`, and `npm run db:status` to confirm.
-4. Auth settings (dashboard → Authentication), matching `supabase/config.toml`: public sign-ups **off** unless C-03 opens registration, email provider on, minimum password length 12, secure password change on, Site URL and redirect allow-list `https://<host>/api/auth/callback`.
+4. Auth settings (dashboard → Authentication), matching `supabase/config.toml`: email provider on, minimum password length 12, secure password change on, Site URL and redirect allow-list `https://<host>/api/auth/callback**`; sign-ups and email confirmation **on** when registration is switched on (C-03 answered: open, see DEPLOYMENT.md).
 5. Bootstrap the first administrator in the Supabase SQL editor (trusted path):
    ```sql
    begin;
@@ -136,3 +136,6 @@ The retention policy has **no periods** (`approved: false`, all periods `null`) 
 | Quote lifecycle | Staff may revise a sent quote (QUOTED → UNDER_REVIEW) or re-quote after expiry |
 
 Status: applied and tested on the local Supabase stack and PGlite. **Not applied to the hosted project**: it is applied automatically by the next production deployment of `master`, which needs your approval (see DEPLOYMENT.md).
+
+## Follow-up migration (20261104000100_outbox_legacy_rows)
+Closes email rows written by the previous inline sender (idempotency keys `ack:`, `staff-new:`, `quote-issued:`, `shipment-update:`) that were never sent, so the new outbox cannot send them late or retry them with the wrong shape, and removes the staff inbox address that old staff rows stored. Idempotent; no effect on a new database. Review, risks, backup, recovery and the tested rollback script: [DEPLOYMENT.md → Migration runbook](./DEPLOYMENT.md).

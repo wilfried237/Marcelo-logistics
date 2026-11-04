@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { checkMessages, icuArgs } from "../../scripts/check-i18n.mjs";
 import { findPlaceholders, isReleaseBuild, MARKER } from "../../scripts/check-owner-placeholders.mjs";
-import { BANNED_PHRASES } from "../../scripts/check-security.mjs";
+import { BANNED_PHRASES, checkEnvExample } from "../../scripts/check-security.mjs";
 
 describe("i18n parity check", () => {
   it("passes for the real message files", () => {
@@ -61,5 +61,15 @@ describe("content integrity", () => {
       const text = readFileSync(file, "utf8");
       for (const re of BANNED_PHRASES as RegExp[]) expect(re.test(text), `${file} matches ${re}`).toBe(false);
     }
+  });
+});
+
+describe(".env.example secret guard", () => {
+  it("accepts the committed template and rejects real values", () => {
+    expect(checkEnvExample(readFileSync(".env.example", "utf8"))).toEqual([]);
+    const leaked = checkEnvExample("SUPABASE_URL=\nDATABASE_URL=postgresql://user:pw@host:6543/postgres\nENABLE_DEMO_DATA=false\n");
+    expect(leaked).toHaveLength(1);
+    expect(leaked[0]).toContain("DATABASE_URL has a value");
+    expect(leaked[0]).not.toContain("pw@host"); // never echoes the value
   });
 });

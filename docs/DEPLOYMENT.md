@@ -13,8 +13,8 @@ Every step below needs the owner's accounts and approval; none has been done.
 1. Owner creates or approves the Vercel and Supabase accounts and the region (R-01).
 2. **Supabase**
    - Apply the migrations **only after approval** (R-02): backup, review, `npm run db:migrate` with `ALLOW_MIGRATE_HOST`; procedure in [DATABASE.md](./DATABASE.md#applying-to-supabase-after-approval-r-02).
-   - Authentication settings, matching `supabase/config.toml`: public sign-ups **off** (invitation-only until C-03), email provider on, minimum password length **12**, secure password change **on**. If registration is opened later (C-03), turn email confirmations on at the same time.
-   - URL configuration: Site URL = the preview URL; redirect allow-list `https://<preview-host>/api/auth/callback` only (no wildcards beyond the project's own preview domain).
+   - Authentication settings, matching `supabase/config.toml`: email provider on, minimum password length **12**, secure password change **on**; sign-ups and email confirmation per the [registration switch-on](#customer-registration-c-03-switch-on) (C-03: open registration).
+   - URL configuration: Site URL = the site's URL; redirect allow-list `https://<host>/api/auth/callback**` only (the `**` allows the `?next=` query string; no other wildcards).
    - Custom SMTP stays unset until the Resend domain is verified (C-02); Supabase's built-in mailer is rate-limited and for testing only.
    - Bootstrap the first administrator (DATABASE.md).
 3. **Vercel → Project → Settings**
@@ -28,7 +28,7 @@ Every step below needs the owner's accounts and approval; none has been done.
 |---|---|
 | `ENABLE_QUOTE_SUBMISSION` | Database migrated, staff reviewer assigned (P-01), email working (C-02) |
 | `ENABLE_TRANSACTIONAL_EMAIL` | Resend domain verified, `EMAIL_FROM` and `STAFF_NOTIFICATION_EMAIL` set |
-| `ENABLE_CUSTOMER_REGISTRATION` | Owner chooses open registration (C-03) **and** Supabase sign-ups are enabled |
+| `ENABLE_CUSTOMER_REGISTRATION` | C-03 answered (open). Switch-on checklist below completed (sign-ups + confirmation on, templates, custom SMTP) |
 | `ENABLE_DOCUMENT_UPLOADS` | Retention policy approved (L-03) |
 | `ENABLE_DEMO_DATA`, `ENABLE_PREVIEW_AREAS` | Never on production (forced off by code) |
 
@@ -75,4 +75,63 @@ Verified locally on 2026-11-03: on an empty Supabase database the step applied a
 3. **Resend webhook:** endpoint `https://<site>/api/webhooks/resend`, events `email.delivered`, `email.bounced`, `email.complained`, `email.delivery_delayed`; copy its signing secret into `RESEND_WEBHOOK_SECRET`.
 4. **Supabase Auth email templates** (hosted): paste `supabase/templates/recovery.html` and `invite.html` into Authentication → Email Templates with the subjects from `supabase/config.toml`.
 5. **Crons** (`vercel.json`): quote expiry 03:15 UTC and email processing 03:45 UTC, daily (Hobby limit). Emails are also delivered immediately after each action; the daily job retries failures. On a Pro plan, run `/api/cron/process-emails` every 5–15 minutes.
-6. **Previews share production variables today:** a preview of this branch would run new code against the production database **before** its migration. Use a separate preview database or keep preview variables empty until the migration is applied.
+6. **Previews share production variables today:** a preview of this branch would run new code against the production database **before** its migration. **Do not push this branch or deploy Preview** until Preview has its own database or none (see ENVIRONMENT.md → Per Vercel environment).
+
+## Migration runbook: backend MVP (`20261104000000_backend_mvp` + `20261104000100_outbox_legacy_rows`)
+Status: reviewed and rehearsed locally; **not applied to the hosted database**. It needs the owner's explicit approval.
+
+### What it does to an existing production database (4 migrations applied)
+| Area | Effect on existing data |
+|---|---|
+| Customers, staff, profiles, roles | None. No column, trigger or policy on `profiles`/`customers` changes, except a new trigger that queues a staff alert when a role changes |
+| Quote requests | Two new nullable columns (`assigned_to` → profiles, `on delete set null`; `privacy_accepted_at`). Existing rows keep NULL (the request predates the acknowledgement); nothing is backfilled |
+| Quotes | Existing quotes have no line items: allowed (the total check applies only when lines exist). The quote lifecycle gains QUOTED→UNDER_REVIEW and EXPIRED→UNDER_REVIEW |
+| Shipments | New transition rule for **future** updates (delivered and cancelled are final; e.g. BOOKED→DELIVERED directly is refused). Existing statuses are not checked or changed |
+| Tracking | `public_track_shipment` adds route countries and delivery time; it now joins quotes/requests, which always exist (`shipments.quote_id` is NOT NULL with a restricting FK) |
+| Email log | New outbox columns (with defaults), `recipient` becomes nullable, new statuses. **Legacy rows** written by the previous version: unsent ones (PENDING/FAILED) are closed as SKIPPED so they are never sent late; legacy staff rows lose their stored inbox address. Sent history is kept |
+| New tables | `quote_line_items`, `case_messages`, `contact_enquiries`, `job_runs`: RLS on, staff/owner policies, column grants (`case_messages.author_id` hidden from clients) |
+| Audit | New tables are audited (personal fields redacted). Existing audit rows untouched |
+| Locks | Short exclusive locks while altering `email_deliveries` and `quote_requests` and creating triggers on `quote_requests`, `shipments`, `shipment_events`, `profiles`. Tables are small: seconds. Run at a quiet time |
+
+Evidence: `tests/db/upgrade-rehearsal.test.ts` builds the production state (first 4 migrations + data written by the previous version, including its email rows), applies the two migrations and checks that every existing row is unchanged, legacy emails are closed, in-flight quotes can still be accepted, tracking works, and a second run changes nothing. The **previous application version runs correctly on the new schema**: `master`'s own test suite passed against it (83 of 86; the 3 failures assert the old schema itself: table list, transition table, tracking field list).
+
+### Before (read-only checks, Supabase SQL editor)
+```sql
+select migration_name, finished_at, rolled_back_at from _prisma_migrations order by started_at; -- exactly the 4, all finished
+select status, split_part(idempotency_key, ':', 1) as kind, count(*) from public.email_deliveries group by 1, 2 order by 1, 2;
+select status, count(*) from public.shipments group by 1;
+select status, count(*) from public.quote_requests group by 1;
+```
+**Backup** (both, kept offline and encrypted; they contain personal data):
+1. Supabase → Database → Backups: confirm a recent backup exists (and note the PITR point if the plan has it).
+2. Logical dump from a trusted machine with the session-pooler URL: `npx supabase db dump --db-url "$DIRECT_URL" -f schema.sql` and `npx supabase db dump --db-url "$DIRECT_URL" --data-only -f data.sql`. Check that both files are non-empty.
+
+### Apply (choose one; both need approval)
+- **A. With the deployment** (current design): merge to `master` → the Vercel production build runs `next build`, then `prisma migrate deploy`, then the deployment is promoted. If the migration fails, the build fails and the previous deployment stays live.
+- **B. Ahead of the deployment** (recommended for this first large change, so it can be watched): from a trusted machine, `DIRECT_URL=<session pooler> ALLOW_MIGRATE_HOST=<pooler host> npm run db:migrate`, check, then merge (the deploy step then has nothing to apply). Safe because the previous version runs on the new schema.
+
+### After
+```sql
+select migration_name, finished_at from _prisma_migrations order by started_at; -- 6 rows, all finished
+select count(*) from public.email_deliveries where status in ('PENDING', 'FAILED') and idempotency_key ~ '^(ack|staff-new|quote-issued|shipment-update):'; -- 0
+select public.public_track_shipment('<an existing reference>'); -- includes origin/destination
+```
+Then the smoke tests (DEPLOYMENT checklist) and `/api/cron/process-emails` with the bearer secret (expect `claimed` ≥ 0, no errors).
+
+### Recovery
+1. **Migration failed part-way:** the SQL is idempotent. Fix the cause, `npx prisma migrate resolve --rolled-back 20261104000000_backend_mvp` (or the failed one), and deploy again; it completes the remaining statements.
+2. **Migration fine, new application faulty:** Vercel → Deployments → previous production deployment → **Instant Rollback**. Keep the schema (the previous version runs on it). While the old version runs, the database still queues emails that nobody sends; before re-deploying the new version, decide whether they should still go out, otherwise close them: `update public.email_deliveries set status = 'SKIPPED', error = 'held during rollback' where status = 'PENDING' and created_at < now() - interval '1 hour';`
+3. **Schema must be removed** (last resort): export the new tables first (`npx supabase db dump --db-url "$DIRECT_URL" --data-only -f mvp-data.sql`), roll the application back (step 2), then run `docs/runbooks/backend-mvp-rollback.sql`. Tested: it restores the exact pre-upgrade schema (columns, constraints, indexes, triggers, functions, policies, grants, RLS).
+4. **Data damaged:** restore the backup (Supabase restore or the dumps). Everything written after the backup is lost.
+
+**Limitations:** PostgreSQL cannot remove enum values, so the 5 new email statuses remain after a rollback (unused, harmless). The rollback deletes the new tables' data (line items, notes, replies, contact enquiries, job runs) and assignments. Supabase Auth settings and email templates are dashboard settings, not covered by SQL; change them back by hand.
+
+## Customer registration (C-03) switch-on
+Open registration is implemented and tested (local Supabase + journey G). In production, in this order:
+1. Custom SMTP in Supabase (Authentication → SMTP), using the verified sender domain (C-02). Supabase's built-in mailer is heavily rate-limited and not meant for production; check its current terms in the dashboard.
+2. Authentication → Sign In / Providers: **Allow new users to sign up: on**; Email provider **Confirm email: on**; minimum password length 12; secure password change on.
+3. Authentication → Email Templates: paste `supabase/templates/confirmation.html` (Confirm sign up), `invite.html`, `recovery.html`, with the subjects in `supabase/config.toml`. The links use `token_hash`, so they work in any browser or device.
+4. Authentication → URL configuration: Site URL = production URL; redirect URL `https://<production-host>/api/auth/callback**`.
+5. Authentication → Rate limits: review "emails sent per hour" for the SMTP provider.
+6. Vercel Production: `ENABLE_CUSTOMER_REGISTRATION=true`, redeploy, then register with an inbox the owner controls and confirm.
+To close registration again, set the flag to `false` (the form disappears) and turn sign-ups off in Supabase (the Auth API then refuses too).

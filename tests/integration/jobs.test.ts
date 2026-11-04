@@ -158,6 +158,13 @@ describe("authentication attempt limits", () => {
     const resets: boolean[] = [];
     for (let i = 0; i < 4; i++) resets.push(await authAttemptAllowed(t.db, "reset", `10.0.1.${i}`, "reset@example.test"));
     expect(resets).toEqual([true, true, true, false]); // 3 reset emails per address per hour
+    const registrations: boolean[] = [];
+    for (let i = 0; i < 4; i++) registrations.push(await authAttemptAllowed(t.db, "register", `10.0.2.${i}`, "signup@example.test"));
+    expect(registrations).toEqual([true, true, true, false]); // 3 sign-up (confirmation) emails per address per hour
+    const flood: boolean[] = [];
+    for (let i = 0; i < 21; i++) flood.push(await authAttemptAllowed(t.db, "register", "10.0.3.1", `flood${i}@example.test`));
+    expect(flood.slice(0, 20).every(Boolean)).toBe(true);
+    expect(flood[20]).toBe(false); // 20 attempts per client per 10 minutes, whatever the address
     const broken = new Proxy(t.db, { get: (target, prop, r) => (prop === "$queryRaw" ? () => Promise.reject(new Error("db down")) : Reflect.get(target, prop, r)) });
     expect(await authAttemptAllowed(broken, "login", "10.0.0.99", "x@example.test")).toBe(false);
   });

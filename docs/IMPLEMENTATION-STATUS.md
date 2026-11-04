@@ -83,3 +83,14 @@ Audit before the work: [BACKEND-AUDIT.md](./BACKEND-AUDIT.md).
 | Jobs | ✅ Expiry, email processing, retention (dry run); runs recorded; failures alert staff once a day; optional expiry reminders (off) | integration + journey F |
 | Documents | ⏸ Unchanged: uploads disabled until L-03 | — |
 | Real providers | ⏸ Resend not tested (no verified domain, C-02). Supabase hosted DB connected earlier (4 migrations); **this phase's migration is not applied to it** (awaiting approval) | — |
+
+## Final verification (2026-11-04, branch `feat/backend-mvp-completion`, not pushed)
+| Area | Status | Evidence |
+|---|---|---|
+| Open customer registration (C-03) | ✅ Implemented and tested locally, **off** in production until the switch-on checklist | 3 real-stack Auth tests, rate-limit test, journey G |
+| Strict 404 on foreign/unknown portal and admin detail pages | ✅ | journey F |
+| Legacy email rows on upgrade | ✅ Follow-up migration | upgrade rehearsal (8 tests incl. tested rollback) |
+| Previous version on the new schema | ✅ Compatible | `master` suite against the new migrations |
+| `.env.example` | ✅ Placeholders only, guarded | `check:security` + unit test |
+| Vercel environments | ⚠️ Preview shares production credentials | ENVIRONMENT.md; owner action |
+| Hosted migration | ⏸ Not applied (awaiting approval) | DEPLOYMENT.md runbook |

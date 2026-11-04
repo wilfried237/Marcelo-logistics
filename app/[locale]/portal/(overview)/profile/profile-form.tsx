@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ActionForm } from "@/components/app/action-form";
 import { FormField, inputClassName, selectClassName } from "@/components/app/form-field";
 import { SubmitButton } from "@/components/app/submit-button";
-import { updateProfileAction } from "../actions";
+import { updateProfileAction } from "../../actions";
 
 export function ProfileForm({ locale, profile }: { locale: string; profile: { name: string; email: string; phone: string | null; preferredLocale: "en" | "fr" } }) {
   const t = useTranslations("portal.profile");

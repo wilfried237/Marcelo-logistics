@@ -25,7 +25,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 | T-02 | Delivery-estimate policy | Whether ETAs are shown |
 | C-01 ★ | Verify contact details | Release (contact page currently says "being confirmed") |
 | C-02 ◆ | Sender email domain and staff notification inbox | Enabling email |
-| C-03 | Customer account onboarding: open registration or invitation only | Enabling registration |
+| C-03 | Customer account onboarding: open registration or invitation only | **Answered 2026-11-04: open registration** |
 | L-01 ★ | Terms and conditions of carriage | Release (terms page hidden) |
 | L-02 ★ | Privacy notice: controller identity and contact | Release |
 | L-03 ◆ | Document and data retention periods | Enabling uploads; automatic deletion |
@@ -163,7 +163,8 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Recommended:** invitation only at first. Customers can still request quotes and track without an account.
 - **If delayed:** self-registration is **off** (`ENABLE_CUSTOMER_REGISTRATION=false`); staff invite customers from the admin area.
 - **Development can continue:** yes.
-- **Answer:**
+- **Answer (owner, 2026-11-04):** **open public customer registration**. Anyone may register without an invitation, with mandatory email verification, secure authentication, customer-only role assignment, rate limiting and protection against privilege escalation.
+- **Implemented (2026-11-04):** see [SECURITY.md](./SECURITY.md#customer-registration-c-03). Production switch-on needs: Supabase Auth "Allow new users to sign up" **on** and "Confirm email" **on**, the confirmation template, custom SMTP (C-02; Supabase's built-in mailer is not for production use), then `ENABLE_CUSTOMER_REGISTRATION=true` ([DEPLOYMENT.md](./DEPLOYMENT.md#customer-registration-c-03-switch-on)). Staff invitations keep working alongside.
 
 ## 6. Legal, privacy and document retention
 
@@ -235,5 +236,5 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 
 ## Additions (2026-11-04, backend MVP)
 - **N-01 Quote expiry reminders:** should customers get an email before a quotation expires, and how long before (e.g. 48 hours)? Built and tested; **off** until answered (`notifications.quoteExpiryReminderHours`).
-- **N-02 Staff notification inbox:** the address(es) for internal alerts (`STAFF_NOTIFICATION_EMAIL`, comma-separated). Linked to P-01/C-02. Until set, alerts are recorded but not sent.
+- **N-02 Staff notification inbox:** **answered 2026-11-04**: a **dedicated business inbox**, not a personal address. The owner sets it in Vercel as `STAFF_NOTIFICATION_EMAIL` (comma-separated, max 10); no address is chosen, invented or hard-coded in the code. Until it is set, alerts are recorded as skipped, not sent. Linked to C-02 (the inbox should be on the business domain once it exists).
 - **N-03 Delivery speed of emails on the Hobby plan:** emails go out immediately after each action; failed ones are retried by a daily job (Hobby limit). A Pro plan allows retries every few minutes.

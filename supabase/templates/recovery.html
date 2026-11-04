@@ -12,12 +12,12 @@
                 {{ if eq .Data.locale "fr" }}
                 <h1 style="font-size:22px;line-height:30px;color:#0e1726;margin:8px 0 16px">Réinitialiser votre mot de passe</h1>
                 <p style="font-size:15px;line-height:24px">Nous avons reçu une demande de réinitialisation du mot de passe de votre compte Marchelo Logistics.</p>
-                <p style="margin:24px 0"><a href="{{ .ConfirmationURL }}" style="background:#0b6fb3;color:#ffffff;padding:12px 22px;border-radius:4px;font-weight:600;text-decoration:none">Choisir un nouveau mot de passe</a></p>
+                <p style="margin:24px 0"><a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery" style="background:#0b6fb3;color:#ffffff;padding:12px 22px;border-radius:4px;font-weight:600;text-decoration:none">Choisir un nouveau mot de passe</a></p>
                 <p style="font-size:13px;line-height:20px;color:#5b6577">Ce lien ne fonctionne qu’une seule fois et expire rapidement. Si vous n’êtes pas à l’origine de cette demande, ignorez cet e-mail : votre mot de passe reste inchangé.</p>
                 {{ else }}
                 <h1 style="font-size:22px;line-height:30px;color:#0e1726;margin:8px 0 16px">Reset your password</h1>
                 <p style="font-size:15px;line-height:24px">We received a request to reset the password for your Marchelo Logistics account.</p>
-                <p style="margin:24px 0"><a href="{{ .ConfirmationURL }}" style="background:#0b6fb3;color:#ffffff;padding:12px 22px;border-radius:4px;font-weight:600;text-decoration:none">Choose a new password</a></p>
+                <p style="margin:24px 0"><a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery" style="background:#0b6fb3;color:#ffffff;padding:12px 22px;border-radius:4px;font-weight:600;text-decoration:none">Choose a new password</a></p>
                 <p style="font-size:13px;line-height:20px;color:#5b6577">This link works once and expires soon. If you did not ask for this, ignore this email: your password stays the same.</p>
                 {{ end }}
               </td>
