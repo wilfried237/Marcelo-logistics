@@ -21,33 +21,33 @@
   },
   "home": {
     "hero": {
-      "title": "Vos envois entre l’Irlande et le Cameroun, chiffrés par des personnes, pas par un calculateur",
-      "subtitle": "Effets personnels, fûts et cartons, véhicules ou marchandises commerciales : dites-nous ce que vous souhaitez envoyer. Un membre de notre équipe examine chaque demande et vous répond avec un devis établi pour votre envoi.",
+      "title": "Fret aérien et maritime entre l’Irlande et le Cameroun",
+      "subtitle": "Colis, fûts, véhicules, conteneurs et marchandises commerciales dans les deux sens, avec dédouanement, entreposage et réexpédition de vos achats en ligne si besoin. Dites-nous ce que vous envoyez : nous préparons un devis adapté à votre envoi.",
       "quoteCta": "Demander un devis",
       "trackCta": "Suivre un envoi",
-      "eyebrow": "Irlande ⇄ Cameroun",
+      "eyebrow": "Lucan, Irlande · Douala, Cameroun",
       "secondaryCta": "Comment ça marche"
     },
     "services": {
-      "heading": "Ce que nous pouvons faire pour vous",
-      "intro": "Les catégories de services ci-dessous sont en cours de confirmation. Parlez-nous de votre envoi et nous vous dirons ce qui est disponible.",
-      "availability": "Disponibilité à confirmer",
+      "heading": "Nos services",
+      "intro": "Expédition par avion et par bateau dans les deux sens, ainsi que le dédouanement, l’entreposage et les achats en ligne qui vont avec. Si votre besoin ne figure pas ici, demandez-nous.",
+      "availability": "Disponibilité sur demande",
       "viewAll": "Voir tous les services"
     },
     "process": {
-      "heading": "Comment ça marche",
-      "step1Title": "Envoyez une demande",
-      "step1Body": "Décrivez ce que vous voulez expédier et sa destination.",
-      "step2Title": "Nous l’examinons",
-      "step2Body": "Un membre de notre équipe vérifie votre demande et peut vous demander des précisions.",
-      "step3Title": "Vous recevez un devis",
-      "step3Body": "Nous vous envoyons un prix établi pour votre envoi. Rien n’est facturé automatiquement.",
+      "heading": "Comment se passe un devis",
+      "step1Title": "Dites-nous ce que vous envoyez",
+      "step1Body": "Avec le formulaire de devis : la nature des marchandises, la quantité approximative, le lieu de départ et la destination.",
+      "step2Title": "Nous vérifions les détails",
+      "step2Body": "Si un point n’est pas clair, nous vous contactons avant d’établir le prix, pour que le devis corresponde à votre envoi réel.",
+      "step3Title": "Vous recevez votre devis",
+      "step3Body": "Le prix, ce qu’il comprend et sa durée de validité. Vous décidez de l’accepter ; aucun paiement en ligne.",
       "step4Title": "Suivez votre envoi",
-      "step4Body": "Une fois votre envoi réservé, utilisez votre référence pour suivre son avancement enregistré."
+      "step4Body": "Une fois réservé, votre envoi reçoit une référence ML que vous et le destinataire pouvez suivre."
     },
     "about": {
       "heading": "À propos de Marchelo Logistics",
-      "body": "Nous sommes une entreprise bilingue (anglais et français) de logistique et de transit, spécialisée dans les envois entre l’Irlande et le Cameroun.",
+      "body": "Marchelo Logistics expédie les marchandises des particuliers et des entreprises entre l’Irlande et le Cameroun, en français comme en anglais.",
       "cta": "En savoir plus sur nous"
     },
     "guide": {
@@ -60,19 +60,13 @@
       "more": "Toutes les questions"
     },
     "final": {
-      "heading": "Prêt à envoyer quelque chose ?",
-      "body": "Décrivez votre envoi en quelques minutes. Nous vous répondrons avec un devis, et rien n’est facturé automatiquement."
+      "heading": "Parlez-nous, en Irlande ou au Cameroun",
+      "body": "Pour un prix, le formulaire de devis est le moyen le plus rapide de nous transmettre les informations utiles. Pour toute autre question, appelez-nous ou écrivez-nous."
     },
-    "tasks": {
-      "heading": "Que souhaitez-vous faire ?",
-      "quoteTitle": "Demander un devis",
-      "quoteBody": "Décrivez votre envoi et recevez un prix établi par notre équipe.",
-      "trackTitle": "Suivre un envoi",
-      "trackBody": "Suivez votre envoi grâce à sa référence ML.",
-      "prepareTitle": "Préparer vos marchandises",
-      "prepareBody": "Emballage, étiquetage et articles à signaler avant d’emballer.",
-      "contactTitle": "Nous contacter",
-      "contactBody": "Des questions sur un envoi ou un devis."
+    "trackIntro": "Suivez un envoi grâce à sa référence ML, sans créer de compte.",
+    "locations": {
+      "heading": "Où nous trouver",
+      "intro": "Nous travaillons depuis Lucan, en Irlande, et depuis Douala, au Cameroun. Des envois partent chaque mois dans chaque sens."
     }
   },
   "services": {
@@ -85,30 +79,45 @@
       "description": "Fûts et cartons remplis d’articles ménagers et d’effets personnels."
     },
     "air_freight": {
-      "title": "Fret aérien",
-      "description": "Envois par avion lorsque la rapidité compte plus que le coût."
+      "title": "Fret aérien et colis express",
+      "description": "Transport express de colis entre l’Irlande et le Cameroun. Délais indicatifs, tarifs et conditions communiqués avec votre devis."
     },
     "sea_freight": {
-      "title": "Fret maritime et conteneurs",
-      "description": "Volumes plus importants expédiés par mer, en conteneur partagé ou complet."
+      "title": "Fret maritime : conteneurs complets et groupage",
+      "description": "Conteneurs de 20 et 40 pieds, groupage, transport maritime et livraison."
     },
     "vehicle": {
       "title": "Transport de véhicules",
-      "description": "Voitures et autres véhicules expédiés jusqu’à destination."
+      "description": "Transport de véhicules, formalités douanières et expédition vers l’Afrique."
     },
     "commercial_cargo": {
       "title": "Marchandises commerciales",
       "description": "Marchandises expédiées pour des entreprises et des commerçants."
+    },
+    "warehousing": {
+      "title": "Entreposage et distribution",
+      "description": "Stockage, réception, préparation et distribution de marchandises."
+    },
+    "customs_clearance": {
+      "title": "Dédouanement",
+      "description": "Accompagnement douanier, documentation et coordination des opérations."
+    },
+    "ecommerce": {
+      "title": "E-commerce et achats en ligne",
+      "description": "Achats en ligne, réception des marchandises en Irlande et réexpédition vers leur destination."
     }
   },
   "contact": {
     "title": "Contactez-nous",
     "description": "Une question sur un envoi ou un devis ? Contactez-nous.",
     "pending": "Nos coordonnées sont en cours de confirmation et seront publiées ici prochainement.",
-    "phoneIreland": "Irlande",
-    "phoneCameroon": "Cameroun",
     "email": "E-mail",
-    "whatsapp": "WhatsApp"
+    "ireland": "Irlande",
+    "cameroon": "Cameroun",
+    "callLabel": "Appeler {place} : {number}",
+    "emailLabel": "E-mail :",
+    "officeLabel": "Bureau :",
+    "locationLabel": "Implantation :"
   },
   "quote": {
     "hero": {
@@ -118,32 +127,6 @@
     "unavailable": {
       "title": "Les demandes en ligne sont temporairement indisponibles",
       "body": "Nous ne pouvons pas encore recevoir de demandes de devis via ce site. Rien de ce que vous saisissez ici n’est envoyé ni enregistré."
-    },
-    "shipmentTypes": {
-      "title": "Type d’envoi",
-      "description": "Choisissez le type d’envoi dont vous avez besoin",
-      "options": {
-        "car": {
-          "label": "Véhicule",
-          "description": "Voiture ou autre véhicule"
-        },
-        "parcel": {
-          "label": "Colis",
-          "description": "Colis et effets personnels"
-        },
-        "container": {
-          "label": "Conteneur",
-          "description": "Fret maritime et conteneurs"
-        },
-        "airExpress": {
-          "label": "Fret aérien",
-          "description": "Envois par avion"
-        },
-        "freight": {
-          "label": "Marchandises commerciales",
-          "description": "Marchandises pour les entreprises"
-        }
-      }
     },
     "form": {
       "title": "Détails de l’envoi",
@@ -256,10 +239,10 @@
   },
   "footer": {
     "rights": "Tous droits réservés.",
-    "pendingDetails": "Les informations sur l’entreprise et les mentions légales seront publiées une fois confirmées.",
     "send": "Envoyer",
     "help": "Aide",
-    "company": "Entreprise"
+    "company": "Entreprise",
+    "contact": "Contact"
   },
   "preview": {
     "banner": "Aperçu uniquement : cet espace n’est pas relié à des données réelles et n’est pas accessible aux clients."
@@ -694,10 +677,10 @@
   },
   "aboutPage": {
     "title": "Qui sommes-nous",
-    "intro": "Nous sommes une entreprise bilingue (anglais et français) de logistique et de transit, spécialisée dans les envois entre l’Irlande et le Cameroun.",
+    "intro": "Marchelo Logistics est une entreprise de logistique et de transit qui travaille entre l’Irlande et le Cameroun, avec un bureau à Lucan et une implantation à Douala.",
     "howWeWorkTitle": "Notre façon de travailler",
     "howWeWork": "Chaque devis est préparé par un membre de notre équipe pour votre envoi. Les prix ne sont jamais calculés automatiquement.",
-    "pendingDetails": "D’autres informations sur notre entreprise seront publiées une fois confirmées."
+    "whereTitle": "Où nous travaillons"
   },
   "faq": {
     "title": "Questions fréquentes",
@@ -1136,5 +1119,15 @@
     "guidePacking": "Un carton ouvert avec des affaires pliées à l’intérieur et du calage autour.",
     "guideLabelling": "Un carton avec une étiquette d’adresse bien lisible, des flèches « haut » et un marqueur.",
     "guideList": "Un porte-bloc avec la liste du contenu, à côté d’un carton fermé."
+  },
+  "servicesPage": {
+    "intro": "Nous expédions par avion et par bateau entre l’Irlande et le Cameroun, dans les deux sens. Les tarifs, délais et conditions dépendent de chaque envoi : chaque devis est donc établi pour vous. Demandez-nous de confirmer ce qui s’applique au vôtre.",
+    "listHeading": "Ce que nous prenons en charge",
+    "groups": {
+      "shipping": "Expédition",
+      "support": "Douane, entreposage et achats en ligne"
+    },
+    "quoteCta": "Demander un devis",
+    "askCta": "Nous consulter pour ce service"
   }
 }

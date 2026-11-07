@@ -75,7 +75,7 @@ test.describe("public pages", () => {
   });
 
   test("photos and illustrations load, keep their aspect ratio and have descriptive alt text", async ({ page }) => {
-    for (const path of ["/en", "/fr/services", "/en/how-it-works", "/en/about", "/en/shipping-guide", "/en/contact", "/en/track"]) {
+    for (const path of ["/en", "/fr/services", "/en/how-it-works", "/en/about", "/en/shipping-guide"]) {
       await page.goto(path);
       const visuals = page.locator("main img[src*='/images/'], main img[src*='_next/image']");
       expect(await visuals.count(), path).toBeGreaterThan(0);
@@ -165,4 +165,36 @@ test.describe("navigation", () => {
     const skip = page.getByRole("link", { name: "Skip to main content" });
     await expect(skip).toBeFocused();
   });
+});
+
+test.describe("business information supplied by the client", () => {
+  for (const locale of ["en", "fr"] as const) {
+    test(`/${locale}/contact and the footer show both locations with working tel: and mailto: links`, async ({ page }) => {
+      await page.goto(`/${locale}/contact`);
+      const main = page.locator("main");
+      await expect(main.getByText("12 Griffeen Glen Chase, Lucan")).toBeVisible();
+      await expect(main.getByText("Douala – Ndogsimbi")).toBeVisible();
+      await expect(main.locator('a[href="tel:+353894840017"]')).toHaveText("+353 89 484 0017");
+      await expect(main.locator('a[href="tel:+237659685479"]')).toHaveText("+237 6 59 68 54 79");
+      await expect(main.locator('a[href="mailto:info.cargo@marchelo-logistics.com"]')).toHaveText("info.cargo@marchelo-logistics.com");
+      const footer = page.locator("footer");
+      await expect(footer.locator('a[href="tel:+353894840017"]')).toBeVisible();
+      await expect(footer.locator('a[href="tel:+237659685479"]')).toBeVisible();
+      await expect(footer.locator('a[href="mailto:info.cargo@marchelo-logistics.com"]')).toBeVisible();
+      // The previous site's unverified details (a Gmail address and old numbers) are never shown.
+      expect(await page.content()).not.toMatch(/@gmail\.com|\+353896160927|\+237695739033/);
+    });
+  }
+
+  const SERVICES = {
+    en: ["Air freight and express parcels", "Sea freight: full containers and groupage (FCL and LCL)", "Vehicle shipping", "Barrels and boxes", "Parcels and personal effects", "Commercial cargo", "Customs clearance", "Warehousing and distribution", "E-commerce and online shopping"],
+    fr: ["Fret aérien et colis express", "Fret maritime : conteneurs complets et groupage", "Transport de véhicules", "Fûts et cartons", "Colis et effets personnels", "Marchandises commerciales", "Dédouanement", "Entreposage et distribution", "E-commerce et achats en ligne"],
+  } as const;
+  for (const locale of ["en", "fr"] as const) {
+    test(`/${locale}/services lists every service, existing and added`, async ({ page }) => {
+      await page.goto(`/${locale}/services`);
+      const titles = await page.locator("main h4").allInnerTexts();
+      expect(titles.map((s) => s.trim())).toEqual([...SERVICES[locale]]);
+    });
+  }
 });

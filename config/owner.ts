@@ -13,8 +13,10 @@
 export const NEEDS_OWNER = "{{NEEDS_OWNER}}"; // @owner-marker-definition
 
 export type ContactChannel = {
-  /** E.164 phone number, e.g. +3538xxxxxxx */
+  /** E.164 phone number (e.g. +3538xxxxxxx) or an email address. */
   value: string;
+  /** How the value is shown to visitors, if different from `value`. */
+  display?: string;
   /** Only verified channels are ever shown to visitors. */
   verified: boolean;
 };
@@ -31,20 +33,30 @@ export const ownerConfig = {
   },
 
   contact: {
-    // These values were found in the previous site code. They are NOT yet verified
-    // by the owner and are therefore never displayed (C-01).
-    irelandPhone: { value: "+353896160927", verified: false } satisfies ContactChannel, // {{NEEDS_OWNER}} C-01
-    irelandWhatsApp: { value: "+353896160927", verified: false } satisfies ContactChannel, // {{NEEDS_OWNER}} C-01
-    cameroonPhone: { value: "+237695739033", verified: false } satisfies ContactChannel, // {{NEEDS_OWNER}} C-01
-    email: { value: "marchelodis@gmail.com", verified: false } satisfies ContactChannel, // {{NEEDS_OWNER}} C-01
+    // Supplied by the client on 2026-11-06 (C-01). `display` keeps the client's own spacing.
+    irelandPhone: { value: "+353894840017", display: "+353 89 484 0017", verified: true } satisfies ContactChannel,
+    cameroonPhone: { value: "+237659685479", display: "+237 6 59 68 54 79", verified: true } satisfies ContactChannel,
+    email: { value: "info.cargo@marchelo-logistics.com", verified: true } satisfies ContactChannel,
+    // No WhatsApp number has been supplied; the previous site's number is not shown.
+    irelandWhatsApp: { value: "", verified: false } satisfies ContactChannel, // {{NEEDS_OWNER}} C-01 (WhatsApp number, optional)
+  },
+
+  /**
+   * Where the business operates, exactly as supplied by the client on 2026-11-06.
+   * No opening hours are published until the client supplies them.
+   */
+  locations: {
+    ireland: { country: "IE", place: "12 Griffeen Glen Chase, Lucan", kind: "office", phone: "irelandPhone" },
+    cameroon: { country: "CM", place: "Douala – Ndogsimbi", kind: "location", phone: "cameroonPhone" },
   },
 
   operations: {
     /**
-     * Service codes the owner has confirmed as currently offered. Until confirmed,
-     * every category is shown as "availability to be confirmed" (S-01).
+     * Services the client has confirmed (their list of 2026-11-06). The earlier
+     * categories (barrels and boxes, parcels and personal effects, commercial
+     * cargo) are kept and shown as "availability on request" until confirmed.
      */
-    confirmedServices: [] as string[], // {{NEEDS_OWNER}} S-01
+    confirmedServices: ["air_freight", "sea_freight", "vehicle", "warehousing", "customs_clearance", "ecommerce"] as string[], // {{NEEDS_OWNER}} S-01 (barrels, parcels, commercial cargo)
     /**
      * Routes offered online (ISO 3166-1 alpha-2) and their monthly departure
      * windows (days of the month). Source: the client's message relayed by the

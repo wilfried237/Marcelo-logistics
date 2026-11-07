@@ -57,7 +57,37 @@ export function getSiteUrl(env: Env = process.env): string {
   return read(url, "SITE_URL", { SITE_URL: env.SITE_URL || "http://localhost:3000" }).replace(/\/$/, "");
 }
 
-export type EmailTransport = { kind: "resend"; apiKey: string; from: string } | { kind: "log" } | { kind: "disabled"; reason: string };
+export type EmailTransport =
+  | { kind: "resend"; apiKey: string; from: string; replyTo?: string; testRecipient?: string }
+  | { kind: "log" }
+  | { kind: "disabled"; reason: string };
+
+/**
+ * Test-only recipient override (EMAIL_TEST_RECIPIENT). When active, EVERY email,
+ * customer and staff alike, goes only to this one address, with "[EMAIL TEST]"
+ * in the subject; stored recipients are never changed.
+ *
+ * Safeguard: it is ignored whenever the code runs on Vercel (VERCEL=1 covers
+ * Production and Preview), so it can never become a live recipient override,
+ * even if someone sets it there. It must be a single valid address.
+ */
+export function emailTestRecipient(env: Env = process.env): string | undefined {
+  const value = env.EMAIL_TEST_RECIPIENT?.trim().toLowerCase();
+  if (!value) return undefined;
+  if (env.VERCEL === "1" || env.VERCEL_ENV) return undefined;
+  return /^[^@\s,;]+@[^@\s,;]+\.[^@\s,;]+$/.test(value) && value.length <= 254 ? value : undefined;
+}
+
+/**
+ * Optional reply-to address for every outgoing email (EMAIL_REPLY_TO), so
+ * replies reach a business mailbox instead of the automated sender. One valid
+ * address; anything else is ignored (emails are then sent without reply-to).
+ */
+export function emailReplyTo(env: Env = process.env): string | undefined {
+  const value = env.EMAIL_REPLY_TO?.trim().toLowerCase();
+  if (!value) return undefined;
+  return /^[^@\s,;<>]+@[^@\s,;<>]+\.[^@\s,;<>]+$/.test(value) && value.length <= 254 ? value : undefined;
+}
 
 /**
  * Real email requires the flag, an API key and a verified sender (C-02).
@@ -67,7 +97,9 @@ export function getEmailTransport(env: Env = process.env): EmailTransport {
   if (isEnabled("ENABLE_TRANSACTIONAL_EMAIL", env)) {
     if (!env.RESEND_API_KEY) return { kind: "disabled", reason: "RESEND_API_KEY is not set" };
     if (!env.EMAIL_FROM) return { kind: "disabled", reason: "EMAIL_FROM is not set" };
-    return { kind: "resend", apiKey: env.RESEND_API_KEY, from: env.EMAIL_FROM };
+    const testRecipient = emailTestRecipient(env);
+    const replyTo = emailReplyTo(env);
+    return { kind: "resend", apiKey: env.RESEND_API_KEY, from: env.EMAIL_FROM, ...(replyTo ? { replyTo } : {}), ...(testRecipient ? { testRecipient } : {}) };
   }
   if (env.NODE_ENV !== "production" && env.EMAIL_DEV_LOG === "true") return { kind: "log" };
   return { kind: "disabled", reason: "ENABLE_TRANSACTIONAL_EMAIL is not true" };

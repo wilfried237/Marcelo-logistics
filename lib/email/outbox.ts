@@ -25,16 +25,16 @@ const BACKOFF_MINUTES = [1, 5, 30, 120, 720];
 const STALE_LOCK_MINUTES = 10;
 
 export interface EmailProvider {
-  send(input: { from: string; to: string[]; subject: string; html: string; text: string; idempotencyKey: string }): Promise<{ id: string } | { error: string }>;
+  send(input: { from: string; to: string[]; subject: string; html: string; text: string; idempotencyKey: string; replyTo?: string }): Promise<{ id: string } | { error: string }>;
 }
 
 /** Resend over its HTTP API. The API key never leaves the server. */
 export function resendProvider(apiKey: string): EmailProvider {
   return {
-    async send({ from, to, subject, html, text, idempotencyKey }) {
+    async send({ from, to, subject, html, text, idempotencyKey, replyTo }) {
       const { Resend } = await import("resend");
       const client = new Resend(apiKey);
-      const { data, error } = await client.emails.send({ from, to, subject, html, text }, { idempotencyKey });
+      const { data, error } = await client.emails.send({ from, to, subject, html, text, ...(replyTo ? { replyTo } : {}) }, { idempotencyKey });
       if (error || !data) return { error: error?.message ?? "unknown provider error" };
       return { id: data.id };
     },
@@ -63,6 +63,14 @@ export interface OutboxReport {
   skipped: number;
   retrying: number;
   dead: number;
+  /** Only with EMAIL_TEST_RECIPIENT: who each redirected email was meant for (masked). */
+  redirected?: { template: string; audience: "customer" | "staff"; intended: string[] }[];
+}
+
+/** "ngozi.example@domain.test" -> "n***@domain.test": enough to identify the case, no full address. */
+export function maskAddress(address: string): string {
+  const [local, domain] = address.split("@");
+  return `${(local ?? "").slice(0, 1)}***@${domain ?? ""}`;
 }
 
 type ClaimedRow = OutboxRow & { idempotencyKey: string; attempts: number };
@@ -174,7 +182,25 @@ export async function processOutbox(db: Database, options: OutboxOptions = {}): 
       const html = await render(element);
       const text = plainTextEmail(rendered.props);
       const provider = options.provider ?? resendProvider(transport.apiKey);
-      const result = await provider.send({ from: transport.from, to, subject: rendered.subject, html, text, idempotencyKey: row.idempotencyKey });
+      // Test-only override (never active on Vercel, see emailTestRecipient):
+      // everything goes to the one test address, the stored recipient is untouched.
+      let recipients = to;
+      let subject = rendered.subject;
+      if (transport.testRecipient) {
+        (report.redirected ??= []).push({ template: row.template, audience: row.audience, intended: to.map(maskAddress) });
+        recipients = [transport.testRecipient];
+        subject = `[EMAIL TEST] ${subject}`;
+      }
+      // Same sender and reply-to for customer emails and staff alerts (EMAIL_FROM, EMAIL_REPLY_TO).
+      const result = await provider.send({
+        from: transport.from,
+        to: recipients,
+        subject,
+        html,
+        text,
+        idempotencyKey: row.idempotencyKey,
+        ...(transport.replyTo ? { replyTo: transport.replyTo } : {}),
+      });
       if ("error" in result) {
         report[await recordFailure(db, row, result.error)]++;
         continue;

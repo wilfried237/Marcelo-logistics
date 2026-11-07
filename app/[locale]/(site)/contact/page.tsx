@@ -4,7 +4,6 @@ import { use } from "react";
 import { ContactChannels } from "@/components/contact/contact-channels";
 import { PageBanner } from "@/components/app/page-banner";
 import { ContactForm } from "@/components/contact/contact-form";
-import { Illustration } from "@/components/brand/illustration";
 import { isDatabaseConfigured } from "@/lib/config/env";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -18,7 +17,6 @@ export default function ContactPage({ params }: { params: Promise<{ locale: stri
   setRequestLocale(locale);
   const t = useTranslations("contact");
   const tf = useTranslations("contactForm");
-  const ti = useTranslations("illustrations");
   return (
     <>
       <PageBanner title={t("title")} description={t("description")} />
@@ -36,7 +34,6 @@ export default function ContactPage({ params }: { params: Promise<{ locale: stri
             {tf("channels")}
           </h2>
           <ContactChannels />
-          <Illustration name="supportChat" alt={ti("supportChat")} className="mt-10 max-w-sm" />
         </section>
       </div>
     </>

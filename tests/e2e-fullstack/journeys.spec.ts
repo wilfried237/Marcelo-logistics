@@ -53,6 +53,9 @@ test.beforeAll(async () => {
 });
 test.afterAll(async () => db?.end());
 
+/** Registration is closed until the official launch; JOURNEY_REGISTRATION_OPEN=1 runs the open journey. */
+const REGISTRATION_OPEN = process.env.JOURNEY_REGISTRATION_OPEN === "1";
+
 test.describe.serial("MVP journeys", () => {
   test("A. a visitor requests a quote; it is stored, staff are alerted and the customer is acknowledged", async ({ page }) => {
     await page.goto("/en/quote");
@@ -263,7 +266,31 @@ test.describe.serial("MVP journeys", () => {
     expect(before).toBeGreaterThan(0);
   });
 
-  test("G. a visitor registers, verifies their email from the link and reaches the portal as a customer", async ({ page }) => {
+  test("G. registration is closed: no sign-up form, the Auth API refuses sign-ups, existing customers still sign in", async ({ page }) => {
+    test.skip(REGISTRATION_OPEN, "registration is open in this run");
+    for (const [path, heading] of [["/en/register", "Accounts are created by invitation"], ["/fr/register", null]] as const) {
+      await page.goto(path);
+      if (heading) await expect(page.getByText(heading)).toBeVisible();
+      await expect(page.locator("main form input[type=password]")).toHaveCount(0);
+    }
+    // The public Supabase Auth API refuses sign-ups too (not only the website form).
+    const email = `closed.${randomUUID().slice(0, 8)}@example.test`;
+    const res = await fetch(`${process.env.SUPABASE_URL}/auth/v1/signup`, {
+      method: "POST",
+      headers: { apikey: process.env.SUPABASE_ANON_KEY ?? "", "content-type": "application/json" },
+      body: JSON.stringify({ email, password: `Journey-Closed-${randomUUID()}` }),
+    });
+    expect(res.status).toBe(422);
+    expect(((await res.json()) as { error_code?: string; code?: string }).error_code ?? "").toBe("signup_disabled");
+    expect((await q<{ n: number }>("select count(*)::int n from auth.users where email = $1", [email]))[0].n).toBe(0);
+    // Existing accounts are unaffected.
+    await page.context().clearCookies();
+    await signIn(page, "demo.customer1@example.test");
+    await expect(page).toHaveURL(/\/en\/portal/);
+  });
+
+  test("G (open). a visitor registers, verifies their email from the link and reaches the portal as a customer", async ({ page }) => {
+    test.skip(!REGISTRATION_OPEN, "registration is closed until the official launch");
     // C-03: open registration with email verification. GoTrue's emails are captured by the local Mailpit.
     const email = `register.${randomUUID().slice(0, 8)}@example.test`;
     const password = `Journey-Register-${randomUUID()}`;

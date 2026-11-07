@@ -1,43 +1,64 @@
 import { useTranslations } from "next-intl";
-import { Mail, MessageCircle, Phone } from "lucide-react";
-import { verifiedContacts } from "@/config/owner";
+import { Mail, MapPin, Phone } from "lucide-react";
+import { ownerConfig, verifiedContacts } from "@/config/owner";
+import { cn } from "@/lib/utils";
+
+type Location = (typeof ownerConfig.locations)[keyof typeof ownerConfig.locations];
 
 /**
- * Shows only owner-verified contact channels (decision C-01). If none are
- * verified, an honest "being confirmed" message is shown instead.
+ * The business's two locations (Ireland and Cameroon) and its email address,
+ * exactly as supplied by the client (C-01). Only verified channels are shown;
+ * phone numbers use tel: links and the email a mailto: link.
+ *
+ * `tone="dark"` is for the footer (light text on the ink background).
  */
-export function ContactChannels() {
+export function ContactChannels({ tone = "light", className }: { tone?: "light" | "dark"; className?: string }) {
   const t = useTranslations("contact");
   const c = verifiedContacts();
-  const items = [
-    c.irelandPhone && { icon: Phone, label: t("phoneIreland"), value: c.irelandPhone.value, href: `tel:${c.irelandPhone.value}` },
-    c.cameroonPhone && { icon: Phone, label: t("phoneCameroon"), value: c.cameroonPhone.value, href: `tel:${c.cameroonPhone.value}` },
-    c.irelandWhatsApp && {
-      icon: MessageCircle,
-      label: t("whatsapp"),
-      value: c.irelandWhatsApp.value,
-      href: `https://wa.me/${c.irelandWhatsApp.value.replace(/\D/g, "")}`,
-    },
-    c.email && { icon: Mail, label: t("email"), value: c.email.value, href: `mailto:${c.email.value}` },
-  ].filter(Boolean) as { icon: typeof Phone; label: string; value: string; href: string }[];
+  const locations = Object.values(ownerConfig.locations) as Location[];
+  const muted = tone === "dark" ? "text-ink-muted" : "text-muted-foreground";
+  const link = cn("font-medium underline-offset-4 hover:underline", tone === "dark" ? "text-ink-foreground" : "text-foreground");
 
-  if (items.length === 0) {
-    return <p className="text-muted-foreground">{t("pending")}</p>;
+  if (!c.irelandPhone && !c.cameroonPhone && !c.email) {
+    return <p className={muted}>{t("pending")}</p>;
   }
 
   return (
-    <ul className="grid gap-3 sm:grid-cols-2">
-      {items.map((item) => (
-        <li key={item.href}>
-          <a href={item.href} className="flex min-h-11 items-center gap-3 rounded-lg border bg-background px-4 py-3 hover:bg-secondary">
-            <item.icon className="h-5 w-5 text-primary" aria-hidden />
-            <span>
-              <span className="block text-sm text-muted-foreground">{item.label}</span>
-              <span className="font-medium">{item.value}</span>
-            </span>
+    <div className={cn("space-y-6", className)}>
+      <ul className={cn("grid gap-6", tone === "light" && "sm:grid-cols-2")}>
+        {locations.map((location) => {
+          const phone = c[location.phone];
+          return (
+            <li key={location.country} className={cn(tone === "light" && "border-l-2 border-brand pl-4")}>
+              <h3 className={cn("font-semibold", tone === "dark" && "text-sm uppercase tracking-wider")}>{t(location.country === "IE" ? "ireland" : "cameroon")}</h3>
+              <p className={cn("mt-1 flex items-start gap-2 text-sm", muted)}>
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                <span>
+                  <span className="sr-only">{t(location.kind === "office" ? "officeLabel" : "locationLabel")} </span>
+                  {location.place}
+                </span>
+              </p>
+              {phone && (
+                <p className="mt-1 flex items-center gap-2 text-sm">
+                  <Phone className={cn("h-4 w-4 shrink-0", muted)} aria-hidden />
+                  <a href={`tel:${phone.value}`} className={link} aria-label={t("callLabel", { place: t(location.country === "IE" ? "ireland" : "cameroon"), number: phone.display ?? phone.value })}>
+                    {phone.display ?? phone.value}
+                  </a>
+                </p>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      {c.email && (
+        <p className="flex items-center gap-2 text-sm">
+          <Mail className={cn("h-4 w-4 shrink-0", muted)} aria-hidden />
+          <span className={muted}>{t("emailLabel")}</span>
+          <a href={`mailto:${c.email.value}`} className={cn(link, "break-all")}>
+            {c.email.value}
           </a>
-        </li>
-      ))}
-    </ul>
+        </p>
+      )}
+    </div>
   );
 }

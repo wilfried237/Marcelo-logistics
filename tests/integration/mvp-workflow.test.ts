@@ -260,7 +260,8 @@ describe("signed quote links (customers without an account)", () => {
     const view = await getQuoteForLink(db, token);
     expect(view).toMatchObject({ reference: r.reference, status: "QUOTED", quote: { amountMinor: 8500, currency: "EUR" } });
     expect(JSON.stringify(view)).not.toContain("INTERNAL");
-    expect(await getQuoteForLink(db, token.slice(0, -1) + "x")).toBeNull();
+    // Tamper with the last signature character (always to a different one).
+    expect(await getQuoteForLink(db, token.slice(0, -1) + (token.endsWith("x") ? "y" : "x"))).toBeNull();
 
     expect(await respondViaLink(db, token, true, randomUUID())).toEqual({ ok: true, data: { status: "ACCEPTED" } });
     expect(await respondViaLink(db, token, false, randomUUID())).toMatchObject({ ok: false, code: "invalid_quote_transition" });

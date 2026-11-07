@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/brand/logo";
 import { BrandName } from "./brand-name";
+import { ContactChannels } from "@/components/contact/contact-channels";
 
 function Column({ title, links }: { title: string; links: { href: string; label: string }[] }) {
   return (
@@ -25,10 +26,14 @@ export function SiteFooter() {
   return (
     <footer className="bg-ink text-ink-foreground">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 md:px-6 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
-        <div className="space-y-3">
+        <div className="space-y-5">
           <Logo variant="reversed" className="h-16 w-auto" />
-          <p className="max-w-xs text-sm text-ink-muted">{t("header.corridor")}</p>
-          <p className="max-w-xs text-sm text-ink-muted">{t("footer.pendingDetails")}</p>
+          <section aria-labelledby="footer-contact-heading">
+            <h2 id="footer-contact-heading" className="sr-only">
+              {t("footer.contact")}
+            </h2>
+            <ContactChannels tone="dark" />
+          </section>
         </div>
         <Column
           title={t("footer.send")}

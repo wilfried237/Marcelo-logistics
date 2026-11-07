@@ -103,7 +103,7 @@ The retention policy has **no periods** (`approved: false`, all periods `null`) 
 1. Create the project in the approved EU region. Note the **direct** connection string (port 5432) and the **pooled** one (port 6543).
 2. Review the SQL in `prisma/migrations/*/migration.sql`.
 3. Take a backup, then run `DIRECT_URL=… ALLOW_MIGRATE_HOST=<db host> npm run db:migrate`, and `npm run db:status` to confirm.
-4. Auth settings (dashboard → Authentication), matching `supabase/config.toml`: email provider on, minimum password length 12, secure password change on, Site URL and redirect allow-list `https://<host>/api/auth/callback**`; sign-ups and email confirmation **on** when registration is switched on (C-03 answered: open, see DEPLOYMENT.md).
+4. Auth settings (dashboard → Authentication; the hosted project does not read `supabase/config.toml`): email provider on, minimum password length 12, secure password change on; Site URL `https://marchelo-logistics.com` and Redirect URLs `https://marchelo-logistics.com/api/auth/callback**` (details in DEPLOYMENT.md, "Supabase Auth URLs: local versus production"); public sign-ups **off** until the official registration launch (owner, 2026-11-08), email confirmation on.
 5. Bootstrap the first administrator in the Supabase SQL editor (trusted path):
    ```sql
    begin;

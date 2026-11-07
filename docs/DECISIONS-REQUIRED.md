@@ -17,13 +17,14 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 | S-01 ★ | Which services are offered now | Release (services shown as "to be confirmed") |
 | S-02 | Routes and destination cities (routes and monthly windows answered 2026-11-03; cities open) | Quote form options |
 | S-03 | Prohibited and restricted items | Service pages, FAQ |
+| S-04 | Quote form for the three new service categories (database change) | Online quotes for customs, warehousing, e-commerce |
 | P-01 ◆ | Who reviews quotes and the response-time wording | Enabling quote submission |
 | P-02 | Information required per service | Quote form fields |
 | P-03 | Currencies, VAT presentation, quote validity | Staff quote form defaults |
 | P-04 | Customs duties: included or not | Quote inclusions/exclusions wording |
 | T-01 | Tracking milestones shown to customers | Tracking page labels |
 | T-02 | Delivery-estimate policy | Whether ETAs are shown |
-| C-01 ★ | Verify contact details | Release (contact page currently says "being confirmed") |
+| C-01 ★ | Verify contact details | **Answered 2026-11-06** (WhatsApp and opening hours still open) |
 | C-02 ◆ | Sender email domain and staff notification inbox | Enabling email |
 | C-03 | Customer account onboarding: open registration or invitation only | **Answered 2026-11-04: open registration** |
 | L-01 ★ | Terms and conditions of carriage | Release (terms page hidden) |
@@ -61,6 +62,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 ## 2. Services, destinations and logistics operations
 
 ### S-01 ★ Services currently offered
+- **Partly answered (client, 2026-11-06):** the client supplied six service categories, recorded as confirmed: air freight and express parcels, sea freight (FCL and LCL), vehicle shipping, warehousing and distribution, customs clearance, e-commerce and online shopping. The first three extend existing categories (renamed and re-described); the last three are new. **Still open:** barrels and boxes, parcels and personal effects, commercial cargo are kept on the site with "Availability on request" until the client confirms them.
 - **Decision needed:** for each category, say *offered now*, *coming soon* or *not offered*: parcels and personal effects · barrels and boxes · air freight · sea freight (shared or full container) · vehicle transport · commercial cargo.
 - **Why it matters:** listing a service creates customer expectations and possible liability.
 - **Recommended:** confirm only what is operational today.
@@ -83,6 +85,14 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Why it matters:** customers need it before packing barrels and boxes; it reduces customs problems.
 - **If delayed:** no binding list is published. The shipping guide (`/shipping-guide`) shows general categories under “Ask us before packing these” (flammables and gas, loose batteries, weapons, medicines and chemicals, perishable food, cash and valuables) and says the final list is confirmed in the quote.
 - **Affected:** FAQ, shipping guide (`guide.restricted*` in `messages/*.json`), quote form guidance.
+- **Development can continue:** yes.
+- **Answer:**
+
+### S-04 Online quotes for customs clearance, warehousing and e-commerce
+- **Decision needed:** approve the database change that lets customers choose the three new categories in the quote form.
+- **Today:** they are listed on the home and services pages with "Ask us about this service" (contact form). The quote form offers the six existing categories; staff see the new names for the renamed ones automatically.
+- **Change proposed:** a migration adding `customs_clearance`, `warehousing` and `ecommerce` to the PostgreSQL enum `service_code` (`ALTER TYPE … ADD VALUE IF NOT EXISTS`, additive, no table rewrite, existing quote requests untouched), the same values in `prisma/schema.prisma` and `SERVICE_CODES`, `quoteCode` set in `SERVICE_OFFERINGS`, and tests. Enum values cannot be removed later; the previous app version keeps working (it never writes them). Applied by the next production deployment like the earlier migrations.
+- **Also to decide:** which questions the form should ask for these services (they are not route-and-items shipments in the same way), or whether they stay contact-only.
 - **Development can continue:** yes.
 - **Answer:**
 
@@ -139,10 +149,11 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 ## 5. Contact information and customer communication
 
 ### C-01 ★ Verify contact details
+- **Answered (client, 2026-11-06), published as supplied:** Ireland +353 89 484 0017, office 12 Griffeen Glen Chase, Lucan; Cameroon +237 6 59 68 54 79, Douala – Ndogsimbi; email info.cargo@marchelo-logistics.com. The old numbers and the Gmail address are no longer used. **Still open:** a WhatsApp number (optional) and opening hours (none are published). **Note:** the email address must exist as a mailbox before customers write to it (see C-02).
 - **Decision needed:** confirm or correct each detail found in the old code, and say which may be published:
   - Ireland phone +353 89 616 0927 (also WhatsApp?)
   - Cameroon phone +237 695 739 033
-  - Email marchelodis@gmail.com (or a domain address?)
+  - Email: a personal Gmail address found in the old code (no longer used; replaced by `info.cargo@marchelo-logistics.com`, 2026-11-06)
   - Opening hours and time zones
 - **Why it matters:** unverified details are never shown, so the site currently has **no visible contact channel**.
 - **If delayed:** the contact page says the details are being confirmed; the launch build (`RELEASE_BUILD=true`) fails.
@@ -165,6 +176,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Development can continue:** yes.
 - **Answer (owner, 2026-11-04):** **open public customer registration**. Anyone may register without an invitation, with mandatory email verification, secure authentication, customer-only role assignment, rate limiting and protection against privilege escalation.
 - **Implemented (2026-11-04):** see [SECURITY.md](./SECURITY.md#customer-registration-c-03). Production switch-on needs: Supabase Auth "Allow new users to sign up" **on** and "Confirm email" **on**, the confirmation template, custom SMTP (C-02; Supabase's built-in mailer is not for production use), then `ENABLE_CUSTOMER_REGISTRATION=true` ([DEPLOYMENT.md](./DEPLOYMENT.md#customer-registration-c-03-switch-on)). Staff invitations keep working alongside.
+- **Launch deferred (owner, 2026-11-08):** public registration stays **closed** until the official launch. Locally `supabase/config.toml` has `[auth] enable_signup = false`; the website form stays off (`ENABLE_CUSTOMER_REGISTRATION=false`). Existing users sign in normally and staff invitations keep working. The hosted project must be closed in its dashboard (see DEPLOYMENT.md, "Public registration closed").
 
 ## 6. Legal, privacy and document retention
 

@@ -49,3 +49,6 @@ next-env.d.ts
 
 # generated Prisma Client (npm postinstall / prebuild)
 /lib/generated/
+
+# Per-developer MCP connector settings (machine-specific; contains the hosted project reference)
+.mcp.json

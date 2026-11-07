@@ -21,33 +21,33 @@
   },
   "home": {
     "hero": {
-      "title": "Shipping between Ireland and Cameroon, quoted by people, not a calculator",
-      "subtitle": "Personal effects, barrels and boxes, vehicles or commercial goods: tell us what you need to send. A member of our team reviews every request and replies with a quote prepared for your shipment.",
+      "title": "Air and sea freight between Ireland and Cameroon",
+      "subtitle": "Parcels, barrels, vehicles, containers and commercial goods in both directions, with customs clearance, storage and online-shopping forwarding when you need them. Tell us what you are sending and we will prepare a quote for your shipment.",
       "quoteCta": "Request a quote",
       "trackCta": "Track a shipment",
-      "eyebrow": "Ireland ⇄ Cameroon",
+      "eyebrow": "Lucan, Ireland · Douala, Cameroon",
       "secondaryCta": "How it works"
     },
     "services": {
-      "heading": "What we can help with",
-      "intro": "The service categories below are being confirmed. Ask us about your shipment and we will tell you what is available.",
-      "availability": "Availability to be confirmed",
+      "heading": "Our services",
+      "intro": "Shipping by air and sea in both directions, and the customs, storage and shopping services that go with it. If what you need is not listed, ask us.",
+      "availability": "Availability on request",
       "viewAll": "View all services"
     },
     "process": {
-      "heading": "How it works",
-      "step1Title": "Send a request",
-      "step1Body": "Describe what you want to ship and where it is going.",
-      "step2Title": "We review it",
-      "step2Body": "A member of our team checks your request and may ask for more details.",
-      "step3Title": "You receive a quote",
-      "step3Body": "We send you a price prepared for your shipment. Nothing is charged automatically.",
-      "step4Title": "Track your shipment",
-      "step4Body": "Once your shipment is booked, use your reference to follow its recorded progress."
+      "heading": "How a quote works",
+      "step1Title": "Tell us what you are sending",
+      "step1Body": "Use the quote form: what the goods are, roughly how much, where they are now and where they need to go.",
+      "step2Title": "We check the details",
+      "step2Body": "If anything is unclear, we contact you before setting a price, so the quote matches what you actually send.",
+      "step3Title": "You receive your quote",
+      "step3Body": "The price, what it includes and how long it is valid. You decide whether to accept it; nothing is paid online.",
+      "step4Title": "Follow the shipment",
+      "step4Body": "Once booked, your shipment gets an ML reference that you and the recipient can track."
     },
     "about": {
       "heading": "About Marchelo Logistics",
-      "body": "We are a bilingual (English and French) logistics and freight-forwarding business focused on shipments between Ireland and Cameroon.",
+      "body": "Marchelo Logistics ships goods for families and businesses between Ireland and Cameroon, in English and in French.",
       "cta": "More about us"
     },
     "guide": {
@@ -60,19 +60,13 @@
       "more": "All questions"
     },
     "final": {
-      "heading": "Ready to send something?",
-      "body": "Describe your shipment in a few minutes. We will reply with a quote, and nothing is charged automatically."
+      "heading": "Talk to us in Ireland or in Cameroon",
+      "body": "For a price, the quote form is the quickest way to send us the details we need. For anything else, call or write to us."
     },
-    "tasks": {
-      "heading": "What would you like to do?",
-      "quoteTitle": "Request a quote",
-      "quoteBody": "Describe your shipment and receive a price prepared by our team.",
-      "trackTitle": "Track a shipment",
-      "trackBody": "Follow your shipment with its ML reference.",
-      "prepareTitle": "Prepare your goods",
-      "prepareBody": "Packing, labelling and what to ask us about first.",
-      "contactTitle": "Contact us",
-      "contactBody": "Questions about a shipment or a quote."
+    "trackIntro": "Follow a shipment with its ML reference. No account needed.",
+    "locations": {
+      "heading": "Where to find us",
+      "intro": "We work from Lucan in Ireland and from Douala in Cameroon, and shipments leave every month in each direction."
     }
   },
   "services": {
@@ -85,30 +79,45 @@
       "description": "Barrels and boxes packed with household goods and personal belongings."
     },
     "air_freight": {
-      "title": "Air freight",
-      "description": "Shipments sent by air when speed matters more than cost."
+      "title": "Air freight and express parcels",
+      "description": "Express parcel transport between Ireland and Cameroon. Indicative delivery times, rates and conditions are given with your quote."
     },
     "sea_freight": {
-      "title": "Sea freight and containers",
-      "description": "Larger volumes shipped by sea, shared or full containers."
+      "title": "Sea freight: full containers and groupage (FCL and LCL)",
+      "description": "20-foot and 40-foot containers, groupage, maritime transport and delivery."
     },
     "vehicle": {
-      "title": "Vehicle transport",
-      "description": "Cars and other vehicles shipped to their destination."
+      "title": "Vehicle shipping",
+      "description": "Vehicle transport, customs formalities and shipping to Africa."
     },
     "commercial_cargo": {
       "title": "Commercial cargo",
       "description": "Goods shipped for businesses and traders."
+    },
+    "warehousing": {
+      "title": "Warehousing and distribution",
+      "description": "Storage, goods reception, preparation and distribution."
+    },
+    "customs_clearance": {
+      "title": "Customs clearance",
+      "description": "Customs assistance, documentation and coordination of shipping operations."
+    },
+    "ecommerce": {
+      "title": "E-commerce and online shopping",
+      "description": "Online shopping, receiving goods in Ireland and forwarding them to their destination."
     }
   },
   "contact": {
     "title": "Contact us",
     "description": "Questions about a shipment or a quote? Get in touch.",
     "pending": "Our contact details are being confirmed and will be published here shortly.",
-    "phoneIreland": "Ireland",
-    "phoneCameroon": "Cameroon",
     "email": "Email",
-    "whatsapp": "WhatsApp"
+    "ireland": "Ireland",
+    "cameroon": "Cameroon",
+    "callLabel": "Call {place}: {number}",
+    "emailLabel": "Email:",
+    "officeLabel": "Office:",
+    "locationLabel": "Location:"
   },
   "quote": {
     "hero": {
@@ -118,32 +127,6 @@
     "unavailable": {
       "title": "Online requests are temporarily unavailable",
       "body": "We cannot receive quote requests through this website yet. Nothing you enter here is sent or stored."
-    },
-    "shipmentTypes": {
-      "title": "Shipment type",
-      "description": "Choose the type of shipment you need",
-      "options": {
-        "car": {
-          "label": "Vehicle",
-          "description": "Car or other vehicle"
-        },
-        "parcel": {
-          "label": "Parcel",
-          "description": "Parcels and personal effects"
-        },
-        "container": {
-          "label": "Container",
-          "description": "Sea freight and containers"
-        },
-        "airExpress": {
-          "label": "Air freight",
-          "description": "Shipments sent by air"
-        },
-        "freight": {
-          "label": "Commercial cargo",
-          "description": "Goods for businesses"
-        }
-      }
     },
     "form": {
       "title": "Shipment details",
@@ -256,10 +239,10 @@
   },
   "footer": {
     "rights": "All rights reserved.",
-    "pendingDetails": "Business and legal details will be published once confirmed.",
     "send": "Send",
     "help": "Help",
-    "company": "Company"
+    "company": "Company",
+    "contact": "Contact"
   },
   "preview": {
     "banner": "Preview only: this area is not connected to real data and is not available to customers."
@@ -694,10 +677,10 @@
   },
   "aboutPage": {
     "title": "About us",
-    "intro": "We are a bilingual (English and French) logistics and freight-forwarding business focused on shipments between Ireland and Cameroon.",
+    "intro": "Marchelo Logistics is a logistics and freight-forwarding business working between Ireland and Cameroon, with an office in Lucan and a base in Douala.",
     "howWeWorkTitle": "How we work",
     "howWeWork": "Every quote is prepared by a member of our team for your specific shipment. Prices are never calculated automatically.",
-    "pendingDetails": "More information about our company will be published once it has been confirmed."
+    "whereTitle": "Where we work"
   },
   "faq": {
     "title": "Frequently asked questions",
@@ -1136,5 +1119,15 @@
     "guidePacking": "An open box with folded items inside and padding around it.",
     "guideLabelling": "A box with a clearly written address label, “this way up” arrows and a marker pen.",
     "guideList": "A clipboard with a checklist of contents next to a sealed box."
+  },
+  "servicesPage": {
+    "intro": "We ship by air and sea between Ireland and Cameroon, in both directions. Rates, transit times and conditions depend on each shipment, so every quote is prepared for you: ask us to confirm what applies to yours.",
+    "listHeading": "What we handle",
+    "groups": {
+      "shipping": "Shipping",
+      "support": "Customs, storage and online shopping"
+    },
+    "quoteCta": "Request a quote",
+    "askCta": "Ask us about this service"
   }
 }

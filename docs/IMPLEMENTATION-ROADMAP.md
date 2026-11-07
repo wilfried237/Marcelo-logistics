@@ -138,7 +138,7 @@ Legend: ✅ working · 🟡 implemented, unverified · 🟠 partial · 🎭 mock
 | EN/FR routing and switching | ✅ | `/en`, `/fr` return 200; switcher works; 176 keys in each locale file with full parity |
 | Translation coverage | 🟠 | Portal, quote calculator, login, dashboard, `navigation.tsx` and the uploader are hard-coded English. 15 FR values are identical to EN (some are fine, e.g. "Services") |
 | Homepage marketing content | 🎭 | Stats ("50+ countries", "1000+ shipments", "99%"), case study, testimonials and the "Sarah Johnson" quote are unverified or fabricated ❓ |
-| Contact details | ❓ | IE `+353 89 616 0927`, CM `+237 695 739 033`, `marchelodis@gmail.com` (Gmail, not a domain address), site `marchelo-logistics.com` |
+| Contact details | ❓ | IE `+353 89 616 0927`, CM `+237 695 739 033`, a personal Gmail address (not a domain address; since replaced), site `marchelo-logistics.com` |
 | Contact form | 💥 | No `<form>`, no handler, no endpoint |
 | WhatsApp button | ✅ | Opens `wa.me/+353896160927` |
 | Quote: live estimate | 🟡 | Client-side calculator works, but the prices are invented ❓ |

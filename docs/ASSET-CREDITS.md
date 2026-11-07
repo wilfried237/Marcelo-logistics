@@ -14,7 +14,7 @@ Downloaded 2026-11-04, converted to WebP (quality 78) with `sharp`; Next.js serv
 | `port-unloading-aerial.webp` | [unsplash.com/photos/4ZornyPnGlA](https://unsplash.com/photos/cargo-ship-loaded-with-colorful-containers-at-a-busy-port-4ZornyPnGlA) (Port of Vancouver) | Daniel Miksha ([@danielmiksha](https://unsplash.com/@danielmiksha)) | Unsplash License | Not required; credited in caption | Resized to 2000 px | Services |
 | `air-freighter-apron.webp` | [unsplash.com/photos/PEf3deR3l_U](https://unsplash.com/photos/a-large-white-cargo-airplane-with-stairs-attached-PEf3deR3l_U) (Sydney Airport) | Peaky_82 ([@peaky_82](https://unsplash.com/@peaky_82)) | Unsplash License | Not required; credited in caption | Resized to 2000 px | Services |
 | `warehouse-aisle-team.webp` | [unsplash.com/photos/c_4eaGRDSVU](https://unsplash.com/photos/workers-walking-through-warehouse-aisle-c_4eaGRDSVU) (Bucharest) | Adrian Sulyok ([@sulyok_imaging](https://unsplash.com/@sulyok_imaging)) | Unsplash License | Not required, but **the photographer asks for a credit link to https://www.sulyokimaging.ro**: the caption credit links there | Resized to 2000 px | Services |
-| `port-sea-panorama.webp` | [unsplash.com/photos/Zuxxq0iHkN4](https://unsplash.com/photos/aerial-view-photo-of-freight-containers-Zuxxq0iHkN4) (Port of Barcelona) | Olga Subach ([@create4eyes](https://unsplash.com/@create4eyes)) | Unsplash License | Not required; credited in caption | Cropped to the sea and cranes (removes small container-line and gas-terminal lettering) | About |
+| `port-sea-panorama.webp` | [unsplash.com/photos/Zuxxq0iHkN4](https://unsplash.com/photos/aerial-view-photo-of-freight-containers-Zuxxq0iHkN4) (Port of Barcelona) | Olga Subach ([@create4eyes](https://unsplash.com/@create4eyes)) | Unsplash License | Not required; credited in caption | Cropped to the sea and cranes (removes small container-line and gas-terminal lettering) | Not currently used (removed 2026-11-06: the About page shows the two locations) |
 
 ### Selection rules applied
 
@@ -47,18 +47,18 @@ Downloaded 2026-11-04, converted to WebP (quality 78) with `sharp`; Next.js serv
 
 | File | Shows | Used on |
 |---|---|---|
-| `request-quote.svg` | Customer filling in a quote form on a laptop | Home (How it works 1), How it works (step 1) |
-| `team-review.svg` | Team member with headset reviewing a request | Home (How it works 2), How it works (step 2) |
-| `quote-received.svg` | Customer receiving a quote on a phone | Home (How it works 3), How it works (step 3) |
+| `request-quote.svg` | Customer filling in a quote form on a laptop | Home (How a quote works 1), How it works (step 1) |
+| `team-review.svg` | Team member with headset reviewing a request | Home (How a quote works 2), How it works (step 2) |
+| `quote-received.svg` | Customer receiving a quote on a phone | Home (How a quote works 3), How it works (step 3) |
 | `handover.svg` | Customer handing a parcel to a team member at a container | How it works (step 4) |
-| `tracking.svg` | Customer following a route and milestones on a phone | Home (How it works 4), How it works (step 5), Track (empty state) |
+| `tracking.svg` | Customer following a route and milestones on a phone | Home (How a quote works 4), How it works (step 5) |
 | `receive-parcel.svg` | Person receiving a parcel at their door | How it works (step 6) |
 | `container-loading.svg` | Worker wheeling a barrel and box into a container | Services (guide band) |
-| `pack-parcel.svg` | Person packing clothes into a box | Home (packing band) |
-| `support-chat.svg` | Customer talking with a team member | Home (final call to action, md and up), Contact |
-| `route-map.svg` | Ireland ⇄ Cameroon by air and sea, with both flags | Home (monthly departures) |
+| `pack-parcel.svg` | Person packing clothes into a box | Not currently used (removed from the home page 2026-11-06: decorative) |
+| `support-chat.svg` | Customer talking with a team member | Not currently used (removed 2026-11-06: the contact details replace it) |
+| `route-map.svg` | Ireland ⇄ Cameroon by air and sea, with both flags | Not currently used (removed 2026-11-06: the locations section replaces it) |
 | `connections.svg` | Sender and recipient linked by a travelling parcel | About |
-| `service-parcels.svg`, `service-barrels.svg`, `service-air.svg`, `service-sea.svg`, `service-vehicle.svg`, `service-commercial.svg` | One spot per service category | Service grid (Home, Services) |
+| `service-parcels.svg`, `service-barrels.svg`, `service-air.svg`, `service-sea.svg`, `service-vehicle.svg`, `service-commercial.svg` | One spot per service category | Not currently used (2026-11-06: services are now listed as rows, without spot illustrations) |
 | `guide-packing.svg`, `guide-labelling.svg`, `guide-list.svg` | Packing, labelling, contents list | Shipping guide |
 
 Palette: the site tokens (ink `#172030`, logo blue `#1495dc`, deeper blue `#1d5fa8`, sky and pale blues), warm cardboard neutrals, a sparing amber accent (high-visibility vests) and a muted green for plants. The only other colours are the Irish and Cameroonian flags on `route-map.svg`.

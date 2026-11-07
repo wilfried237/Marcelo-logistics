@@ -23,7 +23,9 @@ const MOCK = 4010;
 export const JOURNEY_ENV = {
   SITE_URL: `http://localhost:${PORT}`,
   ENABLE_QUOTE_SUBMISSION: "true",
-  ENABLE_CUSTOMER_REGISTRATION: "true",
+  // Registration is closed until the official launch (owner, 2026-11-08). JOURNEY_REGISTRATION_OPEN=1
+  // runs the open-registration journey instead (needs [auth] enable_signup = true locally).
+  ENABLE_CUSTOMER_REGISTRATION: process.env.JOURNEY_REGISTRATION_OPEN === "1" ? "true" : "false",
   ENABLE_TRANSACTIONAL_EMAIL: "true",
   RESEND_API_KEY: "re_mock_local_only",
   RESEND_BASE_URL: `http://127.0.0.1:${MOCK}`,

@@ -1,10 +1,18 @@
 import { describe, expect, it } from "vitest";
 import pg from "pg";
-import { DATABASE_URL, PASSWORD, adminClient, anonClient, createUser, signIn, sql, uniqueEmail } from "./env";
+import { DATABASE_URL, PASSWORD, SUPABASE_URL, adminClient, anonClient, createUser, signIn, sql, uniqueEmail } from "./env";
 
 /* Executed against the REAL local Supabase stack: GoTrue, PostgREST, Storage, Postgres 17, Mailpit. */
 
 const MAILPIT = "http://127.0.0.1:54324";
+
+/**
+ * Whether the local stack accepts public sign-ups (supabase/config.toml [auth] enable_signup).
+ * Closed until the official registration launch (owner decision 2026-11-08); the open-registration
+ * tests below run automatically once it is reopened.
+ */
+const settings = (await (await fetch(`${SUPABASE_URL}/auth/v1/settings`, { headers: { apikey: process.env.SUPABASE_ANON_KEY ?? "" } })).json()) as { disable_signup?: boolean };
+const signupOpen = settings.disable_signup === false;
 
 /** HTML of the latest email sent to the address by the local GoTrue (captured by Mailpit, never delivered). */
 async function confirmationEmail(to: string): Promise<string> {
@@ -18,8 +26,32 @@ async function confirmationEmail(to: string): Promise<string> {
   throw new Error(`no email for ${to}`);
 }
 
-describe("Supabase Auth (local GoTrue)", () => {
-  // C-03 (2026-11-04): open customer registration with mandatory email verification.
+describe.skipIf(signupOpen)("Supabase Auth: public registration closed (until the official launch)", () => {
+  it("rejects public sign-ups and creates no account", async () => {
+    const email = uniqueEmail("closed");
+    const { data, error } = await anonClient().auth.signUp({ email, password: PASSWORD, options: { data: { full_name: "Closed Signup" } } });
+    expect(error).not.toBeNull();
+    expect(error?.code).toBe("signup_disabled");
+    expect(data.user).toBeNull();
+    expect(await sql("select 1 from auth.users where email = $1", [email])).toHaveLength(0);
+  });
+
+  it("still lets staff invite users, who get the customer role whatever the invitation metadata says", async () => {
+    const email = uniqueEmail("invite.closed");
+    const { data, error } = await adminClient().auth.admin.inviteUserByEmail(email, { data: { full_name: "Invited", role: "admin" } });
+    expect(error).toBeNull();
+    const [row] = await sql<{ role: string }>("select role from public.profiles where id = $1", [data.user?.id]);
+    expect(row.role).toBe("customer");
+  });
+
+  it("still lets existing users sign in", async () => {
+    const user = await createUser("customer", "closed.login");
+    const client = await signIn(user.email);
+    expect((await client.auth.getUser()).data.user?.id).toBe(user.id);
+  });
+});
+
+describe.skipIf(!signupOpen)("Supabase Auth: open registration (runs when sign-ups are reopened, C-03)", () => {
   it("open sign-up: unverified until the emailed cross-device link is used, then signs in", async () => {
     const email = uniqueEmail("signup");
     const redirect = "http://localhost:3000/api/auth/callback?next=%2Fen%2Fportal";
@@ -85,7 +117,9 @@ describe("Supabase Auth (local GoTrue)", () => {
     const original = await signIn(user.email); // password unchanged
     expect((await original.auth.getUser()).data.user?.id).toBe(user.id);
   });
+});
 
+describe("Supabase Auth (local GoTrue)", () => {
   it("signs in with valid credentials and rejects wrong passwords with a generic error", async () => {
     const user = await createUser("customer", "login");
     const client = await signIn(user.email);

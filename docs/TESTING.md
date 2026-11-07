@@ -88,3 +88,13 @@ All against local or in-process services only (PGlite, local Supabase in Docker 
 
 Isolation fix: the public E2E suite previously inherited `.env.local` through `next start`, so it only passed while the local stack was stopped. It now blanks the service variables (`playwright.config.ts`) and uses port 3300, never the journeys' 3200.
 Journeys clean up stale queued emails left by other local suites before starting (local database only).
+
+## Live email run (manual, real Resend)
+`tests/live-email/all-scenarios.live.ts` drives every email scenario through the real services, triggers, outbox and Resend API, using fictitious data in a throwaway PostgreSQL (PGlite). It never runs with `npm test`; start it with `npx vitest run --config vitest.live-email.config.mts` and:
+- `ENABLE_TRANSACTIONAL_EMAIL=true`, a **temporary** sending-only `RESEND_API_KEY` (delete it afterwards), `EMAIL_FROM`, `STAFF_NOTIFICATION_EMAIL` (a placeholder);
+- `EMAIL_TEST_RECIPIENT` **and** `LIVE_EMAIL_EXPECTED_RECIPIENT` set to the same test inbox (otherwise every scenario is skipped); optional `LIVE_EMAIL_REPORT` (JSON of what was sent, intended recipients masked) and `LIVE_EMAIL_ONLY` (regex of scenario names to run).
+
+Safeguards: the override is ignored on Vercel; the run refuses to start unless the override matches the expected inbox; a provider wrapper aborts any send that is not to that single address with `[EMAIL TEST]` in the subject. Customer emails go out in French and English, staff alerts once each; failures are simulated with a fake provider, never with real addresses.
+
+Result on 2026-11-08: 52 emails, all 13 customer templates in EN and FR plus all 9 staff alert templates and their variants, every one **delivered** (Resend status) to the single test inbox.
+

@@ -9,34 +9,36 @@ import { DepartureSchedule } from "@/components/schedule/departure-schedule";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "home.services" });
-  return { title: t("heading"), description: t("intro") };
+  const t = await getTranslations({ locale });
+  return { title: t("home.services.heading"), description: t("servicesPage.intro") };
 }
 
 export default async function ServicesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("home");
+  const page = await getTranslations("servicesPage");
   const nav2 = await getTranslations("nav2");
   const media = await getTranslations("media");
   const ill = await getTranslations("illustrations");
   const schedule = await getTranslations("schedule");
   return (
     <>
-      <PageBanner title={t("services.heading")} description={t("services.intro")}>
+      <PageBanner title={t("services.heading")} description={page("intro")}>
         <Button asChild size="lg">
           <Link href="/quote">{t("hero.quoteCta")}</Link>
         </Button>
       </PageBanner>
       <div className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
-        <ServiceGrid />
+        <h2 className="sr-only">{page("listHeading")}</h2>
+        <ServiceGrid actions />
         {/* Photographs of the industry by sea, air and warehouse (not our own facilities). */}
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        <div className="mt-16 grid gap-6 md:grid-cols-3">
           {([PHOTOS.portUnloading, PHOTOS.airFreighter, PHOTOS.warehouse] as const).map((photo) => (
             <Photo key={photo.altKey} {...photoProps(media, photo)} sizes="(min-width: 768px) 33vw, 100vw" className="rounded-none border bg-background" imageClassName="aspect-[4/3]" />
           ))}
         </div>
-        <section aria-labelledby="schedule-heading" className="mt-14">
+        <section aria-labelledby="schedule-heading" className="mt-16">
           <h2 id="schedule-heading" className="text-3xl font-bold tracking-tight">
             {schedule("heading")}
           </h2>
