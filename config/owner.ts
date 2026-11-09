@@ -37,26 +37,33 @@ export const ownerConfig = {
     irelandPhone: { value: "+353894840017", display: "+353 89 484 0017", verified: true } satisfies ContactChannel,
     cameroonPhone: { value: "+237659685479", display: "+237 6 59 68 54 79", verified: true } satisfies ContactChannel,
     email: { value: "info.cargo@marchelo-logistics.com", verified: true } satisfies ContactChannel,
-    // No WhatsApp number has been supplied; the previous site's number is not shown.
-    irelandWhatsApp: { value: "", verified: false } satisfies ContactChannel, // {{NEEDS_OWNER}} C-01 (WhatsApp number, optional)
+    // WhatsApp on the same two numbers, confirmed by the owner on 2026-11-09 (C-01). No other WhatsApp contact exists.
+    irelandWhatsApp: { value: "+353894840017", display: "+353 89 484 0017", verified: true } satisfies ContactChannel,
+    cameroonWhatsApp: { value: "+237659685479", display: "+237 6 59 68 54 79", verified: true } satisfies ContactChannel,
   },
 
   /**
+   * Opening hours confirmed by the owner on 2026-11-09 (C-01): the business is open
+   * 24 hours a day, 7 days a week. This is business availability (phone, WhatsApp,
+   * email, quote handling). It does NOT mean the Lucan office or the Douala location
+   * is staffed 24/7 for drop-off or collection: handover times are agreed per shipment.
+   */
+  hours: { open24x7: true },
+
+  /**
    * Where the business operates, exactly as supplied by the client on 2026-11-06.
-   * No opening hours are published until the client supplies them.
    */
   locations: {
-    ireland: { country: "IE", place: "12 Griffeen Glen Chase, Lucan", kind: "office", phone: "irelandPhone" },
-    cameroon: { country: "CM", place: "Douala – Ndogsimbi", kind: "location", phone: "cameroonPhone" },
+    ireland: { country: "IE", place: "12 Griffeen Glen Chase, Lucan", kind: "office", phone: "irelandPhone", whatsapp: "irelandWhatsApp" },
+    cameroon: { country: "CM", place: "Douala – Ndogsimbi", kind: "location", phone: "cameroonPhone", whatsapp: "cameroonWhatsApp" },
   },
 
   operations: {
     /**
-     * Services the client has confirmed (their list of 2026-11-06). The earlier
-     * categories (barrels and boxes, parcels and personal effects, commercial
-     * cargo) are kept and shown as "availability on request" until confirmed.
+     * Services the owner has confirmed: the client's list of 2026-11-06, plus
+     * parcels, barrels and commercial cargo, confirmed on 2026-11-09 (S-01).
      */
-    confirmedServices: ["air_freight", "sea_freight", "vehicle", "warehousing", "customs_clearance", "ecommerce"] as string[], // {{NEEDS_OWNER}} S-01 (barrels, parcels, commercial cargo)
+    confirmedServices: ["air_freight", "sea_freight", "vehicle", "warehousing", "customs_clearance", "ecommerce", "parcels", "barrels", "commercial_cargo"] as string[],
     /**
      * Routes offered online (ISO 3166-1 alpha-2) and their monthly departure
      * windows (days of the month). Source: the client's message relayed by the

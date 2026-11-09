@@ -185,7 +185,33 @@ test.describe("business information supplied by the client", () => {
       // The previous site's unverified details (a Gmail address and old numbers) are never shown.
       expect(await page.content()).not.toMatch(/@gmail\.com|\+353896160927|\+237695739033/);
     });
+
+    test(`/${locale}/contact and the footer show the two confirmed WhatsApp numbers and 24/7 opening hours`, async ({ page }) => {
+      await page.goto(`/${locale}/contact`);
+      for (const scope of [page.locator("main"), page.locator("footer")]) {
+        const ie = scope.locator('a[href="https://wa.me/353894840017"]');
+        const cm = scope.locator('a[href="https://wa.me/237659685479"]');
+        await expect(ie).toHaveText("+353 89 484 0017");
+        await expect(cm).toHaveText("+237 6 59 68 54 79");
+        for (const link of [ie, cm]) {
+          await expect(link).toHaveAttribute("target", "_blank");
+          await expect(link).toHaveAttribute("rel", /noopener/);
+        }
+        await expect(scope.getByText(locale === "en" ? "Open 24 hours a day, 7 days a week." : "Ouvert 24h/24 et 7j/7.")).toBeVisible();
+        // 24/7 availability is never presented as 24/7 staffed drop-off: handover times are agreed per shipment.
+        await expect(scope.getByText(locale === "en" ? /handing over or collecting goods are agreed with you/ : /remise et de retrait des marchandises sont convenus avec vous/)).toBeVisible();
+      }
+      // Exactly these two WhatsApp contacts, nothing else.
+      expect(await page.locator('a[href^="https://wa.me/"]').count()).toBe(4);
+    });
   }
+
+  test("every service is confirmed: no 'availability on request' label on the services page or the quote form", async ({ page }) => {
+    for (const path of ["/en/services", "/fr/services", "/en/quote"]) {
+      await page.goto(path);
+      await expect(page.getByText(/Availability on request|Disponibilité sur demande/)).toHaveCount(0);
+    }
+  });
 
   const SERVICES = {
     en: ["Air freight and express parcels", "Sea freight: full containers and groupage (FCL and LCL)", "Vehicle shipping", "Barrels and boxes", "Parcels and personal effects", "Commercial cargo", "Customs clearance", "Warehousing and distribution", "E-commerce and online shopping"],

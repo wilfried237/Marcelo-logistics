@@ -14,17 +14,17 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 |---|---|---|
 | B-01 ✓ | Official business name: **Marchelo Logistics** (answered 2026-11-03) | — |
 | B-02 ★ | Legal entity, registration and VAT details | Release (legal pages, footer) |
-| S-01 ★ | Which services are offered now | Release (services shown as "to be confirmed") |
+| S-01 ✓ | Which services are offered now | **Answered 2026-11-09: all nine services confirmed** |
 | S-02 | Routes and destination cities (routes and monthly windows answered 2026-11-03; cities open) | Quote form options |
 | S-03 | Prohibited and restricted items | Service pages, FAQ |
 | S-04 | Quote form for the three new service categories (database change) | Online quotes for customs, warehousing, e-commerce |
-| P-01 ◆ | Who reviews quotes and the response-time wording | Enabling quote submission |
+| P-01 ✓ | Who reviews quotes | **Answered 2026-11-09: the owner reviews every request and replies personally** (response-time wording still open) |
 | P-02 | Information required per service | Quote form fields |
 | P-03 | Currencies, VAT presentation, quote validity | Staff quote form defaults |
 | P-04 | Customs duties: included or not | Quote inclusions/exclusions wording |
 | T-01 | Tracking milestones shown to customers | Tracking page labels |
 | T-02 | Delivery-estimate policy | Whether ETAs are shown |
-| C-01 ★ | Verify contact details | **Answered 2026-11-06** (WhatsApp and opening hours still open) |
+| C-01 ✓ | Verify contact details | **Answered 2026-11-06; WhatsApp and opening hours answered 2026-11-09** |
 | C-02 ◆ | Sender email domain and staff notification inbox | Enabling email |
 | C-03 | Customer account onboarding: open registration or invitation only | **Answered 2026-11-04: open registration** |
 | L-01 ★ | Terms and conditions of carriage | Release (terms page hidden) |
@@ -75,7 +75,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **If delayed:** all six categories are shown with "Availability to be confirmed" and remain selectable in the quote form (staff can decline).
 - **Affected:** `config/owner.ts` → `operations.confirmedServices`; `/services`; quote form.
 - **Development can continue:** yes.
-- **Answer:**
+- **Answer (owner, 2026-11-09):** parcels, barrels and commercial cargo all remain available. All nine services are now confirmed in `config/owner.ts` (`operations.confirmedServices`); no service shows "Availability on request" any more. These three already have quote-form service codes (`parcels`, `barrels`, `commercial_cargo`), so **no database migration is needed for them**. S-04 (customs clearance, warehousing, e-commerce in the quote form) remains a separate, unapplied proposal.
 
 ### S-02 Routes and destination cities
 - **Decision needed:** origin countries (Ireland only? Northern Ireland or UK?), destination countries (Cameroon only, or other approved African countries — which?), and destination cities or collection points in Cameroon.
@@ -114,7 +114,8 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **If delayed:** the confirmation says "Our team will review your request and contact you", with no time stated. Quote submission stays disabled until a reviewer exists (C-02).
 - **Affected:** `STAFF_NOTIFICATION_EMAIL`, confirmation copy, acknowledgement email.
 - **Development can continue:** yes.
-- **Answer:**
+- **Answer (owner, 2026-11-09):** (a) the project owner reviews every incoming quote request and replies to customers personally; there is no separate customer-service team. Staff alerts (`staff_new_request`, customer messages, acceptances, declines) go to `STAFF_NOTIFICATION_EMAIL`, which must be set in Vercel to the owner's notification address (a production setting, not stored in the repository). Customer-facing wording now says "we review every request personally" rather than "our team". (b) **Still open:** whether to state a response time; until then none is stated.
+- **Remaining before quote submission can be enabled:** the first administrator account (the owner), `STAFF_NOTIFICATION_EMAIL` set to the owner's address, transactional email activated (`quoteSubmissionStatus` requires it), then `ENABLE_QUOTE_SUBMISSION=true`. All are production changes awaiting approval.
 
 ### P-02 Information required per service
 - **Decision needed:** what you need in order to price each service, for example: number and size of barrels; box dimensions; vehicle make, model, year and whether it runs; container size; commercial goods description and value.
@@ -175,7 +176,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **If delayed:** the contact page says the details are being confirmed; the launch build (`RELEASE_BUILD=true`) fails.
 - **Affected:** `config/owner.ts` → `contact.*`.
 - **Development can continue:** yes.
-- **Answer:**
+- **Answer (owner, 2026-11-09):** WhatsApp on the same two numbers: Ireland +353 89 484 0017 (https://wa.me/353894840017), Cameroon +237 6 59 68 54 79 (https://wa.me/237659685479); no other WhatsApp contact. Opening hours: open 24 hours a day, 7 days a week (EN "Open 24 hours a day, 7 days a week.", FR "Ouvert 24h/24 et 7j/7."). Both are shown on the contact page, the quote page and the footer in both languages.
 
 ### C-02 ◆ Sender email domain and notification inbox
 - **Decision needed:** the domain to send transactional emails from (DNS records must be added there), the sender name and address, and the internal inbox for new-request notifications.
@@ -282,5 +283,5 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 
 ## Additions (2026-11-04, backend MVP)
 - **N-01 Quote expiry reminders:** should customers get an email before a quotation expires, and how long before (e.g. 48 hours)? Built and tested; **off** until answered (`notifications.quoteExpiryReminderHours`).
-- **N-02 Staff notification inbox:** **answered 2026-11-04**: a **dedicated business inbox**, not a personal address. The owner sets it in Vercel as `STAFF_NOTIFICATION_EMAIL` (comma-separated, max 10); no address is chosen, invented or hard-coded in the code. Until it is set, alerts are recorded as skipped, not sent. Linked to C-02 (the inbox should be on the business domain once it exists).
+- **N-02 Staff notification inbox:** **updated 2026-11-09 (P-01):** quotation and other staff alerts go to the **owner/admin notification address** chosen by the owner, who reviews every request personally. Earlier answer (2026-11-04): a dedicated business inbox, not a personal address. The owner sets it in Vercel as `STAFF_NOTIFICATION_EMAIL` (comma-separated, max 10); no address is chosen, invented or hard-coded in the code. Until it is set, alerts are recorded as skipped, not sent. Linked to C-02 (the inbox should be on the business domain once it exists).
 - **N-03 Delivery speed of emails on the Hobby plan:** emails go out immediately after each action; failed ones are retried by a daily job (Hobby limit). A Pro plan allows retries every few minutes.

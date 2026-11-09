@@ -1,14 +1,15 @@
 import { useTranslations } from "next-intl";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { ownerConfig, verifiedContacts } from "@/config/owner";
 import { cn } from "@/lib/utils";
 
 type Location = (typeof ownerConfig.locations)[keyof typeof ownerConfig.locations];
 
 /**
- * The business's two locations (Ireland and Cameroon) and its email address,
- * exactly as supplied by the client (C-01). Only verified channels are shown;
- * phone numbers use tel: links and the email a mailto: link.
+ * The business's two locations (Ireland and Cameroon), WhatsApp, email and
+ * opening hours, exactly as confirmed by the owner (C-01). Only verified channels
+ * are shown; phone numbers use tel: links, WhatsApp the international wa.me link
+ * (digits only, no +), and the email a mailto: link.
  *
  * `tone="dark"` is for the footer (light text on the ink background).
  */
@@ -28,6 +29,8 @@ export function ContactChannels({ tone = "light", className }: { tone?: "light" 
       <ul className={cn("grid gap-6", tone === "light" && "sm:grid-cols-2")}>
         {locations.map((location) => {
           const phone = c[location.phone];
+          const whatsapp = c[location.whatsapp];
+          const place = t(location.country === "IE" ? "ireland" : "cameroon");
           return (
             <li key={location.country} className={cn(tone === "light" && "border-l-2 border-brand pl-4")}>
               <h3 className={cn("font-semibold", tone === "dark" && "text-sm uppercase tracking-wider")}>{t(location.country === "IE" ? "ireland" : "cameroon")}</h3>
@@ -46,6 +49,21 @@ export function ContactChannels({ tone = "light", className }: { tone?: "light" 
                   </a>
                 </p>
               )}
+              {whatsapp && (
+                <p className="mt-1 flex items-center gap-2 text-sm">
+                  <MessageCircle className={cn("h-4 w-4 shrink-0", muted)} aria-hidden />
+                  <span className={muted}>{t("whatsapp")}</span>
+                  <a
+                    href={`https://wa.me/${whatsapp.value.replace(/\D/g, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={link}
+                    aria-label={t("whatsappLabel", { place, number: whatsapp.display ?? whatsapp.value })}
+                  >
+                    {whatsapp.display ?? whatsapp.value}
+                  </a>
+                </p>
+              )}
             </li>
           );
         })}
@@ -59,6 +77,15 @@ export function ContactChannels({ tone = "light", className }: { tone?: "light" 
           </a>
         </p>
       )}
+      {ownerConfig.hours.open24x7 && (
+        <p className="flex items-center gap-2 text-sm">
+          <Clock className={cn("h-4 w-4 shrink-0", muted)} aria-hidden />
+          <span className={muted}>{t("hoursLabel")}</span>
+          <span className={tone === "dark" ? "text-ink-foreground" : "text-foreground"}>{t("hours24x7")}</span>
+        </p>
+      )}
+      {/* 24/7 is business availability (phone, WhatsApp, email), not staffed premises: handover times are agreed per shipment. */}
+      {ownerConfig.hours.open24x7 && <p className={cn("text-xs", muted)}>{t("hoursHandover")}</p>}
     </div>
   );
 }

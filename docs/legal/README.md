@@ -16,7 +16,7 @@
 | 1 | Privacy notice | [privacy-notice.md](privacy-notice.md) | A short factual summary is live at `/privacy` with a draft notice | B-02, L-02, L-03 |
 | 2 | Cookie policy | [cookie-policy.md](cookie-policy.md) | Inventory live at `/cookies` with a draft notice | L-04 (wording review) |
 | 3 | Terms and conditions | [terms-and-conditions.md](terms-and-conditions.md) | No (`/terms` returns 404 until L-01) | B-02, L-01, P-03, P-05 |
-| 4 | Shipping policy | [shipping-policy.md](shipping-policy.md) | No | S-01, S-02, T-02, L-05 |
+| 4 | Shipping policy | [shipping-policy.md](shipping-policy.md) | No | S-02, T-02, L-05 |
 | 5 | Payment, refund and cancellation | [payment-refund-cancellation.md](payment-refund-cancellation.md) | No | P-05, P-06, L-06 |
 | 6 | Customs and prohibited goods | [customs-prohibited-goods.md](customs-prohibited-goods.md) | No | S-03, P-04 |
 | 7 | Claims and complaints | [claims-complaints.md](claims-complaints.md) | No | L-05, L-07 |

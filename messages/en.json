@@ -6,7 +6,7 @@
   },
   "metadata": {
     "title": "Logistics between Ireland and Cameroon",
-    "description": "Request a quote and track shipments between Ireland and Cameroon. Every quote is reviewed by our team."
+    "description": "Request a quote and track shipments between Ireland and Cameroon. Every quote is prepared personally for your shipment."
   },
   "nav": {
     "home": "Home",
@@ -117,12 +117,17 @@
     "callLabel": "Call {place}: {number}",
     "emailLabel": "Email:",
     "officeLabel": "Office:",
-    "locationLabel": "Location:"
+    "locationLabel": "Location:",
+    "whatsapp": "WhatsApp:",
+    "whatsappLabel": "WhatsApp {place}: {number} (opens WhatsApp)",
+    "hoursLabel": "Opening hours:",
+    "hours24x7": "Open 24 hours a day, 7 days a week.",
+    "hoursHandover": "Times for handing over or collecting goods are agreed with you for each shipment."
   },
   "quote": {
     "hero": {
       "title": "Request a quote",
-      "subtitle": "Tell us about your shipment. Our team reviews every request and contacts you with a quote."
+      "subtitle": "Tell us about your shipment. We review every request personally and reply with a quote."
     },
     "unavailable": {
       "title": "Online requests are temporarily unavailable",
@@ -336,13 +341,13 @@
     },
     "stepOf": "Step {current} of {total}",
     "serviceQuestion": "What would you like to ship?",
-    "serviceHint": "Availability of each service is confirmed by our team when we review your request.",
+    "serviceHint": "We confirm the details of each service when we review your request.",
     "routeTitle": "Where is it going?",
     "originLabel": "From",
     "destinationLabel": "To",
     "cityLabel": "Destination city or town",
     "itemsTitle": "Tell us about the items",
-    "itemsHint": "Approximate weights and sizes are fine. Our team will confirm the details.",
+    "itemsHint": "Approximate weights and sizes are fine. We will confirm the details with you.",
     "itemLabel": "Item {number}",
     "description": "Description",
     "descriptionPlaceholder": "e.g. Barrel of household goods",
@@ -364,7 +369,7 @@
     "email": "Email",
     "phone": "Phone (with country code)",
     "reviewTitle": "Check your request",
-    "reviewHint": "No price is calculated automatically. Our team reviews every request and sends you a quote.",
+    "reviewHint": "No price is calculated automatically. We review every request personally and send you a quote.",
     "privacyNotice": "We use these details only to prepare your quote and contact you about it. See our privacy information.",
     "privacyLink": "Privacy information",
     "submit": "Send quote request",
@@ -373,7 +378,7 @@
     "success": {
       "title": "Request received",
       "body": "Your quote request has been saved. Your reference is {reference}.",
-      "next": "What happens next: our team reviews your request and contacts you with a quote. Keep your reference for any questions.",
+      "next": "What happens next: we review your request and contact you with a quote. Keep your reference for any questions.",
       "emailSent": "A confirmation email is on its way to your email address.",
       "emailNotSent": "Your request is saved. Email confirmations are not active yet, so please keep your reference.",
       "another": "Send another request"
@@ -434,11 +439,11 @@
       "exclusions": "Not included",
       "accept": "Accept quote",
       "decline": "Decline quote",
-      "confirmAccept": "Accept this quote of {amount}? Our team will contact you to arrange the shipment.",
+      "confirmAccept": "Accept this quote of {amount}? We will contact you to arrange the shipment.",
       "confirmDecline": "Decline this quote? This cannot be undone.",
       "accepted": "Thank you. You accepted this quote.",
       "declined": "You declined this quote.",
-      "noQuoteYet": "Our team has not sent a quote yet.",
+      "noQuoteYet": "We have not sent a quote yet.",
       "cancelledReason": "Reason",
       "shipmentLink": "View shipment {reference}",
       "respondError": "This quote can no longer be answered online. Please contact us."
@@ -679,20 +684,20 @@
     "title": "About us",
     "intro": "Marchelo Logistics is a logistics and freight-forwarding business working between Ireland and Cameroon, with an office in Lucan and a base in Douala.",
     "howWeWorkTitle": "How we work",
-    "howWeWork": "Every quote is prepared by a member of our team for your specific shipment. Prices are never calculated automatically.",
+    "howWeWork": "Every quote is prepared personally for your specific shipment. Prices are never calculated automatically.",
     "whereTitle": "Where we work"
   },
   "faq": {
     "title": "Frequently asked questions",
     "intro": "Answers about using this website. For questions about a specific shipment, contact us.",
     "q1": "How do I get a price?",
-    "a1": "Send a quote request with details of what you want to ship. Our team reviews it and sends you a quote. Prices are not calculated automatically.",
+    "a1": "Send a quote request with details of what you want to ship. We review it personally and send you a quote. Prices are not calculated automatically.",
     "q2": "Do I need an account?",
     "a2": "No. You can request a quote and track a shipment without an account.",
     "q3": "Where do I find my tracking reference?",
     "a3": "Shipment references start with ML and are given to you when your shipment is booked. Quote request references start with QR.",
     "q4": "Can I send any item?",
-    "a4": "Some items cannot be shipped. Describe your items in your request and our team will tell you if anything cannot be carried.",
+    "a4": "Some items cannot be shipped. Describe your items in your request and we will tell you if anything cannot be carried.",
     "q5": "Which languages can I use?",
     "a5": "You can use the website in English or French.",
     "q6": "When do shipments leave?",
@@ -741,20 +746,20 @@
     "quote_received": {
       "subject": "We have received your quote request {reference}",
       "heading": "Your request has been received",
-      "body": "Thank you for your request. Our team will review it and prepare a quotation for your shipment. Nothing is charged automatically.",
+      "body": "Thank you for your request. We will review it and prepare a quotation for your shipment. Nothing is charged automatically.",
       "next": "Keep this reference. You will need it if you contact us about this request.",
       "cta": "View your request"
     },
     "quote_under_review": {
       "subject": "Your request {reference} is being reviewed",
       "heading": "Your request is being reviewed",
-      "body": "A member of our team is now reviewing your request. We will contact you if we need more information.",
+      "body": "We are now reviewing your request. We will contact you if we need more information.",
       "cta": "View your request"
     },
     "info_requested": {
       "subject": "We need more information for {reference}",
       "heading": "We need a few more details",
-      "body": "To prepare an accurate quotation, our team needs more information about your shipment:",
+      "body": "To prepare an accurate quotation, we need more information about your shipment:",
       "cta": "Reply with the information"
     },
     "quote_issued": {
@@ -786,7 +791,7 @@
     "quote_accepted": {
       "subject": "Thank you: quotation {reference} accepted",
       "heading": "You have accepted the quotation",
-      "body": "Thank you. Our team will now arrange your shipment and confirm the next steps, including how and when your goods are handed over.",
+      "body": "Thank you. We will now arrange your shipment and confirm the next steps, including how and when your goods are handed over.",
       "cta": "View your request"
     },
     "quote_declined": {
@@ -936,8 +941,8 @@
     "step1Point2": "Approximate size and weight, if you know them",
     "step1Point3": "Where the goods are now and where they need to go",
     "step1Point4": "How we can contact you",
-    "step2Title": "2. Our team reviews it",
-    "step2Body": "A member of our team checks your request. If something is missing or unclear, we ask you before preparing a price, so you are not quoted for the wrong thing.",
+    "step2Title": "2. We review it",
+    "step2Body": "We check your request personally. If something is missing or unclear, we ask you before preparing a price, so you are not quoted for the wrong thing.",
     "step3Title": "3. You receive a quote",
     "step3Body": "Your quote shows the price, the currency, how long it stays valid, and what is included and excluded. You decide whether to accept it. Nothing is charged automatically.",
     "step4Title": "4. Hand over your goods",
@@ -1007,11 +1012,11 @@
     "intro": "Hello {name}. This private page shows the latest information about your request.",
     "status": "Status",
     "statusHelp": {
-      "SUBMITTED": "We have received your request. A member of our team will review it shortly.",
-      "UNDER_REVIEW": "Our team is reviewing your request.",
+      "SUBMITTED": "We have received your request and will review it shortly.",
+      "UNDER_REVIEW": "We are reviewing your request.",
       "AWAITING_CUSTOMER": "We need more information from you. Please read our message below and reply.",
       "QUOTED": "Your quotation is ready. Review it below and accept or decline it.",
-      "ACCEPTED": "You accepted the quotation. Our team will contact you about the next steps.",
+      "ACCEPTED": "You accepted the quotation. We will contact you about the next steps.",
       "DECLINED": "You declined the quotation. Contact us if you change your mind.",
       "EXPIRED": "The quotation has expired. Contact us and we will review your request.",
       "CANCELLED": "This request has been cancelled."
@@ -1022,11 +1027,11 @@
     "fromTeam": "Marchelo Logistics",
     "fromYou": "You",
     "noMessages": "No messages yet.",
-    "replyLabel": "Send a message to our team",
+    "replyLabel": "Send us a message",
     "replyLabelInfo": "Your reply with the requested information",
-    "replyHint": "Our team will be notified. Please do not include payment card details.",
+    "replyHint": "We will be notified. Please do not include payment card details.",
     "sendReply": "Send",
-    "replySent": "Thank you. Your message has been sent to our team.",
+    "replySent": "Thank you. Your message has been sent to us.",
     "reference": "Reference",
     "service": "Service",
     "route": "Route",
@@ -1036,9 +1041,9 @@
     "decline": "Decline",
     "confirmAccept": "Yes, accept",
     "confirmDecline": "Yes, decline",
-    "acceptConsequence": "By accepting, you ask us to arrange this shipment at the quoted price. Nothing is charged automatically; our team will contact you.",
+    "acceptConsequence": "By accepting, you ask us to arrange this shipment at the quoted price. Nothing is charged automatically; we will contact you.",
     "declineConsequence": "The quotation will be closed. You can contact us later if you change your mind.",
-    "accepted": "Thank you. You have accepted the quotation; our team will contact you.",
+    "accepted": "Thank you. You have accepted the quotation; we will contact you.",
     "declined": "You have declined the quotation.",
     "issueTitle": "Report a problem",
     "issueLabel": "Describe the problem with this shipment",
@@ -1101,7 +1106,7 @@
   },
   "illustrations": {
     "requestQuote": "A customer at a laptop filling in a quote request form.",
-    "teamReview": "A member of our team, wearing a headset, reviews a request at a desk.",
+    "teamReview": "A person wearing a headset reviews a request at a desk.",
     "quoteReceived": "A customer holding a phone receives a quote, marked with a tick.",
     "handover": "A customer hands a parcel to a team member in a high-visibility vest beside a shipping container.",
     "containerLoading": "A worker in a high-visibility vest wheels a barrel and a box into a shipping container.",

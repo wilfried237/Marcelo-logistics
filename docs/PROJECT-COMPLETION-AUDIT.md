@@ -29,7 +29,7 @@ Because no account exists in production, **no signed-in workflow has been verifi
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Registration, login, password recovery | `app/[locale]/(auth)/*` (login, register, forgot-password, reset-password), `actions.ts`, `/api/auth/callback`, Supabase templates in `supabase/templates` | Yes: Supabase tests (sign-up closed, invites, sign-in), journeys (closed registration G, recovery), e2e | Partly: login form renders; register shows "Accounts are created by invitation"; portal redirects to login. Sign-in and recovery cannot be tried (no users). | Recovery and invite emails use Supabase's built-in mailer until custom SMTP is set | First admin (B); custom SMTP (C); production sign-in and recovery test after approval |
 | 2 | Customer dashboard and profile | `app/[locale]/portal/*` (overview, quotes, shipments, documents, profile) | Yes: journeys, Supabase RLS tests | No (needs a customer account) | None known | Production test with an invited test customer |
-| 3 | Quote request workflow | `/quote` wizard (`components/quote/quote-wizard.tsx`), `quote/actions.ts`, `/api/quote`, `lib/domain/quote-schema.ts`, `quote-lifecycle.ts` | Yes: unit, PGlite, e2e (validation, disabled state), journeys (submission end to end) | Disabled state verified ("temporarily unavailable") | `quoteSubmissionStatus()` (in `lib/config/env.ts`) needs **all three**: `ENABLE_QUOTE_SUBMISSION=true`, a database, and a working email transport (`ENABLE_TRANSACTIONAL_EMAIL=true` with `RESEND_API_KEY` and `EMAIL_FROM`). Production has email off, which alone keeps the form disabled. | P-01, email activation (C), then enable both flags |
+| 3 | Quote request workflow | `/quote` wizard (`components/quote/quote-wizard.tsx`), `quote/actions.ts`, `/api/quote`, `lib/domain/quote-schema.ts`, `quote-lifecycle.ts` | Yes: unit, PGlite, e2e (validation, disabled state), journeys (submission end to end) | Disabled state verified ("temporarily unavailable") | Reviewer decided (P-01, 2026-11-09): the owner reviews every request and replies personally. `quoteSubmissionStatus()` (in `lib/config/env.ts`) needs **all three**: `ENABLE_QUOTE_SUBMISSION=true`, a database, and a working email transport (`ENABLE_TRANSACTIONAL_EMAIL=true` with `RESEND_API_KEY` and `EMAIL_FROM`). Production has email off, which alone keeps the form disabled. | First admin (B), owner address in `STAFF_NOTIFICATION_EMAIL`, email activation (C), then enable both flags |
 | 4 | Configurable pricing | `lib/domain/pricing.ts` (exact integer arithmetic, re-verified in SQL), `ownerConfig.pricing.taxRatesBp`, EUR and XAF | Yes: unit tests and DB function parity tests | No | No price list, by directive (staff price each quote). Tax lines are disabled until P-03. | P-03 (VAT); optional standard-wording list |
 | 5 | Staff quotation management | `app/[locale]/admin/(staff)/quotes`, `admin/quotes/[reference]`, `admin/actions.ts`, `lib/services/*` | Yes: integration, journeys | No | None known | Production test after the first admin |
 | 6 | Quote acceptance and rejection | `/quote/view/[token]` (signed link), portal quote detail, `quote/view/actions.ts` | Yes: integration (including tampered token), journeys | No | None known | Production test |
@@ -37,7 +37,7 @@ Because no account exists in production, **no signed-in workflow has been verifi
 | 8 | Public tracking | `/track`, `/track/[reference]`, `/api/track` (rate-limited, customer-visible milestones only) | Yes: e2e and journeys | Page renders (200) | None known | Production test with a real shipment |
 | 9 | Status updates | Milestones (`MilestoneCode`), customer-visible or internal flag, ETA with visibility flag | Yes | No | T-01 and T-02 wording not confirmed | T-01, T-02 |
 | 10 | Customer notifications | Outbox triggers write to `email_deliveries`; templates `quote_received`, `quote_under_review`, `info_requested`, `quote_issued`, `quote_updated`, `quote_expiring`, `quote_expired`, `quote_accepted`, `quote_declined`, `shipment_confirmed`, `shipment_update`, `shipment_delivered`, `contact_received` (EN/FR) | Yes: integration, email previews, live harness to the test inbox (`[EMAIL TEST]`) | Disabled (`ENABLE_TRANSACTIONAL_EMAIL=false`); 0 emails queued or sent | Retries depend on the next user action or the daily cron (see C) | Activation checklist (C) |
-| 11 | Staff notifications | Templates `staff_new_request`, `staff_customer_message`, `staff_quote_accepted`, `staff_quote_declined`, `staff_shipment_exception`, `staff_contact`, `staff_role_changed`, `staff_email_failure`, `staff_job_failure` (EN), sent to `STAFF_NOTIFICATION_EMAIL` | Yes | Disabled | The production `STAFF_NOTIFICATION_EMAIL` value is to be confirmed by the owner (currently the business mailbox) | Owner confirms the inbox |
+| 11 | Staff notifications | Templates `staff_new_request`, `staff_customer_message`, `staff_quote_accepted`, `staff_quote_declined`, `staff_shipment_exception`, `staff_contact`, `staff_role_changed`, `staff_email_failure`, `staff_job_failure` (EN), sent to `STAFF_NOTIFICATION_EMAIL` | Yes | Disabled | The owner reviews quotations (P-01), so `STAFF_NOTIFICATION_EMAIL` in Vercel must be the owner's notification address (currently the business mailbox) | Set it in Vercel (production setting, needs approval) |
 | 12 | Contact enquiries | `/contact` form, `contact/actions.ts`, `admin/(staff)/enquiries` | Yes | Page and details verified (both locations, tel: and mailto: links) | Submission needs the database and the email flag as for quotes | Production test |
 | 13 | Admin dashboard | `app/[locale]/admin/*` (dashboard, quotes, shipments, customers, enquiries, notifications, audit, users) | Yes | Redirect to login verified | No admin exists | B (first admin) |
 | 14 | Roles and permissions | `requireRole` / `pageStaff`, `assertAdmin`, `admin_set_user_role` (advisory lock, last-admin guard), RLS, role-change trigger | Yes: Supabase RLS tests, provisioning tests (self-elevation blocked) | Partly: sign-up disabled confirmed in Supabase settings | None known | — |
@@ -46,7 +46,7 @@ Because no account exists in production, **no signed-in workflow has been verifi
 | 17 | Cookie consent | **New:** `lib/consent/consent.ts`, `components/consent/*`, footer "Cookie preferences", `/cookies` page | Yes: 5 unit and 16 e2e tests (desktop and mobile) | **Not deployed** (this branch) | — | Approve, then release |
 | 18 | Privacy and legal pages | `/privacy` (draft notice), `/terms` (404 until L-01), **new** `/cookies`; drafts in `docs/legal/` | Yes: e2e | `/privacy` live with draft notice | Seven drafts need owner and legal review | Section E |
 | 19 | Security | CSP with nonce, security headers, HttpOnly session cookies, RLS, rate limits, signed quote links, Svix-verified webhook, secret guard for `.env.example`, `EMAIL_TEST_RECIPIENT` blocked on Vercel | Yes: security tests, `scripts/check-security.mjs` | Headers verified on the live site | Admin Gmail remains in 4 old public commits (history not rewritten) | Optional: decide whether to rewrite history |
-| 20 | Business configuration | `config/owner.ts` (contacts, locations, routes, confirmed services, tax rates, legal flags), feature flags in `lib/config/env.ts` | Yes: quality gates | Contacts, services and routes live | 6 owner markers remain (section F) | Section F |
+| 20 | Business configuration | `config/owner.ts` (contacts, locations, routes, confirmed services, tax rates, legal flags), feature flags in `lib/config/env.ts` | Yes: quality gates | Contacts, services and routes live | 4 owner markers remain, all legal (section F) | Section F |
 
 ---
 
@@ -174,10 +174,8 @@ See [docs/legal/README.md](legal/README.md).
 
 ## F. Owner decisions and placeholders
 
-**Code markers (`{{NEEDS_OWNER}}`, 6):**
+**Code markers (`{{NEEDS_OWNER}}`, 4).** C-01 (WhatsApp, opening hours), S-01 (services) and P-01 (reviewer) were answered on 2026-11-09. The remaining markers:
 
-- WhatsApp number (C-01);
-- services awaiting confirmation: barrels, parcels, commercial cargo (S-01);
 - terms (L-01);
 - privacy (L-02);
 - cookie policy (L-04);
@@ -190,14 +188,12 @@ A `RELEASE_BUILD=true` build fails until they are resolved.
 | Topic | Decision | Needed for |
 | --- | --- | --- |
 | Legal identity: name, form, registration, VAT, controller | B-02, L-02 | Privacy, Terms, footer |
-| WhatsApp number (optional) | C-01 | Contact page |
-| Opening hours, depot address for drop-off | C-01 | Contact, Shipping policy |
-| Barrels, parcels, commercial cargo: still offered? | S-01 | Services page |
+| Drop-off address, if different from the Lucan office | Shipping policy | Shipping policy |
 | Destination cities | S-02 | Quote form |
 | Prohibited and restricted goods | S-03 | Customs policy, FAQ |
 | Online quotes for the three support services, and their questions | S-04 (proposal ready) | Quote form |
 | Collection service: offered? areas? charges? | new: Shipping policy | Shipping policy |
-| Who reviews quotes, and the response-time wording | P-01 | **Enabling quote submission** |
+| Response-time wording (the reviewer is decided: the owner) | P-01 (remaining part) | Quote confirmation text (optional) |
 | Currencies, VAT presentation, validity | P-03 | Tax lines |
 | Customs duties included or not | P-04 | Quotes, Customs policy |
 | Payment methods, deposit, due date | P-05 | Payment policy |

@@ -16,7 +16,7 @@ Everything about deadlines, compensation and escalation is an open decision.
 
 - **From your account:** open the shipment and use "Report a problem". The report is added to the case history and our staff are notified.
 - **By email:** info.cargo@marchelo-logistics.com. Please quote your ML reference.
-- **By phone:** Ireland +353 89 484 0017; Cameroon +237 6 59 68 54 79.
+- **By phone or WhatsApp:** Ireland +353 89 484 0017; Cameroon +237 6 59 68 54 79. We are open 24 hours a day, 7 days a week.
 
 ### Damage, loss or shortage
 
@@ -47,7 +47,7 @@ We keep complaint records for **[OWNER/LEGAL: L-03]**. See the Privacy notice.
 
 - **Depuis votre compte :** ouvrez l’expédition et utilisez « Signaler un problème ». Le signalement est ajouté à l’historique du dossier et notre personnel est prévenu.
 - **Par e-mail :** info.cargo@marchelo-logistics.com. Indiquez votre référence ML.
-- **Par téléphone :** Irlande +353 89 484 0017 ; Cameroun +237 6 59 68 54 79.
+- **Par téléphone ou WhatsApp :** Irlande +353 89 484 0017 ; Cameroun +237 6 59 68 54 79. Nous sommes ouverts 24h/24 et 7j/7.
 
 ### Avarie, perte ou manquant
 

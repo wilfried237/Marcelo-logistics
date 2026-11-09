@@ -2,6 +2,8 @@
 
 Status: **proposal only. No migration file has been created and nothing has been applied.** It needs owner approval of the questions in section 5, then developer implementation, then the normal release (migrations are applied by the production deployment, R-02).
 
+> **Update 2026-11-09:** the owner confirmed parcels, barrels and commercial cargo (S-01). Those three already exist in the enum and the quote form, so they need **no** migration; this proposal concerns only customs clearance, warehousing and e-commerce.
+
 ## 1. Today
 
 | Item | State |

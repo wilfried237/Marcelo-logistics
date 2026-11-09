@@ -21,14 +21,13 @@ Destination cities served: **[OWNER: S-02.]**
 
 | Service | Status |
 | --- | --- |
-| Air freight and express parcels; sea freight (full containers and groupage); vehicle shipping; customs clearance; warehousing and distribution; e-commerce and online shopping | Confirmed by the owner |
-| Barrels and boxes; parcels and personal effects; commercial cargo | Shown as "availability on request" **[OWNER: S-01: confirm]** |
+| Air freight and express parcels; sea freight (full containers and groupage); vehicle shipping; barrels and boxes; parcels and personal effects; commercial cargo; customs clearance; warehousing and distribution; e-commerce and online shopping | Confirmed by the owner (S-01, 2026-11-09) |
 
 ### Booking and preparation
 
 1. Request a quotation. Our staff confirm the price, inclusions, exclusions and validity.
 2. Accept the quotation before it expires.
-3. Bring your goods to us, or arrange collection: **[OWNER: depot address and opening hours (C-01); whether collection is offered and in which areas; charges.]**
+3. Bring your goods to us, or arrange collection. We are open 24 hours a day, 7 days a week. **[OWNER: drop-off address (if different from the Lucan office); whether collection is offered and in which areas; charges.]**
 4. Packing requirements: **[OWNER: barrels, boxes, vehicles (fuel level, personal items inside or not), labelling.]**
 5. Documents: **[OWNER: per service, e.g. identity document, purchase invoices, vehicle registration and title, packing list.]**
 
@@ -65,14 +64,13 @@ Villes de destination desservies : **[PROPRIÉTAIRE : S-02.]**
 
 | Service | Statut |
 | --- | --- |
-| Fret aérien et colis express ; fret maritime (conteneurs complets et groupage) ; transport de véhicules ; dédouanement ; entreposage et distribution ; e-commerce et achats en ligne | Confirmés par le propriétaire |
-| Fûts et cartons ; colis et effets personnels ; marchandises commerciales | Affichés « disponibilité sur demande » **[PROPRIÉTAIRE : S-01 : à confirmer]** |
+| Fret aérien et colis express ; fret maritime (conteneurs complets et groupage) ; transport de véhicules ; fûts et cartons ; colis et effets personnels ; marchandises commerciales ; dédouanement ; entreposage et distribution ; e-commerce et achats en ligne | Confirmés par le propriétaire (S-01, 9 novembre 2026) |
 
 ### Réservation et préparation
 
 1. Demandez un devis. Notre personnel confirme le prix, les inclusions, les exclusions et la validité.
 2. Acceptez le devis avant son expiration.
-3. Déposez vos marchandises ou organisez leur enlèvement : **[PROPRIÉTAIRE : adresse et horaires du dépôt (C-01) ; enlèvement proposé ou non, zones, frais.]**
+3. Déposez vos marchandises ou organisez leur enlèvement. Nous sommes ouverts 24h/24 et 7j/7. **[PROPRIÉTAIRE : adresse de dépôt (si différente du bureau de Lucan) ; enlèvement proposé ou non, zones, frais.]**
 4. Exigences d’emballage : **[PROPRIÉTAIRE : fûts, cartons, véhicules (niveau de carburant, effets personnels à bord ou non), étiquetage.]**
 5. Documents : **[PROPRIÉTAIRE : selon le service, par exemple pièce d’identité, factures d’achat, carte grise et titre de propriété, liste de colisage.]**
 
