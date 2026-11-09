@@ -71,7 +71,7 @@ This affects only the emails Supabase Auth sends: invitations, password resets a
    | Confirm signup | `Marchelo Logistics: confirm your email / confirmez votre adresse e-mail` | `supabase/templates/confirmation.html` |
 
    - Each body contains English and French. The language follows the user's saved locale (`{{ if eq .Data.locale "fr" }}`), which the invitation sets from `--locale`.
-   - After pasting, check that each link is `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=invite|recovery|signup`.
+   - After pasting, check that each link is `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=…` with `type=invite` (Invite user), `type=recovery` (Reset password) and `type=email` (Confirm signup; the callback accepts `email`).
 5. **URL configuration** (Authentication → URL Configuration), read-only check:
    - Site URL: `https://marchelo-logistics.com`;
    - Redirect URLs include `https://marchelo-logistics.com/api/auth/callback**`.
