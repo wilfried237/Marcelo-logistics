@@ -98,3 +98,15 @@ Safeguards: the override is ignored on Vercel; the run refuses to start unless t
 
 Result on 2026-11-08: 52 emails, all 13 customer templates in EN and FR plus all 9 staff alert templates and their variants, every one **delivered** (Resend status) to the single test inbox.
 
+
+## Project completion run (2026-11-09, branch `feat/project-completion`)
+
+| Suite | Command | Result |
+| --- | --- | --- |
+| Type check, lint, security scan, i18n parity | `npx tsc --noEmit`, `npm run lint`, `node scripts/check-security.mjs`, `node scripts/check-i18n.mjs` | Clean; 927 keys in each locale |
+| Unit, PGlite and integration | `npm test` | 231 passed (includes the 5 new cookie-consent unit tests) |
+| Real local Supabase | `npm run test:supabase` | 22 passed, 3 skipped (open-registration tests while registration is closed); includes 6 first-admin provisioning tests |
+| Public e2e (production build, desktop and Pixel 7) | `npm run test:e2e` | 122 passed, 4 skipped; includes 16 cookie-consent tests (`tests/e2e/consent.spec.ts`) |
+| Full-stack journeys (local Supabase and mock Resend) | `npm run test:journeys` | 7 passed, 1 skipped (the open-registration journey) |
+
+The Playwright configs preset a "reject optional" consent cookie (`tests/consent-storage-state.ts`), so the banner never covers the pages under test. `consent.spec.ts` clears it to test the banner itself.

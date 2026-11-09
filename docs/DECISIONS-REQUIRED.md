@@ -1,6 +1,6 @@
 # Decisions Required from the Owner
 
-_Last updated: 2026-11-03 · This is the single consolidated list of open **business** decisions._
+_Last updated: 2026-11-09 (legal drafts: [docs/legal/](./legal/README.md); completion audit: [PROJECT-COMPLETION-AUDIT.md](./PROJECT-COMPLETION-AUDIT.md)) · This is the single consolidated list of open **business** decisions._
 
 **How to answer:** write your answer on the `Answer:` line under each decision (or reply by email quoting the ID). Answers already recorded here are preserved. Development continues on everything that does not depend on an answer.
 
@@ -30,6 +30,12 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 | L-01 ★ | Terms and conditions of carriage | Release (terms page hidden) |
 | L-02 ★ | Privacy notice: controller identity and contact | Release |
 | L-03 ◆ | Document and data retention periods | Enabling uploads; automatic deletion |
+| L-04 ★ | Cookie policy wording (the inventory is factual and live as a draft) | Release |
+| L-05 | Liability, insurance and carriage regime | Terms, claims policy |
+| L-06 | Cancellation right for distance contracts | Payment and cancellation policy |
+| L-07 | Claim deadlines, complaint process, dispute resolution | Claims policy |
+| P-05 | Payment methods, deposit, due date | Payment policy |
+| P-06 | Refund rules and timelines | Payment policy |
 | A-01 ✓ | Logo in use on every page (2026-11-04); artwork wording vs name to confirm | — |
 | A-02 | Photographs | Visual quality only |
 | R-01 ◆ | Vercel and Supabase account ownership and EU region | Preview deployment, database |
@@ -92,6 +98,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Decision needed:** approve the database change that lets customers choose the three new categories in the quote form.
 - **Today:** they are listed on the home and services pages with "Ask us about this service" (contact form). The quote form offers the six existing categories; staff see the new names for the renamed ones automatically.
 - **Change proposed:** a migration adding `customs_clearance`, `warehousing` and `ecommerce` to the PostgreSQL enum `service_code` (`ALTER TYPE … ADD VALUE IF NOT EXISTS`, additive, no table rewrite, existing quote requests untouched), the same values in `prisma/schema.prisma` and `SERVICE_CODES`, `quoteCode` set in `SERVICE_OFFERINGS`, and tests. Enum values cannot be removed later; the previous app version keeps working (it never writes them). Applied by the next production deployment like the earlier migrations.
+- **Full proposal (2026-11-09):** [docs/proposals/S-04-service-codes.md](./proposals/S-04-service-codes.md): migration SQL, compatibility, application changes and the questions for each service. Not created and not applied.
 - **Also to decide:** which questions the form should ask for these services (they are not route-and-items shipments in the same way), or whether they stay contact-only.
 - **Development can continue:** yes.
 - **Answer:**
@@ -123,6 +130,15 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **If delayed:** staff may choose EUR or XAF per quote; validity is entered per quote; the VAT treatment is written in the inclusions/exclusions text.
 - **Affected:** staff quote form, quote display.
 - **Development can continue:** yes.
+- **Answer:**
+
+### P-05 Payment methods and timing
+- **Decision needed:** which payment methods you accept (only those actually used), whether a deposit is taken, when payment is due, and whether a EUR quote can be paid in XAF. The website takes no online payments.
+- **Draft:** [docs/legal/payment-refund-cancellation.md](./legal/payment-refund-cancellation.md).
+- **Answer:**
+
+### P-06 Refunds
+- **Decision needed:** when refunds are due (for example cancellation before departure, or a service not performed), how they are calculated, the method and the timeline.
 - **Answer:**
 
 ### P-04 Customs duties and destination charges
@@ -197,6 +213,24 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Why it matters:** GDPR requires retention limits, while tax and customs rules may require minimum periods.
 - **If delayed:** **nothing is deleted automatically** (`retention_until` stays empty); document uploads stay disabled.
 - **Development can continue:** yes.
+- **Answer:**
+
+### L-04 ★ Cookie policy
+- **Decision needed:** legal review of the cookie policy and banner wording. The inventory (strictly necessary cookies only) is verified; see [docs/legal/cookie-policy.md](./legal/cookie-policy.md).
+- **If delayed:** `/cookies` shows a draft notice; the launch build fails.
+- **Answer:**
+
+### L-05 Liability, insurance and carriage regime
+- **Decision needed:** our legal role (carrier, forwarder or consolidator), liability limits, exclusions, whether insurance is offered, and declared values. This determines which conventions apply (Montreal, Hague-Visby, CMR).
+- **Answer:**
+
+### L-06 Cancellation right for distance contracts
+- **Decision needed:** how the consumer right to cancel (Consumer Rights Act 2022) applies to quotations accepted online, and the required information and form.
+- **Answer:**
+
+### L-07 Claims and complaints
+- **Decision needed:** notification and claim deadlines, acknowledgement and response times, and escalation and dispute-resolution bodies (Ireland and Cameroon).
+- **Draft:** [docs/legal/claims-complaints.md](./legal/claims-complaints.md).
 - **Answer:**
 
 ## 7. Logo, images and other brand assets

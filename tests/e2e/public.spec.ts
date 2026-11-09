@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const PAGES = ["/en", "/fr", "/en/services", "/en/quote", "/fr/quote", "/en/track", "/en/about", "/fr/faq", "/en/privacy", "/en/contact", "/en/login", "/en/how-it-works", "/fr/how-it-works", "/en/shipping-guide", "/fr/shipping-guide"];
+const PAGES = ["/en", "/fr", "/en/services", "/en/quote", "/fr/quote", "/en/track", "/en/about", "/fr/faq", "/en/privacy", "/en/cookies", "/fr/cookies", "/en/contact", "/en/login", "/en/how-it-works", "/fr/how-it-works", "/en/shipping-guide", "/fr/shipping-guide"];
 
 test.describe("public pages", () => {
   for (const path of PAGES) {
@@ -20,7 +20,7 @@ test.describe("public pages", () => {
     });
   }
 
-  for (const path of ["/en", "/fr", "/en/services", "/fr/services", "/en/quote", "/en/track", "/en/login", "/en/faq", "/en/how-it-works", "/fr/shipping-guide", "/en/about", "/en/contact"]) {
+  for (const path of ["/en", "/fr", "/en/services", "/fr/services", "/en/quote", "/en/track", "/en/login", "/en/faq", "/en/how-it-works", "/fr/shipping-guide", "/en/about", "/en/contact", "/en/cookies", "/fr/cookies"]) {
     test(`${path} has no serious or critical accessibility violations`, async ({ page }) => {
       await page.goto(path);
       const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
@@ -100,6 +100,7 @@ test.describe("public pages", () => {
     const sitemap = await (await request.get("/sitemap.xml")).text();
     expect(sitemap).toContain("/en/shipping-guide");
     expect(sitemap).toContain("/fr/how-it-works");
+    expect(sitemap).toContain("/fr/cookies");
     expect(sitemap).not.toContain("/terms");
   });
 

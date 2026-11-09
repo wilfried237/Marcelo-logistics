@@ -92,6 +92,8 @@ export const ownerConfig = {
     termsApproved: false, // {{NEEDS_OWNER}} L-01
     /** Privacy notice: controller identity and retention must be confirmed (L-02, L-03). */
     privacyApproved: false, // {{NEEDS_OWNER}} L-02
+    /** Cookie policy: the inventory is factual; the wording awaits legal review (L-04). */
+    cookiePolicyApproved: false, // {{NEEDS_OWNER}} L-04
   },
 } as const;
 

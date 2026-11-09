@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { consentStorageState } from "./tests/consent-storage-state";
 
 // 3300: never the full-stack journeys port (3200), so a running journeys server is never reused.
 const PORT = Number(process.env.E2E_PORT ?? 3300);
@@ -21,7 +22,8 @@ export default defineConfig({
   timeout: 60_000,
   retries: 0,
   reporter: [["list"]],
-  use: { baseURL: `http://localhost:${PORT}`, trace: "retain-on-failure" },
+  // A stored cookie choice keeps the banner out of the way; consent.spec.ts tests the banner from a clean state.
+  use: { baseURL: `http://localhost:${PORT}`, trace: "retain-on-failure", storageState: consentStorageState() },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"], channel: "chrome" } },
     { name: "mobile", use: { ...devices["Pixel 7"], channel: "chrome" } },

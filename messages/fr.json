@@ -912,7 +912,8 @@
     "legal": "Mentions légales",
     "company": "Entreprise",
     "howItWorks": "Comment ça marche",
-    "guide": "Guide d’expédition"
+    "guide": "Guide d’expédition",
+    "cookies": "Cookies"
   },
   "media": {
     "containerShipAlt": "Vue aérienne d’un porte-conteneurs chargé de conteneurs empilés, naviguant sur une mer d’un bleu profond.",
@@ -1129,5 +1130,78 @@
     },
     "quoteCta": "Demander un devis",
     "askCta": "Nous consulter pour ce service"
+  },
+  "consent": {
+    "bannerLabel": "Consentement aux cookies",
+    "bannerTitle": "Les cookies sur ce site",
+    "bannerBody": "Ce site utilise uniquement des cookies nécessaires (langue et connexion). Aucun cookie de mesure d’audience ni de publicité n’est utilisé. Vous pouvez modifier votre choix à tout moment via « Préférences cookies » en bas de page.",
+    "policyLink": "Politique relative aux cookies",
+    "acceptAll": "Tout accepter",
+    "rejectOptional": "Refuser les cookies facultatifs",
+    "customise": "Personnaliser mes choix",
+    "dialogTitle": "Préférences cookies",
+    "dialogIntro": "Choisissez les catégories de cookies que vous autorisez. Les cookies strictement nécessaires sont toujours actifs, car le site ne peut pas fonctionner sans eux. Les catégories facultatives restent désactivées tant que vous ne les activez pas.",
+    "alwaysActive": "Toujours actifs",
+    "notInUse": "Non utilisés sur ce site actuellement.",
+    "save": "Enregistrer mes choix",
+    "close": "Fermer",
+    "footerLink": "Préférences cookies",
+    "categories": {
+      "necessary": {
+        "title": "Strictement nécessaires",
+        "description": "Mémoriser votre langue, maintenir votre connexion à votre compte, sécuriser la réinitialisation du mot de passe et mémoriser vos choix en matière de cookies."
+      },
+      "functional": {
+        "title": "Fonctionnels",
+        "description": "Serviraient à mémoriser des réglages facultatifs ou à fournir des fonctions intégrées, comme une carte ou un chat."
+      },
+      "analytics": {
+        "title": "Mesure d’audience",
+        "description": "Serviraient à comprendre, à l’aide de statistiques, comment les visiteurs utilisent le site."
+      },
+      "marketing": {
+        "title": "Marketing",
+        "description": "Serviraient à afficher ou à mesurer de la publicité."
+      }
+    }
+  },
+  "cookiePolicy": {
+    "title": "Politique relative aux cookies",
+    "draftNotice": "Projet en attente de relecture juridique : cette page recense les cookies que le site dépose réellement aujourd’hui. Elle sera mise à jour avant l’ajout de tout nouvel outil.",
+    "intro": "Les cookies sont de petits fichiers qu’un site enregistre dans votre navigateur. Cette page recense tous les cookies déposés par ce site, leur utilité et leur durée de conservation.",
+    "summaryTitle": "En bref",
+    "summary": "Ce site utilise uniquement des cookies strictement nécessaires. Il n’utilise aucun cookie de mesure d’audience, de publicité ou de réseaux sociaux, et ne charge aucun script de suivi tiers. Les cookies strictement nécessaires ne requièrent pas votre consentement, mais nous vous en informons ici.",
+    "tableTitle": "Les cookies que nous utilisons",
+    "purpose": "Finalité",
+    "category": "Catégorie",
+    "duration": "Durée",
+    "provider": "Déposé par",
+    "necessary": "Strictement nécessaire",
+    "firstParty": "Marchelo Logistics (ce site)",
+    "firstPartySupabase": "Marchelo Logistics (ce site), via notre service de connexion Supabase",
+    "locale": {
+      "purpose": "Mémorise la langue que vous avez choisie (anglais ou français).",
+      "duration": "Jusqu’à la fermeture de votre navigateur"
+    },
+    "consentCookie": {
+      "purpose": "Enregistre vos choix en matière de cookies et la version de cette politique à laquelle vous avez répondu, afin de ne pas vous interroger à chaque page.",
+      "duration": "6 mois"
+    },
+    "session": {
+      "name": "sb-…-auth-token (parfois découpé en parties numérotées)",
+      "purpose": "Maintient votre connexion à votre compte client ou personnel. Déposé uniquement lorsque vous vous connectez et supprimé lorsque vous vous déconnectez.",
+      "duration": "Jusqu’à 400 jours, ou jusqu’à votre déconnexion"
+    },
+    "verifier": {
+      "name": "sb-…-auth-token-code-verifier",
+      "purpose": "Protège le lien de réinitialisation du mot de passe que vous demandez, afin que seul votre navigateur puisse la terminer. Déposé uniquement lors d’une demande de réinitialisation.",
+      "duration": "Jusqu’à 400 jours, ou jusqu’à la fin de la réinitialisation"
+    },
+    "optionalTitle": "Cookies facultatifs",
+    "optional": "Nous n’utilisons actuellement aucun cookie fonctionnel, de mesure d’audience ou marketing. Si nous en ajoutons un à l’avenir, il sera indiqué ici, ne sera utilisé qu’avec votre accord, et nous vous demanderons à nouveau votre choix.",
+    "manageTitle": "Modifier votre choix",
+    "manage": "Vous pouvez modifier ou retirer votre choix à tout moment via « Préférences cookies » en bas de chaque page. Vous pouvez aussi supprimer les cookies dans les réglages de votre navigateur ; si vous supprimez les cookies strictement nécessaires, vous serez déconnecté et votre choix de langue sera oublié.",
+    "questionsTitle": "Questions",
+    "questions": "Pour toute question sur les cookies ou vos données personnelles, contactez-nous grâce aux coordonnées indiquées sur notre page de contact. La page de confidentialité explique comment nous utilisons les données personnelles."
   }
 }

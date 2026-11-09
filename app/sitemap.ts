@@ -4,7 +4,7 @@ import { ownerConfig } from "@/config/owner";
 import { getSiteUrl } from "@/lib/config/env";
 
 /** Public, indexable pages in every locale. Terms are listed only once approved (L-01). */
-const PAGES = ["", "/services", "/how-it-works", "/shipping-guide", "/quote", "/track", "/about", "/faq", "/contact", "/privacy"];
+const PAGES = ["", "/services", "/how-it-works", "/shipping-guide", "/quote", "/track", "/about", "/faq", "/contact", "/privacy", "/cookies"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getSiteUrl();

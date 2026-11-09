@@ -912,7 +912,8 @@
     "legal": "Legal",
     "company": "Company",
     "howItWorks": "How it works",
-    "guide": "Shipping guide"
+    "guide": "Shipping guide",
+    "cookies": "Cookies"
   },
   "media": {
     "containerShipAlt": "Aerial view of a container ship loaded with stacked containers, sailing on deep blue water.",
@@ -1129,5 +1130,78 @@
     },
     "quoteCta": "Request a quote",
     "askCta": "Ask us about this service"
+  },
+  "consent": {
+    "bannerLabel": "Cookie consent",
+    "bannerTitle": "Cookies on this website",
+    "bannerBody": "This website uses only necessary cookies (language and sign-in). We use no analytics or advertising cookies. You can change your choice at any time from “Cookie preferences” at the bottom of the page.",
+    "policyLink": "Cookie policy",
+    "acceptAll": "Accept all",
+    "rejectOptional": "Reject optional cookies",
+    "customise": "Customise preferences",
+    "dialogTitle": "Cookie preferences",
+    "dialogIntro": "Choose which categories of cookies you allow. Strictly necessary cookies are always on because the website cannot work without them. Optional categories stay off unless you switch them on.",
+    "alwaysActive": "Always active",
+    "notInUse": "Not used on this website at present.",
+    "save": "Save my choices",
+    "close": "Close",
+    "footerLink": "Cookie preferences",
+    "categories": {
+      "necessary": {
+        "title": "Strictly necessary",
+        "description": "Remember your language, keep you signed in to your account, protect password resets and remember your cookie choices."
+      },
+      "functional": {
+        "title": "Functional",
+        "description": "Would remember optional settings or provide embedded features such as maps or chat."
+      },
+      "analytics": {
+        "title": "Analytics",
+        "description": "Would help us understand, through statistics, how visitors use the website."
+      },
+      "marketing": {
+        "title": "Marketing",
+        "description": "Would be used to show or measure advertising."
+      }
+    }
+  },
+  "cookiePolicy": {
+    "title": "Cookie policy",
+    "draftNotice": "Draft awaiting legal review: this page lists the cookies the website actually sets today. It will be updated before any new tool is added.",
+    "intro": "Cookies are small files that a website stores in your browser. This page lists every cookie this website sets, why it is needed and how long it is kept.",
+    "summaryTitle": "In short",
+    "summary": "This website uses only strictly necessary cookies. It does not use analytics, advertising or social media cookies, and it loads no third-party tracking scripts. Strictly necessary cookies do not require your consent, but we tell you about them here.",
+    "tableTitle": "Cookies we use",
+    "purpose": "Purpose",
+    "category": "Category",
+    "duration": "Duration",
+    "provider": "Set by",
+    "necessary": "Strictly necessary",
+    "firstParty": "Marchelo Logistics (this website)",
+    "firstPartySupabase": "Marchelo Logistics (this website), using our Supabase sign-in service",
+    "locale": {
+      "purpose": "Remembers the language you chose (English or French).",
+      "duration": "Until you close your browser"
+    },
+    "consentCookie": {
+      "purpose": "Records your cookie choices and the version of this policy you answered, so that we do not ask on every page.",
+      "duration": "6 months"
+    },
+    "session": {
+      "name": "sb-…-auth-token (may be split into numbered parts)",
+      "purpose": "Keeps you signed in to your customer or staff account. Set only when you sign in and removed when you sign out.",
+      "duration": "Up to 400 days, or until you sign out"
+    },
+    "verifier": {
+      "name": "sb-…-auth-token-code-verifier",
+      "purpose": "Protects the password reset link you request, so that only your browser can complete the reset. Set only when you request a password reset.",
+      "duration": "Up to 400 days, or until the reset is completed"
+    },
+    "optionalTitle": "Optional cookies",
+    "optional": "We do not currently use any functional, analytics or marketing cookies. If we add one in future, it will be listed here, it will be used only after you agree, and we will ask for your choice again.",
+    "manageTitle": "Changing your choice",
+    "manage": "You can change or withdraw your choice at any time using “Cookie preferences” at the bottom of every page. You can also delete cookies in your browser settings; if you delete the strictly necessary cookies, you will be signed out and your language choice will be forgotten.",
+    "questionsTitle": "Questions",
+    "questions": "If you have a question about cookies or your personal data, contact us using the details on our contact page. The privacy page explains how we use personal data."
   }
 }

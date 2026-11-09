@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { consentStorageState } from "./tests/consent-storage-state";
 
 /*
  * Full-stack business journeys: production build + REAL local Supabase (Docker)
@@ -43,7 +44,7 @@ export default defineConfig({
   retries: 0,
   timeout: 90_000,
   reporter: [["list"]],
-  use: { baseURL: `http://localhost:${PORT}`, trace: "retain-on-failure", channel: "chrome" },
+  use: { baseURL: `http://localhost:${PORT}`, trace: "retain-on-failure", channel: "chrome", storageState: consentStorageState() },
   projects: [{ name: "desktop", use: { ...devices["Desktop Chrome"], channel: "chrome" } }],
   webServer: [
     { command: `node tests/e2e-fullstack/mock-resend.mjs`, port: MOCK, reuseExistingServer: false, env: { MOCK_RESEND_PORT: String(MOCK) } },
