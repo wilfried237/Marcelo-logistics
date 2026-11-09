@@ -32,12 +32,56 @@ Tests: `tests/supabase/provision-admin.test.ts` runs against the real local Supa
 ## Before you start (owner decisions)
 
 1. **The administrator's email address.** The owner has confirmed it privately. It is **not** written in this public repository. Use it only on the command line.
-2. **Invitation email.** Supabase sends the invitation through its own email service unless custom SMTP is configured (see `docs/DEPLOYMENT.md`, "Transactional email activation"). The built-in service is rate-limited and sends from a Supabase address. Either approach works for one invitation. Check the spam folder.
+2. **Custom SMTP must be configured first** (stage 0 below). Without custom SMTP, Supabase's default email service sends only to addresses that are members of the project's organisation team, and only a few messages per hour. The owner's invitation would very likely never arrive. Run the provisioning only once stage 0 is complete, unless the owner's address is a member of the Supabase organisation.
 3. **Locale** of the invitation landing page: `en` or `fr`.
 4. **Production checks.** Do these in the Supabase dashboard, read-only:
    - Authentication → URL configuration: Site URL is `https://marchelo-logistics.com`.
    - The redirect allow-list contains `https://marchelo-logistics.com/api/auth/callback**`.
    - The invite template links to `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=invite`, as committed in `supabase/templates/invite.html`. The committed template file is the source of truth. If the hosted template differs, the link opens the home page instead of the password page.
+
+## Stage 0: Supabase custom SMTP through Resend (separate approval)
+
+This affects only the emails Supabase Auth sends: invitations, password resets and sign-up confirmations. The app's transactional emails stay off (`ENABLE_TRANSACTIONAL_EMAIL=false`), and no Vercel variable changes.
+
+1. **Create a separate Resend key.**
+   - In the Resend dashboard, go to API Keys → Create API key.
+   - Name: `supabase-auth-smtp`. Permission: **Sending access**. Domain: `marchelo-logistics.com` (already verified, eu-west-1).
+   - Copy the key once and paste it straight into step 2. Do not store it anywhere else.
+   - Do **not** reuse or rotate the app's existing key.
+2. **Set up SMTP in Supabase** (project → Authentication → Emails → SMTP Settings → Enable custom SMTP):
+
+   | Field | Value |
+   | --- | --- |
+   | Sender email | The verified sender used for `EMAIL_FROM`, on `marchelo-logistics.com` (decision C-02) |
+   | Sender name | `Marchelo Logistics` |
+   | Host | `smtp.resend.com` |
+   | Port | `465` |
+   | Username | `resend` |
+   | Password | The key from step 1 |
+   | Minimum interval between emails | Keep the default |
+
+   Save.
+3. **Rate limit** (Authentication → Rate Limits). Supabase applies a limit on emails sent per hour once custom SMTP is on. Keep the default; it is ample for invitations and password resets.
+4. **Templates** (Authentication → Emails → Templates). For each template below, paste the subject from `supabase/config.toml` and the body from the committed file.
+
+   | Template | Subject | Body |
+   | --- | --- | --- |
+   | Invite user | `Marchelo Logistics: activate your account / activez votre compte` | `supabase/templates/invite.html` |
+   | Reset password | `Marchelo Logistics: reset your password / réinitialisez votre mot de passe` | `supabase/templates/recovery.html` |
+   | Confirm signup | `Marchelo Logistics: confirm your email / confirmez votre adresse e-mail` | `supabase/templates/confirmation.html` |
+
+   - Each body contains English and French. The language follows the user's saved locale (`{{ if eq .Data.locale "fr" }}`), which the invitation sets from `--locale`.
+   - After pasting, check that each link is `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=invite|recovery|signup`.
+5. **URL configuration** (Authentication → URL Configuration), read-only check:
+   - Site URL: `https://marchelo-logistics.com`;
+   - Redirect URLs include `https://marchelo-logistics.com/api/auth/callback**`.
+
+   Both were confirmed earlier. Change nothing if they match.
+6. **Testing.** Supabase has no "send test email" button, and any other test would create a production user. So:
+   - the owner's invitation (the procedure below) is the first delivery test;
+   - the password reset in "After the run" is the second.
+
+   For both, check Resend → Emails: the message should show *Delivered*. Also check Supabase → Logs → Auth for errors.
 
 ## Procedure (production, after approval)
 
@@ -93,6 +137,16 @@ unset SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY DIRECT_URL SITE_URL ALLOW_PROVISION
 set -o history
 ```
 
+Expected output of step 2, the dry run (it writes nothing and sends nothing):
+
+```text
+provision-admin: target HOSTED project <ref> (api <ref>.supabase.co, db <region>.pooler.supabase.com); account o***@<domain>; dry run
+provision-admin: plan: send a Supabase invitation to this address, then give the new account the admin role. Re-run with --apply.
+```
+
+- If the second line says `plan: the account already exists; give it the admin role (no email is sent)`, the address already has a production account. Stop and check before applying.
+- Any line starting `refused:` or `refusing` means nothing happened. Fix the cause it names.
+
 Expected output of step 3: `done. Invitation sent; the account has the admin role.`
 
 **What happens in step 3:**
@@ -121,6 +175,7 @@ The script prints only the masked address, the host names and the project ID. It
 | --- | --- |
 | `refused: an administrator already exists` | Nothing changed. Sign in with the existing administrator, or check `profiles` with a read-only query. |
 | `invitation failed: ...` | No role was changed. Check the Supabase Auth logs and the SMTP or rate limit, then re-run. The tool then finds the existing account and promotes it without another email. |
+| `done` was printed but no invitation arrived | The account exists and is already an administrator. Check Resend → Emails and Supabase → Logs → Auth, and the spam folder. Once SMTP is fixed, the owner uses **Forgot password** on `/<locale>/forgot-password` to set a password. Do not re-run the tool: it would refuse because an administrator exists. |
 | The invitation link opens the home page | The redirect allow-list or the invite template does not match (see "Before you start", point 4). The account is already an administrator, so the owner can use **Forgot password** on `/<locale>/forgot-password` once the allow-list is fixed. |
 | The wrong address was promoted | An administrator demotes it from Staff area → Users. Before any administrator exists, run the documented SQL path in `docs/DATABASE.md` to set it back to `customer`. |
 
