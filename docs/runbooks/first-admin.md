@@ -14,7 +14,7 @@ Every role change in the application goes through `setUserRole` (in `lib/service
 | Never in the deployed app | It exits immediately when `VERCEL` or `VERCEL_ENV` is set. |
 | No hardcoded credentials | Secrets come from the operator's shell. The tool never prints secrets or URLs, and it masks the email address in its output. |
 | No password handled by anyone else | A new address receives a Supabase invitation, and the owner chooses the password. An existing account is promoted without any email. |
-| Hosted projects need explicit approval | It refuses any non-local host unless `ALLOW_PROVISION_HOSTS` lists **both** the Supabase API host and the database host exactly. |
+| Hosted projects need explicit approval | It refuses any non-local host unless `ALLOW_PROVISION_HOSTS` lists **both** the Supabase API host and the database host exactly. The API, the database and `--project-ref` must name the same project; secrets must come from the shell; mixed local and hosted targets are refused. |
 | One time only | It refuses if any administrator exists, checked again under the advisory lock that `admin_set_user_role` uses. |
 | No self-elevation | It uses the trusted path (`app.role_change`). The profile trigger rejects role changes made any other way (covered by a test). |
 | Audited | The `profiles_audit` trigger records the role change in `audit_log`. |
@@ -43,28 +43,67 @@ Tests: `tests/supabase/provision-admin.test.ts` runs against the real local Supa
 
 Run it from a trusted machine in a fresh terminal. Do not use a CI job.
 
+### Exactly three production credentials
+
+| Variable | Where to find it | Secret? |
+| --- | --- | --- |
+| `SUPABASE_URL` | Supabase → Project Settings → API: `https://<ref>.supabase.co` | No |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API keys: the `service_role` (legacy) or `sb_secret_…` key | **Yes** |
+| `DIRECT_URL` | Supabase → Connect → **Session pooler** (port 5432): `postgresql://postgres.<ref>:<password>@<region>.pooler.supabase.com:5432/postgres` | **Yes** (it contains the database password) |
+
+You also need the project ID (`<ref>`, Supabase → Project Settings → General) and `SITE_URL`. No Vercel or Resend credential is needed.
+
+### Checks the tool makes before changing anything
+
+1. **Refuses on Vercel.**
+2. **Refuses mixed targets.** A hosted API with a local database, or the reverse, is refused.
+3. **Hosted secrets must come from the shell.** For a hosted project, the three variables must be set in **this shell**. A value picked up from `.env.local` or `.env` is refused, so a forgotten variable cannot fall back to the local database.
+4. **Both hosts must be allowed.** The API host and the database host must both appear in `ALLOW_PROVISION_HOSTS`.
+5. **One project, named by the operator.**
+   - The project ID in the API host must equal the one in the database. That comes from the pooler user `postgres.<ref>` or from a host `db.<ref>.supabase.co`.
+   - It must also equal `--project-ref`, typed by the operator.
+   - A legacy JWT key must be a `service_role` key for that project.
+6. **Read-only key check.** A `listUsers` call (one row) must succeed with the key against that project's Auth API.
+7. **Read-only database checks.** It counts the existing admins (and refuses if there are any), then looks the address up in `auth.users`.
+8. **Dry run unless `--apply`.** Without the flag, nothing is written and no email is sent.
+
+### Commands (Git Bash, from the repository root, on the merged `master`)
+
 ```bash
-# 1. Secrets for this shell only, typed or pasted from the dashboards (never committed, never echoed):
-#    SUPABASE_URL                 Supabase → Project Settings → API (https://<project-ref>.supabase.co)
-#    SUPABASE_SERVICE_ROLE_KEY    Supabase → Project Settings → API keys (service_role / secret)
-#    DIRECT_URL                   Supabase → Connect → Session pooler (port 5432)
-#    SITE_URL=https://marchelo-logistics.com
-#    Make sure .env.local does NOT point at production; shell values win over it.
+# 0. Fresh terminal; turn off history for this session, so nothing is saved.
+set +o history
+cd /c/TRAVAIL/Next.js/test/marcel-logistics
+git checkout master && git pull --ff-only
 
-# 2. Approve exactly these two hosts (API host, database host):
-export ALLOW_PROVISION_HOSTS="<project-ref>.supabase.co,<region>.pooler.supabase.com"
+# 1. Credentials for this shell only. Pasted values are not shown on screen.
+export SUPABASE_URL="https://<ref>.supabase.co"
+read -rs -p "Service role key: " SUPABASE_SERVICE_ROLE_KEY; echo; export SUPABASE_SERVICE_ROLE_KEY
+read -rs -p "Session pooler URL: " DIRECT_URL; echo; export DIRECT_URL
+export SITE_URL="https://marchelo-logistics.com"
+export ALLOW_PROVISION_HOSTS="<ref>.supabase.co,<region>.pooler.supabase.com"
 
-# 3. Dry run: prints LOCAL/HOSTED, the hosts, the masked address and the plan. Changes nothing.
-node scripts/provision-admin.mjs --email "<OWNER_ADMIN_EMAIL>" --locale fr
+# 2. Dry run: prints "HOSTED project <ref>", the two hosts, the masked address and the plan. Changes nothing.
+node scripts/provision-admin.mjs --email "<OWNER_ADMIN_EMAIL>" --locale fr --project-ref <ref>
 
-# 4. Apply:
-node scripts/provision-admin.mjs --email "<OWNER_ADMIN_EMAIL>" --locale fr --apply
+# 3. Apply, only if the dry run printed the right project and "plan: send a Supabase invitation":
+node scripts/provision-admin.mjs --email "<OWNER_ADMIN_EMAIL>" --locale fr --project-ref <ref> --apply
 
-# 5. Clear the secrets from the shell:
-unset SUPABASE_SERVICE_ROLE_KEY DIRECT_URL ALLOW_PROVISION_HOSTS
+# 4. Clear everything:
+unset SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY DIRECT_URL SITE_URL ALLOW_PROVISION_HOSTS
+set -o history
 ```
 
-Expected output of step 4: `done. Invitation sent; the account has the admin role.`
+Expected output of step 3: `done. Invitation sent; the account has the admin role.`
+
+**What happens in step 3:**
+
+- Supabase Auth (`auth.admin.inviteUserByEmail`) creates the user and sends the invitation email.
+- The database trigger `app_on_auth_user_created` gives the new user a `customer` profile, as for every new user.
+- In one transaction, under the role-change advisory lock, the tool checks again that there is no administrator. It then sets `profiles.role = 'admin'` through the trusted path (`app.role_change`).
+- The `profiles_audit` trigger records the change.
+- If anything fails, the transaction rolls back and no role changes.
+
+The script prints only the masked address, the host names and the project ID. It never prints keys, the database URL or passwords. Error messages from `pg` and supabase-js do not include credentials.
 
 ## After the run
 

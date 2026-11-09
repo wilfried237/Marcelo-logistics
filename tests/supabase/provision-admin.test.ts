@@ -43,17 +43,48 @@ describe("first administrator provisioning (scripts/provision-admin.mjs)", () =>
     expect(checkTargets({ ...local, VERCEL: "1" }).ok).toBe(false);
     expect(checkTargets({ ...local, VERCEL_ENV: "production" }).ok).toBe(false);
     expect(checkTargets({ ...local, SUPABASE_SERVICE_ROLE_KEY: "" }).ok).toBe(false);
-    const hosted = { SUPABASE_URL: "https://abc.supabase.co", SUPABASE_SERVICE_ROLE_KEY: "k", DIRECT_URL: "postgresql://u:p@aws-0-eu-west-1.pooler.supabase.com:5432/postgres" };
-    expect(checkTargets(hosted).ok).toBe(false);
-    expect(checkTargets({ ...hosted, ALLOW_PROVISION_HOSTS: "abc.supabase.co" }).ok).toBe(false); // both hosts required
-    expect(checkTargets({ ...hosted, ALLOW_PROVISION_HOSTS: "abc.supabase.co,aws-0-eu-west-1.pooler.supabase.com" }).ok).toBe(true);
-    const refused = checkTargets(hosted);
-    expect(JSON.stringify(refused)).not.toContain("u:p@"); // never echoes credentials
+    const REF = "abcdefghij0123456789";
+    const OTHER = "zzzzzzzzzz0123456789";
+    const POOLER = "aws-0-eu-west-1.pooler.supabase.com";
+    const hosted = {
+      SUPABASE_URL: `https://${REF}.supabase.co`,
+      SUPABASE_SERVICE_ROLE_KEY: "sb_secret_x",
+      DIRECT_URL: `postgresql://postgres.${REF}:p@${POOLER}:5432/postgres`,
+      ALLOW_PROVISION_HOSTS: `${REF}.supabase.co,${POOLER}`,
+    };
+    const opts = { projectRef: REF, shellEnv: hosted };
+    expect(checkTargets(hosted, opts).ok).toBe(true);
+    expect(checkTargets({ ...hosted, ALLOW_PROVISION_HOSTS: "" }, { ...opts, shellEnv: { ...hosted, ALLOW_PROVISION_HOSTS: "" } }).ok).toBe(false);
+    expect(checkTargets({ ...hosted, ALLOW_PROVISION_HOSTS: `${REF}.supabase.co` }, opts).ok).toBe(false); // both hosts required
+    // The operator must name the project, and it must be the one configured.
+    expect(checkTargets(hosted, { shellEnv: hosted }).ok).toBe(false);
+    expect(checkTargets(hosted, { ...opts, projectRef: OTHER }).ok).toBe(false);
+    // API and database of different projects.
+    const mismatch = { ...hosted, DIRECT_URL: `postgresql://postgres.${OTHER}:p@${POOLER}:5432/postgres` };
+    expect(checkTargets(mismatch, { projectRef: REF, shellEnv: mismatch }).error).toMatch(/project mismatch/);
+    // Hosted API with a local database (a variable forgotten in the shell, filled from .env.local).
+    const mixed = { ...hosted, DIRECT_URL: "postgresql://u:p@127.0.0.1:54322/postgres" };
+    expect(checkTargets(mixed, { projectRef: REF, shellEnv: mixed }).error).toMatch(/mixed targets/);
+    // A secret that came from a .env file rather than the shell.
+    const shellWithoutDb: Record<string, string> = { ...hosted };
+    delete shellWithoutDb.DIRECT_URL;
+    expect(checkTargets(hosted, { projectRef: REF, shellEnv: shellWithoutDb }).error).toMatch(/set these in the shell/);
+    // Legacy JWT keys: must be service_role of the same project.
+    const jwt = (claims: object) => `eyJhbGciOiJIUzI1NiJ9.${Buffer.from(JSON.stringify(claims)).toString("base64url")}.sig`;
+    const withKey = (key: string) => ({ ...hosted, SUPABASE_SERVICE_ROLE_KEY: key });
+    expect(checkTargets(withKey(jwt({ role: "service_role", ref: REF })), { projectRef: REF, shellEnv: withKey(jwt({ role: "service_role", ref: REF })) }).ok).toBe(true);
+    expect(checkTargets(withKey(jwt({ role: "anon", ref: REF })), { projectRef: REF, shellEnv: withKey(jwt({ role: "anon", ref: REF })) }).ok).toBe(false);
+    expect(checkTargets(withKey(jwt({ role: "service_role", ref: OTHER })), { projectRef: REF, shellEnv: withKey(jwt({ role: "service_role", ref: OTHER })) }).ok).toBe(false);
+    // Never echoes credentials in any refusal.
+    for (const r of [checkTargets(mismatch, { projectRef: REF, shellEnv: mismatch }), checkTargets(mixed, { projectRef: REF, shellEnv: mixed })]) {
+      expect(JSON.stringify(r)).not.toMatch(/:p@|sb_secret/);
+    }
   });
 
   it("validates arguments: a real address, en/fr only, dry run unless --apply", () => {
-    expect(parseArgs(["--email", "Owner@Example.com"])).toEqual({ email: "owner@example.com", locale: "en", apply: false });
-    expect(parseArgs(["--email=o@x.ie", "--locale=fr", "--apply"])).toEqual({ email: "o@x.ie", locale: "fr", apply: true });
+    expect(parseArgs(["--email", "Owner@Example.com"])).toEqual({ email: "owner@example.com", locale: "en", apply: false, projectRef: "" });
+    expect(parseArgs(["--email=o@x.ie", "--locale=fr", "--apply", "--project-ref", "abcdefghij0123456789"])).toEqual({ email: "o@x.ie", locale: "fr", apply: true, projectRef: "abcdefghij0123456789" });
+    expect(parseArgs(["--email", "o@x.ie", "--project-ref", "short"])).toHaveProperty("error");
     expect(parseArgs(["--email", "not-an-email"])).toHaveProperty("error");
     expect(parseArgs(["--email", "o@x.ie", "--locale", "de"])).toHaveProperty("error");
     expect(parseArgs(["--email", "o@x.ie", "--role", "admin"])).toHaveProperty("error");
