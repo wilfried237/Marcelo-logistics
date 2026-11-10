@@ -20,6 +20,7 @@ export const DOMAIN_ERROR_CODES = [
   "quote_total_mismatch",
   "invalid_shipment_transition",
   "assignee_not_staff",
+  "shipment_exists",
 ] as const;
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number] | "conflict" | "invalid_data" | "permission_denied" | "unknown";
 

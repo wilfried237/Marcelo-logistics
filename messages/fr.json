@@ -468,7 +468,12 @@
       "respondError": "Il n’est plus possible de répondre à ce devis en ligne. Veuillez nous contacter."
     },
     "shipmentDetail": {
-      "publicNote": "Seules les mises à jour destinées aux clients sont affichées."
+      "publicNote": "Seules les mises à jour destinées aux clients sont affichées.",
+      "details": "Détails de l’envoi",
+      "etaNotShared": "Aucune date d’arrivée estimée n’a encore été communiquée.",
+      "booked": "Réservé le",
+      "lastUpdated": "Dernière mise à jour",
+      "quoteRequest": "Demande de devis"
     },
     "documents": {
       "title": "Documents",
@@ -568,7 +573,28 @@
       "recorded": "Étape enregistrée.",
       "makePublic": "Montrer au client",
       "makeInternal": "Masquer au client",
-      "events": "Étapes"
+      "events": "Étapes",
+      "details": "Détails de l’envoi",
+      "quoteRequest": "Demande de devis",
+      "eta": "Arrivée estimée",
+      "notRecorded": "Non renseignée",
+      "noEvents": "Aucune étape enregistrée pour le moment.",
+      "history": "Historique",
+      "historyHint": "Toutes les modifications de cet envoi et de ses étapes, d’après le journal d’audit. Les heures sont à l’heure irlandaise.",
+      "historyEmpty": "Aucune modification enregistrée.",
+      "historyCreated": "Envoi créé ({status})",
+      "historyStatus": "Statut modifié de {from} à {to}",
+      "historyEta": "Arrivée estimée modifiée",
+      "historyMilestone": "Étape enregistrée : {milestone} ({visibility})",
+      "historyShown": "Étape rendue visible au client",
+      "historyHidden": "Étape masquée au client",
+      "historyMilestoneEdited": "Étape modifiée",
+      "actorSystem": "Système",
+      "actorYou": "Vous",
+      "actorStaff": "Membre de l’équipe {id}",
+      "invalidTransition": "Ce changement de statut n’est pas autorisé depuis le statut actuel.",
+      "alreadyExists": "Un envoi existe déjà pour cette demande.",
+      "notAccepted": "Seul un devis accepté peut devenir un envoi."
     },
     "users": {
       "intro": "Seuls les administrateurs peuvent modifier les rôles. Chaque modification est enregistrée dans le journal d’audit.",
@@ -666,7 +692,9 @@
       "assignedNone": "Non attribuées",
       "sort": "Tri",
       "newest": "Plus récentes d’abord",
-      "oldest": "Plus anciennes d’abord"
+      "oldest": "Plus anciennes d’abord",
+      "shipmentSearchPlaceholder": "Référence d’envoi ou de devis, nom ou e-mail",
+      "updated": "Mis à jour récemment"
     },
     "enquiries": {
       "intro": "Messages envoyés via le formulaire de contact.",

@@ -468,7 +468,12 @@
       "respondError": "This quote can no longer be answered online. Please contact us."
     },
     "shipmentDetail": {
-      "publicNote": "Only updates recorded for customers are shown."
+      "publicNote": "Only updates recorded for customers are shown.",
+      "details": "Shipment details",
+      "etaNotShared": "No estimated arrival date has been shared yet.",
+      "booked": "Booked on",
+      "lastUpdated": "Last updated",
+      "quoteRequest": "Quote request"
     },
     "documents": {
       "title": "Documents",
@@ -568,7 +573,28 @@
       "recorded": "Milestone recorded.",
       "makePublic": "Show to customer",
       "makeInternal": "Hide from customer",
-      "events": "Milestones"
+      "events": "Milestones",
+      "details": "Shipment details",
+      "quoteRequest": "Quote request",
+      "eta": "Estimated arrival",
+      "notRecorded": "Not recorded",
+      "noEvents": "No milestones recorded yet.",
+      "history": "History",
+      "historyHint": "Every change to this shipment and its milestones, from the audit log. Times are in Irish time.",
+      "historyEmpty": "No changes recorded.",
+      "historyCreated": "Shipment created ({status})",
+      "historyStatus": "Status changed from {from} to {to}",
+      "historyEta": "Estimated arrival changed",
+      "historyMilestone": "Milestone recorded: {milestone} ({visibility})",
+      "historyShown": "Milestone shown to the customer",
+      "historyHidden": "Milestone hidden from the customer",
+      "historyMilestoneEdited": "Milestone edited",
+      "actorSystem": "System",
+      "actorYou": "You",
+      "actorStaff": "Staff member {id}",
+      "invalidTransition": "This status change is not allowed from the current status.",
+      "alreadyExists": "A shipment already exists for this request.",
+      "notAccepted": "Only an accepted quotation can become a shipment."
     },
     "users": {
       "intro": "Only administrators can change roles. Every change is recorded in the audit log.",
@@ -666,7 +692,9 @@
       "assignedNone": "Unassigned",
       "sort": "Sort",
       "newest": "Newest first",
-      "oldest": "Oldest first"
+      "oldest": "Oldest first",
+      "shipmentSearchPlaceholder": "Shipment or quote reference, name or email",
+      "updated": "Recently updated"
     },
     "enquiries": {
       "intro": "Messages sent through the contact form.",

@@ -5,7 +5,12 @@ import type { Prisma } from "@/lib/generated/prisma/client";
 import { assertStaff, type AppUser } from "@/lib/auth/types";
 import { fieldErrors, shipmentEventInputSchema, shipmentUpdateInputSchema } from "@/lib/domain/quote-schema";
 import { MAX_REFERENCE_ATTEMPTS, SHIPMENT_REFERENCE_PATTERN, generateShipmentReference, normaliseReference } from "@/lib/domain/references";
+import type { ShipmentStatus } from "@/lib/domain/enums";
+import { toShipmentHistory } from "@/lib/domain/shipment-history";
+import { likeLiteral } from "@/lib/db/like";
 import type { StaffActionResult } from "./quote-requests";
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const shipmentSelect = {
   id: true,
@@ -68,10 +73,37 @@ export async function getCustomerShipment(db: Database, user: AppUser, rawRefere
 
 // ---- Staff -------------------------------------------------------------------
 
-export async function listShipmentsForStaff(db: Database, user: AppUser) {
+export interface StaffShipmentFilter {
+  status?: ShipmentStatus;
+  /** Shipment or quote request reference, customer name or email (partial, case-insensitive). */
+  q?: string;
+  /** "updated" (default): most recently updated first; "oldest": oldest created first. */
+  sort?: "updated" | "oldest";
+}
+
+export async function listShipmentsForStaff(db: Database, user: AppUser, filter: StaffShipmentFilter = {}) {
   assertStaff(user);
+  const q = filter.q?.trim().slice(0, 120);
+  const where: Prisma.ShipmentWhereInput = {
+    ...(filter.status ? { status: filter.status } : {}),
+    ...(q
+      ? {
+          OR: [
+            { reference: { contains: likeLiteral(normaliseReference(q)) } },
+            { quote: { quoteRequest: { reference: { contains: likeLiteral(normaliseReference(q)) } } } },
+            { customer: { name: { contains: likeLiteral(q), mode: "insensitive" } } },
+            { customer: { email: { contains: likeLiteral(q.toLowerCase()) } } },
+          ],
+        }
+      : {}),
+  };
   const rows = await withUser(db, user.id, (tx) =>
-    tx.shipment.findMany({ select: { ...shipmentSelect, customer: { select: { name: true } } }, orderBy: { updatedAt: "desc" }, take: 200 }),
+    tx.shipment.findMany({
+      where,
+      select: { ...shipmentSelect, customer: { select: { name: true } } },
+      orderBy: filter.sort === "oldest" ? { createdAt: "asc" } : { updatedAt: "desc" },
+      take: 200,
+    }),
   );
   return rows.map(({ customer, ...s }) => ({ ...toShipmentView(s), customerName: customer.name }));
 }
@@ -91,6 +123,18 @@ export async function getShipmentForStaff(db: Database, user: AppUser, rawRefere
     });
     if (!shipment) return null;
     const events = await tx.shipmentEvent.findMany({ where: { shipmentId: shipment.id }, select: eventSelect, orderBy: { occurredAt: "desc" } });
+    // History: the audit log rows for this shipment and its milestones (staff-only by RLS).
+    const audit = await tx.auditLog.findMany({
+      where: { OR: [{ entity: "shipments", entityId: shipment.id }, { entity: "shipment_events", entityId: { in: events.map((e) => e.id) } }] },
+      select: { action: true, actor: true, before: true, after: true, at: true },
+      orderBy: { at: "asc" },
+      take: 500,
+    });
+    // Staff names come from their linked customer record, as on the users page.
+    const actorIds = [...new Set(audit.map((a) => a.actor).filter((a): a is string => a !== null))];
+    const actors = actorIds.length
+      ? await tx.customer.findMany({ where: { userId: { in: actorIds } }, select: { userId: true, name: true } })
+      : [];
     const { customer, quote, ...rest } = toShipmentView(shipment);
     return {
       ...rest,
@@ -100,14 +144,23 @@ export async function getShipmentForStaff(db: Database, user: AppUser, rawRefere
       quoteReference: quote.quoteRequest.reference,
       quoteRequestId: quote.quoteRequest.id,
       events: events.map(toEventView),
+      history: toShipmentHistory(audit),
+      actorNames: Object.fromEntries(actors.map((a) => [a.userId!, a.name])) as Record<string, string>,
     };
   });
 }
 
-/** Creates the shipment for an ACCEPTED request (the database derives owner and service). */
+/**
+ * Creates the shipment for an ACCEPTED request (the database derives owner and service).
+ * One shipment per request: the database also enforces one shipment per quote
+ * (`shipments_quote_key`), so a concurrent second attempt fails the same way.
+ */
 export async function createShipmentForRequest(db: Database, user: AppUser, requestId: string): Promise<StaffActionResult<{ reference: string }>> {
   assertStaff(user);
+  if (!UUID_PATTERN.test(requestId)) return { ok: false, code: "not_found" };
   try {
+    const existing = await withUser(db, user.id, (tx) => tx.shipment.findFirst({ where: { quote: { quoteRequestId: requestId } }, select: { id: true } }));
+    if (existing) return { ok: false, code: "shipment_exists" };
     const quote = await withUser(db, user.id, (tx) =>
       tx.quote.findFirst({ where: { quoteRequestId: requestId, sentAt: { not: null } }, select: { id: true }, orderBy: { sentAt: "desc" } }),
     );
@@ -126,6 +179,7 @@ export async function createShipmentForRequest(db: Database, user: AppUser, requ
         return { ok: true, data: { reference: created.reference } };
       } catch (error) {
         if (isUniqueViolation(error, "reference")) continue;
+        if (isUniqueViolation(error, "quote")) return { ok: false, code: "shipment_exists" };
         throw error;
       }
     }

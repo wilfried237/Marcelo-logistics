@@ -20,18 +20,46 @@ export default async function PortalShipmentDetail({ params }: { params: Promise
   const tv = await getTranslations("quoteView");
   const tp = await getTranslations("portal");
   const ts = await getTranslations("services");
+  const tsh = await getTranslations("status.shipment");
   const format = await getFormatter();
   return (
     <div className="space-y-8">
       <PageHeader title={shipment.reference} description={ts(`${shipment.serviceCode}.title`)} actions={<ShipmentStatusBadge status={shipment.status} />} />
-      {shipment.etaFrom && shipment.etaTo && (
-        <p>
-          <span className="text-muted-foreground">{t("eta")}: </span>
-          <span className="font-medium">
-            {t("etaRange", { from: format.dateTime(new Date(shipment.etaFrom), { dateStyle: "medium" }), to: format.dateTime(new Date(shipment.etaTo), { dateStyle: "medium" }) })}
-          </span>
-        </p>
-      )}
+      <section aria-labelledby="details">
+        <h2 id="details" className="sr-only">
+          {tp("shipmentDetail.details")}
+        </h2>
+        <dl className="grid gap-x-6 gap-y-4 rounded-xl border bg-card p-5 text-sm sm:grid-cols-2 md:p-6">
+          <div>
+            <dt className="text-muted-foreground">{t("statusLabel")}</dt>
+            <dd className="font-medium">{tsh(shipment.status)}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">{t("eta")}</dt>
+            <dd className="font-medium">
+              {shipment.etaFrom && shipment.etaTo
+                ? t("etaRange", { from: format.dateTime(new Date(shipment.etaFrom), { dateStyle: "medium", timeZone: "UTC" }), to: format.dateTime(new Date(shipment.etaTo), { dateStyle: "medium", timeZone: "UTC" }) })
+                : tp("shipmentDetail.etaNotShared")}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">{tp("shipmentDetail.booked")}</dt>
+            <dd>{format.dateTime(new Date(shipment.createdAt), { dateStyle: "medium", timeZone: "Europe/Dublin" })}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">{tp("shipmentDetail.lastUpdated")}</dt>
+            <dd>{format.dateTime(new Date(shipment.updatedAt), { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Dublin" })}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">{tp("shipmentDetail.quoteRequest")}</dt>
+            <dd>
+              <Link href={`/portal/quotes/${shipment.quoteReference}`} className="font-medium text-primary underline-offset-4 hover:underline">
+                {shipment.quoteReference}
+              </Link>
+            </dd>
+          </div>
+        </dl>
+      </section>
       <section aria-labelledby="history" className="space-y-4">
         <h2 id="history" className="text-xl font-semibold">
           {t("historyTitle")}
@@ -47,11 +75,6 @@ export default async function PortalShipmentDetail({ params }: { params: Promise
         </h2>
         <MessageForm action={reportIssueAction} locale={locale} hidden={{ reference: shipment.reference }} label={tv("issueLabel")} hint={tv("issueHint")} submit={tv("sendIssue")} />
       </section>
-      <p className="text-sm">
-        <Link href={`/portal/quotes/${shipment.quoteReference}`} className="font-medium text-primary underline-offset-4 hover:underline">
-          {shipment.quoteReference}
-        </Link>
-      </p>
     </div>
   );
 }

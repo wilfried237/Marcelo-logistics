@@ -8,6 +8,8 @@ import { AddEventForm, EventVisibilityToggle, NoteForm, UpdateShipmentForm } fro
 import { listShipmentMessages } from "@/lib/services/cases";
 import { PageHeader } from "@/components/app/page-header";
 import { ShipmentStatusBadge } from "@/components/app/status-badge";
+import type { ShipmentStatus } from "@/lib/domain/enums";
+import type { ShipmentHistoryEntry } from "@/lib/domain/shipment-history";
 
 /** Current time in Europe/Dublin formatted for <input type="datetime-local">. */
 function dublinNow(): string {
@@ -30,6 +32,27 @@ export default async function AdminShipmentDetail({ params }: { params: Promise<
   const format = await getFormatter();
   const tcase = await getTranslations("admin.case");
   const messages = await listShipmentMessages(getDb(), user, shipment.id);
+  const tsh = await getTranslations("status.shipment");
+  const dateTime = (d: Date | string) => format.dateTime(new Date(d), { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Dublin" });
+  const statusLabel = (s: ShipmentStatus | null) => (s ? tsh(s) : "—");
+  const actorLabel = (actor: string | null) =>
+    actor === null ? t("actorSystem") : actor === user.id ? t("actorYou") : (shipment.actorNames[actor] ?? t("actorStaff", { id: actor.slice(0, 8) }));
+  const historyText = (h: ShipmentHistoryEntry): string => {
+    switch (h.kind) {
+      case "created":
+        return t("historyCreated", { status: statusLabel(h.status) });
+      case "status":
+        return t("historyStatus", { from: statusLabel(h.from), to: statusLabel(h.to) }) + (h.etaChanged ? ` · ${t("historyEta")}` : "");
+      case "eta":
+        return t("historyEta");
+      case "milestone":
+        return t("historyMilestone", { milestone: h.milestone ? tm(h.milestone) : "—", visibility: h.public ? tc("visibleToCustomer") : tc("internalOnly") });
+      case "visibility":
+        return t(h.public ? "historyShown" : "historyHidden");
+      case "milestoneEdited":
+        return t("historyMilestoneEdited");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -38,11 +61,47 @@ export default async function AdminShipmentDetail({ params }: { params: Promise<
         description={`${ts(`${shipment.serviceCode}.title`)} · ${shipment.customerName}`}
         actions={<ShipmentStatusBadge status={shipment.status} />}
       />
-      <p className="text-sm">
-        <Link href={`/admin/quotes/${shipment.quoteReference}`} className="font-medium text-primary underline-offset-4 hover:underline">
-          {shipment.quoteReference}
-        </Link>
-      </p>
+      <section aria-labelledby="details" className="rounded-xl border bg-card p-5 md:p-6">
+        <h2 id="details" className="mb-4 text-lg font-semibold">
+          {t("details")}
+        </h2>
+        <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <dt className="text-muted-foreground">{tc("customer")}</dt>
+            <dd className="font-medium">{shipment.customerName}</dd>
+            <dd className="break-all text-muted-foreground">{shipment.customerEmail}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">{t("quoteRequest")}</dt>
+            <dd>
+              <Link href={`/admin/quotes/${shipment.quoteReference}`} className="font-medium text-primary underline-offset-4 hover:underline">
+                {shipment.quoteReference}
+              </Link>
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">{tc("service")}</dt>
+            <dd className="font-medium">{ts(`${shipment.serviceCode}.title`)}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">{tc("created")}</dt>
+            <dd>{dateTime(shipment.createdAt)}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">{tc("updated")}</dt>
+            <dd>{dateTime(shipment.updatedAt)}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">{t("eta")}</dt>
+            <dd>
+              {shipment.etaFrom && shipment.etaTo
+                ? `${format.dateTime(new Date(shipment.etaFrom), { dateStyle: "medium", timeZone: "UTC" })} – ${format.dateTime(new Date(shipment.etaTo), { dateStyle: "medium", timeZone: "UTC" })}`
+                : t("notRecorded")}
+              {shipment.etaFrom && shipment.etaTo && <span className="block text-muted-foreground">{shipment.etaVisible ? tc("visibleToCustomer") : tc("internalOnly")}</span>}
+            </dd>
+          </div>
+        </dl>
+      </section>
       <div className="grid gap-6 lg:grid-cols-2">
         <section aria-labelledby="update" className="rounded-xl border bg-card p-5 md:p-6">
           <h2 id="update" className="mb-4 text-lg font-semibold">
@@ -68,6 +127,7 @@ export default async function AdminShipmentDetail({ params }: { params: Promise<
         <h2 id="events" className="mb-4 text-lg font-semibold">
           {t("events")}
         </h2>
+        {!shipment.events.length && <p className="text-sm text-muted-foreground">{t("noEvents")}</p>}
         <ul className="divide-y">
           {shipment.events.map((e) => (
             <li key={e.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
@@ -92,6 +152,25 @@ export default async function AdminShipmentDetail({ params }: { params: Promise<
             </li>
           ))}
         </ul>
+      </section>
+      <section aria-labelledby="shipment-history" className="rounded-xl border bg-card p-5 md:p-6">
+        <h2 id="shipment-history" className="mb-1 text-lg font-semibold">
+          {t("history")}
+        </h2>
+        <p className="mb-4 text-xs text-muted-foreground">{t("historyHint")}</p>
+        {shipment.history.length ? (
+          <ol className="space-y-2 text-sm">
+            {shipment.history.map((h, i) => (
+              <li key={i} className="flex flex-wrap gap-x-2">
+                <span className="whitespace-nowrap text-muted-foreground">{dateTime(h.at)}</span>
+                <span className="font-medium">{historyText(h)}</span>
+                <span className="text-muted-foreground">· {actorLabel(h.actor)}</span>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="text-sm text-muted-foreground">{t("historyEmpty")}</p>
+        )}
       </section>
       <section aria-labelledby="case" className="rounded-xl border bg-card p-5 md:p-6">
         <h2 id="case" className="mb-4 text-lg font-semibold">

@@ -36,10 +36,13 @@ async function toState(locale: string, result: StaffActionResult<unknown>, okMes
   }
   const tv = await getTranslations({ locale, namespace: "validation" });
   const tc = await getTranslations({ locale, namespace: "common" });
+  const tsh = await getTranslations({ locale, namespace: "admin.shipment" });
   const fieldErrors = result.fieldErrors ? Object.fromEntries(Object.entries(result.fieldErrors).map(([k, v]) => [k, tv(v as "required")])) : undefined;
   const known: Record<string, string> = {
     invalid_quote_transition: tc("notAllowed"),
-    invalid_shipment_transition: tc("notAllowed"),
+    invalid_shipment_transition: tsh("invalidTransition"),
+    shipment_exists: tsh("alreadyExists"),
+    quote_not_accepted: tsh("notAccepted"),
     quote_total_mismatch: tc("genericError"),
     assignee_not_staff: tc("notAllowed"),
     permission_denied: tc("notAllowed"),

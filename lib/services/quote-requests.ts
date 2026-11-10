@@ -2,6 +2,7 @@ import { isRouteOffered, ownerConfig } from "@/config/owner";
 import { quoteSubmissionStatus } from "@/lib/config/env";
 import { withSystem, withUser } from "@/lib/db/context";
 import { domainErrorCode, isUniqueViolation, type DomainErrorCode } from "@/lib/db/errors";
+import { likeLiteral } from "@/lib/db/like";
 import type { Database } from "@/lib/db/types";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import { assertStaff, type AppUser } from "@/lib/auth/types";
@@ -223,9 +224,9 @@ export async function listQuoteRequestsForStaff(db: Database, user: AppUser, fil
     ...(q
       ? {
           OR: [
-            { reference: { contains: normaliseReference(q) } },
-            { customer: { name: { contains: q, mode: "insensitive" } } },
-            { customer: { email: { contains: q.toLowerCase() } } },
+            { reference: { contains: likeLiteral(normaliseReference(q)) } },
+            { customer: { name: { contains: likeLiteral(q), mode: "insensitive" } } },
+            { customer: { email: { contains: likeLiteral(q.toLowerCase()) } } },
           ],
         }
       : {}),

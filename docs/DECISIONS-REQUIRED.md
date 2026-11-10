@@ -1,6 +1,6 @@
 # Decisions Required from the Owner
 
-_Last updated: 2026-11-10 (Stage 3 price list and customer information: see [section 9](#9-stage-3-client-information-2026-11-10); legal drafts: [docs/legal/](./legal/README.md); completion audit: [PROJECT-COMPLETION-AUDIT.md](./PROJECT-COMPLETION-AUDIT.md)) · This is the single consolidated list of open **business** decisions._
+_Last updated: 2026-11-11 (Stage 5 shipment decisions SH-01 to SH-04: see [section 4](#4-delivery-estimates-and-shipment-tracking); Stage 3 price list and customer information: see [section 9](#9-stage-3-client-information-2026-11-10); legal drafts: [docs/legal/](./legal/README.md); completion audit: [PROJECT-COMPLETION-AUDIT.md](./PROJECT-COMPLETION-AUDIT.md)) · This is the single consolidated list of open **business** decisions._
 
 **How to answer:** write your answer on the `Answer:` line under each decision (or reply by email quoting the ID). Answers already recorded here are preserved. Development continues on everything that does not depend on an answer.
 
@@ -24,6 +24,10 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 | P-04 ✓ | Customs duties: included or not | **Answered 2026-11-10** (included for parcels and personal effects; vehicles quoted separately; see L-11) |
 | T-01 | Tracking milestones shown to customers | Tracking page labels |
 | T-02 | Delivery-estimate policy | Whether ETAs are shown |
+| SH-01 | One shipment per accepted request, or split consignments | Shipment creation |
+| SH-02 | Operational fields to record per shipment (carrier, container, vessel, booking numbers) | Shipment details, customer view |
+| SH-03 | Customer emails for status changes, especially cancellation | Shipment notifications |
+| SH-04 | Who may cancel a booked shipment, and what the customer is told | Shipment cancellation |
 | C-01 ✓ | Verify contact details | **Answered 2026-11-06; WhatsApp and opening hours answered 2026-11-09** |
 | C-02 ◆ | Sender email domain and staff notification inbox | Enabling email |
 | C-03 | Customer account onboarding: open registration or invitation only | **Answered 2026-11-04: open registration** |
@@ -165,7 +169,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 ### T-01 Tracking milestones shown to customers
 - **Decision needed:** confirm or adjust the default stages: Booked → Received at depot → Departed origin → In transit → Arrived at destination port → In customs → Customs cleared → Ready for collection → Out for delivery → Delivered (plus "Delayed" and "On hold").
 - **If delayed:** the defaults are used; staff choose which events are public.
-- **Affected:** `lib/domain/milestones.ts`, translations.
+- **Affected:** `MILESTONE_CODES` in `lib/domain/enums.ts` (the database enum must match), translations.
 - **Development can continue:** yes.
 - **Answer:**
 
@@ -173,6 +177,30 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Decision needed:** may staff show an estimated arrival range to customers? Should a disclaimer accompany it?
 - **If delayed:** ETAs can be recorded by staff but are **only** shown when staff tick "show to customer"; no default estimates exist.
 - **Development can continue:** yes.
+- **Answer:**
+
+### SH-01 One shipment per accepted request (Stage 5, 2026-11-11)
+- **Today:** an accepted quotation becomes exactly one shipment. The database enforces it (one shipment per quote), and the staff screen refuses a second attempt with a clear message.
+- **Decision needed:** must one request ever become several shipments (for example, goods split across two departures or two containers), or several requests be grouped into one shipment?
+- **If delayed:** one shipment per request. Splitting or grouping would need a schema change and new rules for references, status and notifications.
+- **Answer:**
+
+### SH-02 Operational shipment fields (Stage 5, 2026-11-11)
+- **Today:** a shipment records its ML reference, customer, original request, service, status, an optional estimated arrival range (shown only when staff tick it; see T-02), milestones with location and EN/FR notes, and the dates it was created and last updated.
+- **Decision needed:** which other details the business wants to record, and which customers may see. For example: carrier or shipping line, container number, seal number, vessel or flight, bill of lading or air waybill number, departure and arrival ports, weight and volume, collection and delivery addresses.
+- **If delayed:** none of these are recorded. Staff can put them in internal notes or, for customers, in milestone notes. No carrier tracking integration exists, and the site claims none.
+- **Answer:**
+
+### SH-03 Customer emails for status changes (Stage 5, 2026-11-11)
+- **Today:** the customer receives an email when the shipment is created (`shipment_confirmed`) and whenever staff record a milestone that is visible to the customer (`shipment_update`; `shipment_delivered` for the Delivered milestone). Changing the status itself (In transit, At destination, On hold, Delivered, **Cancelled**) sends the customer nothing; On hold alerts staff only.
+- **Decision needed:** should a status change, and in particular a cancellation, email the customer automatically, or do staff record a visible milestone or contact the customer themselves?
+- **If delayed:** unchanged. A cancelled shipment shows Cancelled in the portal and on the tracking page, without an email.
+- **Answer:**
+
+### SH-04 Cancelling a booked shipment (Stage 5, 2026-11-11)
+- **Today:** staff can cancel a shipment that is Booked or On hold. A shipment that is in transit or at its destination must first be put on hold. Delivered and Cancelled are final. Customers cannot cancel a shipment online. They can report a problem from the shipment page, which reaches staff as a message.
+- **Decision needed:** confirm these rules, and say what the customer must be told when a shipment is cancelled (refund conditions are still open under P-06 and L-10).
+- **If delayed:** unchanged.
 - **Answer:**
 
 ## 5. Contact information and customer communication
