@@ -236,11 +236,16 @@
       "weak_password": "Choose a stronger password.",
       "link_invalid": "This link is invalid or has expired. Please request a new one.",
       "session_required": "Please open the link from your email again.",
-      "generic": "We could not complete this request. Please try again later."
+      "generic": "We could not complete this request. Please try again later.",
+      "link_expired": "This link has expired or has already been used. Request a new one.",
+      "email_not_confirmed": "Your email address is not confirmed yet. Open the link in the email we sent you, then sign in.",
+      "same_password": "Your new password must be different from your current one.",
+      "reauthentication_needed": "For your security, please sign out and sign in again, or use “Forgot your password?”, then change your password."
     },
     "checkEmailTitle": "Check your email",
     "checkEmailBody": "If an account can be created or reset for this address, you will receive an email with a link in the next few minutes.",
-    "passwordUpdated": "Your password has been updated."
+    "passwordUpdated": "Your password has been updated.",
+    "signedOutEverywhere": "You have been signed out on all your devices."
   },
   "footer": {
     "rights": "All rights reserved.",
@@ -491,7 +496,12 @@
       "phone": "Phone",
       "language": "Preferred language",
       "english": "English",
-      "french": "French"
+      "french": "French",
+      "securityTitle": "Sign-in and security",
+      "changePassword": "Change your password",
+      "changePasswordHint": "Use at least 12 characters. You stay signed in on this device.",
+      "signOutEverywhere": "Sign out on all devices",
+      "signOutEverywhereHint": "Ends every session of your account, including on other phones and computers."
     }
   },
   "admin": {

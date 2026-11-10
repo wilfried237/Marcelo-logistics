@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import pg from "pg";
 import { randomUUID } from "node:crypto";
+import { resetLocalLoginLimits } from "./local-db";
 
 /*
  * MVP business journeys A-F in a real browser against the production build,
@@ -43,6 +44,7 @@ async function signIn(page: Page, email: string) {
 }
 
 test.beforeAll(async () => {
+  await resetLocalLoginLimits();
   db = new pg.Client({ connectionString: process.env.DIRECT_URL });
   await db.connect();
   // Earlier local suites (e.g. test:supabase) leave queued emails that no server delivered; they would

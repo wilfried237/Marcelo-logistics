@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import pg from "pg";
+import { randomUUID } from "node:crypto";
 import { DATABASE_URL, PASSWORD, SUPABASE_URL, adminClient, anonClient, createUser, signIn, sql, uniqueEmail } from "./env";
 
 /* Executed against the REAL local Supabase stack: GoTrue, PostgREST, Storage, Postgres 17, Mailpit. */
@@ -205,6 +206,52 @@ describe("Row Level Security through the real PostgREST API", () => {
     expect(rpc.error?.message).toMatch(/forbidden/);
     const [{ role }] = await sql<{ role: string }>("select role from public.profiles where id = $1", [user.id]);
     expect(role).toBe("customer");
+  });
+
+  it("stops a customer from changing, deleting or messaging on another customer's records (Stage 4)", async () => {
+    const a = await createUser("customer", "write.a");
+    const b = await createUser("customer", "write.b");
+    const reference = `QR${randomUUID().replace(/[^a-z]/gi, "").toUpperCase().replace(/[01890]/g, "A").slice(0, 6).padEnd(6, "B")}`;
+    const [request] = await sql<{ id: string }>(
+      `insert into public.quote_requests (reference, customer_id, service_code, origin_country, destination_country, items, locale)
+       values ($1, $2, 'parcels', 'IE', 'CM', '[{"description":"x","quantity":1}]', 'en') returning id`,
+      [reference, b.customerId],
+    );
+    const clientA = await signIn(a.email);
+
+    // Another customer's profile: update matches no row (RLS), so nothing changes.
+    const profile = await clientA.from("customers").update({ name: "Hijacked", phone: "+353 1 000 0000" }).eq("id", b.customerId).select("id");
+    expect(profile.data ?? []).toEqual([]);
+    // Another customer's request: customers have no update policy on requests, and no delete grant at all.
+    const status = await clientA.from("quote_requests").update({ status: "CANCELLED", cancellation_reason: "x" }).eq("id", request.id).select("id");
+    expect(status.data ?? []).toEqual([]);
+    const removed = await clientA.from("quote_requests").delete().eq("id", request.id).select("id");
+    expect(removed.error ?? (removed.data ?? []).length === 0).toBeTruthy();
+    // A message on someone else's request is refused by the insert policy.
+    const message = await clientA.from("case_messages").insert({ quote_request_id: request.id, author_kind: "customer", author_id: a.id, internal: false, kind: "customer_reply", body: "hello" });
+    expect(message.error?.code).toBe("42501");
+    // Re-assigning a customer record to oneself is not possible either (user_id is not updatable).
+    const takeover = await clientA.from("customers").update({ user_id: a.id }).eq("id", b.customerId);
+    expect(takeover.error?.code).toBe("42501");
+
+    const [after] = await sql<{ name: string; status: string; messages: number }>(
+      `select c.name, r.status::text, (select count(*)::int from public.case_messages m where m.quote_request_id = r.id) messages
+         from public.quote_requests r join public.customers c on c.id = r.customer_id where r.id = $1`,
+      [request.id],
+    );
+    expect(after).toEqual({ name: "Test write.b", status: "SUBMITTED", messages: 0 });
+  });
+
+  it("'sign out on all devices' revokes the account's other sessions (Stage 4)", async () => {
+    const user = await createUser("customer", "global.signout");
+    const phone = await signIn(user.email);
+    const laptop = await signIn(user.email);
+    const phoneSession = (await phone.auth.getSession()).data.session!;
+    expect((await laptop.auth.signOut({ scope: "global" })).error).toBeNull();
+    // The other device's refresh token no longer works, so its session cannot be renewed.
+    const refreshed = await anonClient().auth.refreshSession({ refresh_token: phoneSession.refresh_token });
+    expect(refreshed.error).not.toBeNull();
+    expect(refreshed.data.session).toBeNull();
   });
 
   it("exposes only the allowlisted public tracking function to anon", async () => {

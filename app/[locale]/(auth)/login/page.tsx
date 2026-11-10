@@ -3,6 +3,7 @@ import { redirect } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { isEnabled } from "@/lib/config/flags";
 import { getCurrentUser, isAccountSystemAvailable } from "@/lib/auth/session";
+import { loginUrlError } from "@/lib/auth/redirects";
 import { AccountsUnavailable, AuthCard } from "@/components/app/auth-card";
 import { Alert } from "@/components/app/alert";
 import { LoginForm } from "../auth-forms";
@@ -12,9 +13,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return { title: (await getTranslations({ locale, namespace: "auth" }))("loginTitle") };
 }
 
-export default async function LoginPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ next?: string; error?: string }> }) {
+export default async function LoginPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ next?: string; error?: string; signedOut?: string }> }) {
   const { locale } = await params;
-  const { next, error } = await searchParams;
+  const { next, error: rawError, signedOut } = await searchParams;
+  const error = loginUrlError(rawError);
   setRequestLocale(locale);
   const t = await getTranslations("auth");
 
@@ -30,9 +32,17 @@ export default async function LoginPage({ params, searchParams }: { params: Prom
 
   return (
     <AuthCard title={t("loginTitle")}>
-      {error === "link_invalid" && (
+      {error && (
         <Alert variant="danger" className="mb-5">
-          {t("errors.link_invalid")}
+          {t(`errors.${error}`)}{" "}
+          <Link href="/forgot-password" className="font-medium underline">
+            {t("forgotLink")}
+          </Link>
+        </Alert>
+      )}
+      {signedOut === "all" && (
+        <Alert variant="success" className="mb-5">
+          {t("signedOutEverywhere")}
         </Alert>
       )}
       <LoginForm next={typeof next === "string" ? next : undefined} />

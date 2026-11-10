@@ -37,6 +37,9 @@ function authErrorCode(error: { status?: number; code?: string } | null): string
   if (!error) return "generic";
   if (error.status === 429 || error.code === "over_request_rate_limit" || error.code === "over_email_send_rate_limit") return "rate_limited";
   if (error.code === "weak_password") return "weak_password";
+  if (error.code === "same_password") return "same_password";
+  // Secure password change: an older session must prove it is recent before changing the password.
+  if (error.code === "reauthentication_needed" || error.code === "reauthentication_not_valid") return "reauthentication_needed";
   return "generic";
 }
 
@@ -49,7 +52,13 @@ export async function loginAction(_prev: AuthFormState, formData: FormData): Pro
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
-  if (error || !data.user) return { status: "error", code: error?.status === 429 ? "rate_limited" : "invalid_credentials" };
+  if (error || !data.user) {
+    if (error?.status === 429) return { status: "error", code: "rate_limited" };
+    // GoTrue checks the password before the confirmation state, so this is only ever
+    // returned to someone who already knows the correct password: it reveals nothing new.
+    if (error?.code === "email_not_confirmed") return { status: "error", code: "email_not_confirmed" };
+    return { status: "error", code: "invalid_credentials" };
+  }
 
   const user = await loadAppUser(getDb(), data.user.id, data.user.email ?? null);
   const fallback = user && (user.role === "staff" || user.role === "admin") ? "/admin" : "/portal";
@@ -117,11 +126,16 @@ export async function resetPasswordAction(_prev: AuthFormState, formData: FormDa
   return { status: "done" };
 }
 
+/**
+ * Signs out. `scope=global` (offered on the profile page) also revokes every
+ * other session of the account, on all devices; the default ends this session only.
+ */
 export async function logoutAction(formData: FormData): Promise<void> {
   const locale = localeSchema.catch("en").parse(formData.get("locale"));
+  const scope = formData.get("scope") === "global" ? "global" : "local";
   if (isAccountSystemAvailable()) {
     const supabase = await createSupabaseServerClient();
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope });
   }
-  redirect(`/${locale}`);
+  redirect(scope === "global" ? `/${locale}/login?signedOut=all` : `/${locale}`);
 }

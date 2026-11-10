@@ -362,3 +362,8 @@ The client supplied an official price list and customer information, confirmed b
 - **Issue:** the client's rules (drop-off at collection points, home collection in the Dublin region for €25, quotations for other Irish locations, delivery in Cameroon, 48 hours' free storage then 2,000 XAF per day) were supplied in general terms.
 - **Today:** they appear on the full price list, the shipping guide and the FAQ as general information. On the service pages, the collection block and the collection price table appear **only for parcels and personal effects, and barrels and cartons**. They are not shown for vehicles, sea freight (including full containers), air freight, commercial cargo, warehousing or e-commerce.
 - **Answer:** for each of vehicles, full containers, air freight, commercial cargo, warehousing and e-commerce: do drop-off, home collection, delivery in Cameroon and the storage rule apply, and on what terms?
+
+### A-03 Account self-service (Stage 4, 2026-11-10)
+- **Issue:** customers can change their name, phone, language and password, and sign out on all devices. Changing the sign-in email, deleting the account and exporting their data are not self-service: they go through the business by email.
+- **Decision needed:** keep these as requests handled by the business, or build self-service versions (email change needs a confirmation email to both addresses; deletion and export need the retention rules in L-03).
+- **Answer:**

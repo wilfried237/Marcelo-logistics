@@ -236,11 +236,16 @@
       "weak_password": "Choisissez un mot de passe plus robuste.",
       "link_invalid": "Ce lien est invalide ou a expiré. Veuillez en demander un nouveau.",
       "session_required": "Veuillez rouvrir le lien reçu par e-mail.",
-      "generic": "Nous n’avons pas pu traiter cette demande. Veuillez réessayer plus tard."
+      "generic": "Nous n’avons pas pu traiter cette demande. Veuillez réessayer plus tard.",
+      "link_expired": "Ce lien a expiré ou a déjà été utilisé. Demandez-en un nouveau.",
+      "email_not_confirmed": "Votre adresse e-mail n’est pas encore confirmée. Ouvrez le lien de l’e-mail que nous vous avons envoyé, puis connectez-vous.",
+      "same_password": "Votre nouveau mot de passe doit être différent de l’actuel.",
+      "reauthentication_needed": "Pour votre sécurité, déconnectez-vous puis reconnectez-vous, ou utilisez « Mot de passe oublié ? », puis changez votre mot de passe."
     },
     "checkEmailTitle": "Consultez votre messagerie",
     "checkEmailBody": "Si un compte peut être créé ou réinitialisé pour cette adresse, vous recevrez un e-mail contenant un lien dans les prochaines minutes.",
-    "passwordUpdated": "Votre mot de passe a été mis à jour."
+    "passwordUpdated": "Votre mot de passe a été mis à jour.",
+    "signedOutEverywhere": "Vous avez été déconnecté de tous vos appareils."
   },
   "footer": {
     "rights": "Tous droits réservés.",
@@ -491,7 +496,12 @@
       "phone": "Téléphone",
       "language": "Langue préférée",
       "english": "Anglais",
-      "french": "Français"
+      "french": "Français",
+      "securityTitle": "Connexion et sécurité",
+      "changePassword": "Changer votre mot de passe",
+      "changePasswordHint": "Au moins 12 caractères. Vous restez connecté sur cet appareil.",
+      "signOutEverywhere": "Se déconnecter de tous les appareils",
+      "signOutEverywhereHint": "Met fin à toutes les sessions de votre compte, y compris sur d’autres téléphones et ordinateurs."
     }
   },
   "admin": {

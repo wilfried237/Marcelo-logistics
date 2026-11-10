@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "@/i18n/routing";
 import { isAuthConfigured } from "@/lib/config/env";
-import { safeNextPath } from "@/lib/auth/redirects";
+import { linkErrorCode, safeNextPath } from "@/lib/auth/redirects";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function localeFrom(next: string | null): string {
@@ -18,8 +18,11 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const next = searchParams.get("next");
   const locale = localeFrom(next);
-  const failure = NextResponse.redirect(new URL(`/${locale}/login?error=link_invalid`, origin));
+  const failWith = (code: "link_invalid" | "link_expired") => NextResponse.redirect(new URL(`/${locale}/login?error=${code}`, origin));
+  const failure = failWith("link_invalid");
   if (!isAuthConfigured()) return failure;
+  // Supabase redirects here with error parameters when a link is expired or already used.
+  if (searchParams.get("error") || searchParams.get("error_code")) return failWith(linkErrorCode(searchParams));
 
   const supabase = await createSupabaseServerClient();
   const code = searchParams.get("code");
@@ -28,10 +31,10 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) return failure;
+    if (error) return failWith(error.code === "flow_state_expired" || error.code === "otp_expired" ? "link_expired" : "link_invalid");
   } else if (tokenHash && (type === "signup" || type === "recovery" || type === "invite" || type === "email" || type === "magiclink")) {
     const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
-    if (error) return failure;
+    if (error) return failWith(error.code === "otp_expired" ? "link_expired" : "link_invalid");
   } else {
     return failure;
   }

@@ -30,3 +30,23 @@ describe("post-login redirect validation", () => {
     expect(safeNextPath(undefined, "fr", "/admin")).toBe("/fr/admin");
   });
 });
+
+describe("email link failures (Stage 4)", () => {
+  const params = (q: string) => new URLSearchParams(q);
+  it("tells an expired or already-used link apart from an invalid one, without revealing anything about the account", async () => {
+    const { linkErrorCode } = await import("@/lib/auth/redirects");
+    expect(linkErrorCode(params("error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired"))).toBe("link_expired");
+    expect(linkErrorCode(params("error_code=flow_state_expired"))).toBe("link_expired");
+    expect(linkErrorCode(params("error=access_denied&error_code=bad_jwt"))).toBe("link_invalid");
+    expect(linkErrorCode(params("error=server_error"))).toBe("link_invalid");
+  });
+
+  it("only shows known error codes taken from the login URL", async () => {
+    const { loginUrlError } = await import("@/lib/auth/redirects");
+    expect(loginUrlError("link_expired")).toBe("link_expired");
+    expect(loginUrlError("link_invalid")).toBe("link_invalid");
+    expect(loginUrlError("<script>")).toBeNull();
+    expect(loginUrlError(["link_invalid"])).toBeNull();
+    expect(loginUrlError(undefined)).toBeNull();
+  });
+});
