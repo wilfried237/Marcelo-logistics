@@ -64,7 +64,23 @@
     "Turnstile",
     "QRAAAAAA",
     "QRBBBBBB",
-    "msdownload"
+    "msdownload",
+    "roro",
+    "RORO",
+    "Roro",
+    "tcat",
+    "midsize",
+    "Revolut",
+    "Griffeen",
+    "Ndogsimbi",
+    "Gulfil",
+    "groupage",
+    "Yaris",
+    "nonced",
+    "OfferCatalog",
+    "UKWA",
+    "BIFA",
+    "yaounde"
   ],
   "ignoreRegExpList": [
     "/\b(QR|ML)[A-Za-z0-9]{6,12}\b/gi"

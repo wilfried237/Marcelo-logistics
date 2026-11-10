@@ -9,7 +9,7 @@ const GROUPS = ["shipping", "support"] as const;
  * The full service offering in two groups (shipping; customs, storage and
  * shopping), as a ruled list rather than identical cards. With `actions`, each row
  * links to the quote form (services that can be quoted online) or to the
- * contact page (the others).
+ * contact page (the others), and every service links to its detail page.
  */
 export function ServiceGrid({ className, actions = false }: { className?: string; actions?: boolean }) {
   const t = useTranslations();
@@ -36,14 +36,24 @@ function ServiceRow({ service, actions }: { service: ServiceOffering; actions: b
   const confirmed = isServiceConfirmed(service.key);
   return (
     <li className="border-b py-5">
-      <h4 className="text-lg font-semibold">{t(`services.${service.key}.title`)}</h4>
+      <h4 className="text-lg font-semibold">
+        <Link href={`/services/${service.key}`} className="underline-offset-4 hover:text-primary hover:underline">
+          {t(`services.${service.key}.title`)}
+        </Link>
+      </h4>
       <p className="mt-1 text-muted-foreground">{t(`services.${service.key}.description`)}</p>
       {(actions || !confirmed) && (
         <p className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
           {!confirmed && <span className="font-medium text-accent-foreground">{t("home.services.availability")}</span>}
+          {actions && (
+            <Link href={`/services/${service.key}`} className="font-semibold text-primary underline-offset-4 hover:underline">
+              {t("serviceDetail.detailsCta")}
+              <span className="sr-only">: {t(`services.${service.key}.title`)}</span>
+            </Link>
+          )}
           {actions &&
             (service.quoteCode ? (
-              <Link href="/quote" className="font-semibold text-primary underline-offset-4 hover:underline">
+              <Link href={{ pathname: "/quote", query: { service: service.quoteCode } }} className="font-semibold text-primary underline-offset-4 hover:underline">
                 {t("servicesPage.quoteCta")}
               </Link>
             ) : (

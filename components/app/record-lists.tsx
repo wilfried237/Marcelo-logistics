@@ -3,6 +3,8 @@ import { ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { QuoteStatus, ShipmentStatus } from "@/lib/domain/enums";
 import type { ServiceCode } from "@/lib/domain/services";
+import { findEntry } from "@/lib/domain/catalogue";
+import { usePriceText } from "@/components/pricing/price-table";
 import { QuoteStatusBadge, ShipmentStatusBadge } from "./status-badge";
 
 /** Card list (works at 360 px); each row is one link with a descriptive name. */
@@ -74,7 +76,19 @@ export function ShipmentList({
 /** Renders validated quote items (generic or vehicle) as a readable list. */
 export function ItemsList({ items }: { items: unknown }) {
   const t = useTranslations("quoteForm");
+  const tcat = useTranslations("catalogue");
+  const priceText = usePriceText();
   const list = Array.isArray(items) ? (items as Record<string, unknown>[]) : [];
+  // Catalogue choice made by the customer (guidance only; requests from before Stage 3 have none).
+  const catalogue = (item: Record<string, unknown>) => {
+    const entry = typeof item.catalogueItem === "string" ? findEntry(item.catalogueItem) : undefined;
+    if (!entry) return null;
+    return (
+      <span className="mt-1 block text-muted-foreground">
+        {tcat(`items.${entry.section}.${entry.item.key}.label`)} · {t("guidePrice", { price: priceText(entry.item.price) })}
+      </span>
+    );
+  };
   return (
     <ul className="space-y-2">
       {list.map((item, i) => (
@@ -83,12 +97,15 @@ export function ItemsList({ items }: { items: unknown }) {
             <span>
               {String(item.vehicleMake)} {String(item.vehicleModel)} ({String(item.vehicleYear)}){item.running === false ? " · ✕" : ""}
               {item.description ? ` · ${String(item.description)}` : ""}
+              {item.shippingMethod === "container" || item.shippingMethod === "roro" ? ` · ${t(item.shippingMethod === "roro" ? "vehicleMethodRoro" : "vehicleMethodContainer")}` : ""}
+              {catalogue(item)}
             </span>
           ) : (
             <span>
               {String(item.quantity)} × {String(item.description)}
               {item.weightKg ? ` · ${t("weight")}: ${String(item.weightKg)}` : ""}
               {item.lengthCm && item.widthCm && item.heightCm ? ` · ${String(item.lengthCm)}×${String(item.widthCm)}×${String(item.heightCm)} cm` : ""}
+              {catalogue(item)}
             </span>
           )}
         </li>

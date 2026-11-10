@@ -247,7 +247,8 @@
     "send": "Send",
     "help": "Help",
     "company": "Company",
-    "contact": "Contact"
+    "contact": "Contact",
+    "legalLine": "{legalName}, trading as {tradingName}"
   },
   "preview": {
     "banner": "Preview only: this area is not connected to real data and is not available to customers."
@@ -393,7 +394,19 @@
     },
     "routeLabel": "Route",
     "phoneHint": "Include the country code, for example +353 89 123 4567 or +237 6 95 73 90 33.",
-    "consentLabel": "I have read how my information will be used to prepare my quote."
+    "consentLabel": "I have read how my information will be used to prepare my quote.",
+    "catalogueLabel": "Item type",
+    "vehicleCategoryLabel": "Vehicle category",
+    "catalogueNone": "Other or not listed",
+    "catalogueHint": "Choose the closest match to see its guide price, or leave “Other or not listed”.",
+    "guidePrice": "Guide price: {price}",
+    "guideQuote": "This item needs an individual quotation.",
+    "guideNote": "Guide prices only. Your written quotation confirms the final price.",
+    "vehicleMethod": "Shipping method",
+    "vehicleMethodUnknown": "Not sure yet",
+    "vehicleMethodContainer": "Container (personal effects allowed inside)",
+    "vehicleMethodRoro": "RORO (no personal effects inside)",
+    "pricesLink": "See all prices"
   },
   "trackPage": {
     "invalid": "This does not look like a shipment reference. References start with ML followed by 10 letters or digits.",
@@ -685,23 +698,96 @@
     "intro": "Marchelo Logistics is a logistics and freight-forwarding business working between Ireland and Cameroon, with an office in Lucan and a base in Douala.",
     "howWeWorkTitle": "How we work",
     "howWeWork": "Every quote is prepared personally for your specific shipment. Prices are never calculated automatically.",
-    "whereTitle": "Where we work"
+    "whereTitle": "Where we work",
+    "companyTitle": "Company details",
+    "legalEntity": "Legal entity",
+    "tradingName": "Trading name",
+    "irelandAddress": "Ireland",
+    "cameroonAddress": "Cameroon"
   },
   "faq": {
     "title": "Frequently asked questions",
-    "intro": "Answers about using this website. For questions about a specific shipment, contact us.",
-    "q1": "How do I get a price?",
-    "a1": "Send a quote request with details of what you want to ship. We review it personally and send you a quote. Prices are not calculated automatically.",
-    "q2": "Do I need an account?",
-    "a2": "No. You can request a quote and track a shipment without an account.",
-    "q3": "Where do I find my tracking reference?",
-    "a3": "Shipment references start with ML and are given to you when your shipment is booked. Quote request references start with QR.",
-    "q4": "Can I send any item?",
-    "a4": "Some items cannot be shipped. Describe your items in your request and we will tell you if anything cannot be carried.",
-    "q5": "Which languages can I use?",
-    "a5": "You can use the website in English or French.",
-    "q6": "When do shipments leave?",
-    "a6": "We run an express shipment every month in each direction. The departure windows are:"
+    "intro": "Prices, payment, customs, collection and using this website. For questions about a specific shipment, contact us.",
+    "groups": {
+      "rates": "Prices and quotations",
+      "payment": "Payment",
+      "customs": "VAT and customs",
+      "collection": "Collection, delivery and storage",
+      "shipping": "Shipping",
+      "website": "Using this website"
+    },
+    "items": {
+      "price": {
+        "q": "How do I get a price?",
+        "a": "Check our guide prices, then send a quote request with details of what you want to ship. We review it personally and send you a written quotation."
+      },
+      "currency": {
+        "q": "Are your prices in euros, and do they include VAT?",
+        "a": "Yes. All our prices are in euros (EUR), and listed prices include applicable VAT."
+      },
+      "individual": {
+        "q": "Why do some services need an individual quotation?",
+        "a": "Prices depend on the type of shipment, its weight, volume and destination. Certain destinations, vehicles, specific goods and commercial freight are always quoted individually."
+      },
+      "methods": {
+        "q": "How can I pay?",
+        "a": "By bank transfer or Revolut."
+      },
+      "when": {
+        "q": "When do I pay?",
+        "a": "For sea groupage, a 20% deposit is due at booking. Express freight is paid in full before dispatch. Any remaining balance must be paid before the shipment departs."
+      },
+      "xaf": {
+        "q": "Can I pay in CFA francs (XAF)?",
+        "a": "Only for shipments from Cameroon to Ireland."
+      },
+      "customs": {
+        "q": "Is customs clearance included?",
+        "a": "For parcels and personal effects, yes. Vehicle customs clearance is not included and is quoted separately. We also offer customs clearance services in Cameroon."
+      },
+      "home": {
+        "q": "Can you collect from my home?",
+        "a": "Yes, in the Dublin region, for a fixed fee shown on our prices page. Collection elsewhere in Ireland is quoted individually. You can also drop off your goods at a collection point: ask us where."
+      },
+      "delivery": {
+        "q": "Do you deliver in Cameroon?",
+        "a": "Yes. Barrels are delivered door to door in the main cities of Cameroon. Remote or other destinations may need an individual quotation."
+      },
+      "storage": {
+        "q": "How long can my goods stay at your premises?",
+        "a": "48 hours free of charge after they become available. After that, storage is charged per day, as shown on our prices page."
+      },
+      "departures": {
+        "q": "When do shipments leave?",
+        "a": "We run an express shipment every month in each direction. The departure windows are:"
+      },
+      "prohibited": {
+        "q": "What can’t I send?",
+        "a": "Some goods can never be shipped, such as weapons, explosives, hazardous chemicals and perishable food. See the full prohibited goods list in our shipping guide."
+      },
+      "cancel": {
+        "q": "Can I cancel a shipment?",
+        "a": "Yes, subject to conditions. A refund is available only if the shipment has not yet left our premises. This does not affect your statutory rights."
+      },
+      "delay": {
+        "q": "What happens if my shipment is delayed?",
+        "a": "We tell you by telephone, WhatsApp or email."
+      },
+      "account": {
+        "q": "Do I need an account?",
+        "a": "No. You can request a quote and track a shipment without an account."
+      },
+      "reference": {
+        "q": "Where do I find my tracking reference?",
+        "a": "Shipment references start with ML and are given to you when your shipment is booked. Quote request references start with QR."
+      },
+      "languages": {
+        "q": "Which languages can I use?",
+        "a": "You can use the website in English or French."
+      }
+    },
+    "guideLink": "Read the shipping guide",
+    "pricesLink": "See our prices"
   },
   "privacyPage": {
     "title": "Privacy information",
@@ -918,7 +1004,8 @@
     "company": "Company",
     "howItWorks": "How it works",
     "guide": "Shipping guide",
-    "cookies": "Cookies"
+    "cookies": "Cookies",
+    "prices": "Prices"
   },
   "media": {
     "containerShipAlt": "Aerial view of a container ship loaded with stacked containers, sailing on deep blue water.",
@@ -970,18 +1057,39 @@
     "label3": "Once your shipment is booked, add your ML reference to every piece.",
     "listTitle": "Keep a list of contents",
     "listBody": "Write down what is in each barrel or box and its approximate value. You will need this information for your quote request and it helps if customs ask questions.",
-    "restrictedTitle": "Ask us before packing these",
-    "restrictedBody": "Some goods can never be shipped and others need special handling. Do not pack any of the following without asking us first:",
-    "restricted1": "Flammable liquids, gas cylinders, aerosols and fuel",
-    "restricted2": "Loose batteries, especially lithium batteries",
-    "restricted3": "Weapons, ammunition and anything that looks like them",
-    "restricted4": "Medicines, drugs and chemicals",
-    "restricted5": "Fresh or perishable food",
-    "restricted6": "Cash, jewellery and important documents",
-    "restrictedNote": "The final list for your shipment is confirmed in your quote.",
-    "customsTitle": "Customs and duties",
-    "customsBody": "Goods arriving in Cameroon or Ireland may be subject to customs checks, duties and taxes. Your quote states what is included and what is not, so ask us if anything is unclear.",
-    "cta": "Request a quote"
+    "customsTitle": "VAT and customs",
+    "cta": "Request a quote",
+    "onThisPage": "On this page",
+    "packingNav": "Packing",
+    "ratesTitle": "Rates and quotations",
+    "rates1": "Prices depend on the type of shipment, its weight, volume and destination.",
+    "rates2": "Express air freight is charged by the kilogram.",
+    "rates3": "Sea groupage and container prices depend on the volume or the category of goods.",
+    "rates4": "All our prices are in euros (EUR).",
+    "rates5": "Certain destinations, vehicles, specific goods and commercial freight need an individual quotation.",
+    "pricesCta": "See our guide prices",
+    "paymentTitle": "Payment",
+    "payment1": "We accept bank transfer and Revolut.",
+    "payment2": "Sea freight groupage: a 20% deposit is due at booking.",
+    "payment3": "Express freight: full payment is due before dispatch.",
+    "payment4": "Any remaining balance must be paid before the shipment departs.",
+    "payment5": "Payment in CFA francs (XAF) is accepted only for shipments from Cameroon to Ireland.",
+    "customs1": "Listed prices include applicable VAT.",
+    "customs2": "Customs clearance is included for parcels and personal effects.",
+    "customs3": "Vehicle customs clearance is not included and is quoted separately.",
+    "customs4": "Customs authorities may inspect goods. Your quotation states what is included, so ask us if anything is unclear.",
+    "collectionTitle": "Collection and delivery",
+    "collection1": "You can drop off your goods at a collection point: ask us where.",
+    "collection2": "Home collection is available in the Dublin region for a fixed fee. Collection elsewhere in Ireland is quoted individually.",
+    "collection3": "We deliver in Cameroon. Remote or other destinations may need an individual quotation.",
+    "collection4": "Goods are kept free of charge for 48 hours once they are available at our premises. After that, storage is charged per day.",
+    "scheduleTitle": "Departure schedule",
+    "cancelTitle": "Cancellations, refunds and delays",
+    "cancel1": "You can cancel a shipment, subject to conditions.",
+    "cancel2": "A refund is available only if the shipment has not yet left our premises.",
+    "cancel3": "If your shipment is delayed, we tell you by telephone, WhatsApp or email.",
+    "cancel4": "Our policy for lost or damaged goods is being finalised. Contact us straight away if there is a problem with your shipment.",
+    "cancelNote": "These are our own business policies. They do not affect your statutory rights."
   },
   "header": {
     "mainNav": "Main navigation",
@@ -995,7 +1103,8 @@
     "helpFaqDesc": "Answers to common questions",
     "helpContactDesc": "Get in touch with our team",
     "trackDesc": "Follow a shipment with its reference",
-    "corridor": "Shipping between Ireland and Cameroon"
+    "corridor": "Shipping between Ireland and Cameroon",
+    "sendPricesDesc": "Guide prices for every service"
   },
   "breadcrumb": {
     "label": "Breadcrumb"
@@ -1134,7 +1243,8 @@
       "support": "Customs, storage and online shopping"
     },
     "quoteCta": "Request a quote",
-    "askCta": "Ask us about this service"
+    "askCta": "Ask us about this service",
+    "pricesCta": "See our prices"
   },
   "consent": {
     "bannerLabel": "Cookie consent",
@@ -1208,5 +1318,437 @@
     "manage": "You can change or withdraw your choice at any time using “Cookie preferences” at the bottom of every page. You can also delete cookies in your browser settings; if you delete the strictly necessary cookies, you will be signed out and your language choice will be forgotten.",
     "questionsTitle": "Questions",
     "questions": "If you have a question about cookies or your personal data, contact us using the details on our contact page. The privacy page explains how we use personal data."
+  },
+  "catalogue": {
+    "price": {
+      "fixed": "{amount}",
+      "from": "From {amount}",
+      "range": "{min}–{max}",
+      "per_kg": "{amount} per kg (from {minKg} kg)",
+      "per_day": "{amount} per day",
+      "quote": "Individual quotation"
+    },
+    "tableItem": "Item",
+    "tablePrice": "Guide price",
+    "examplesLabel": "Examples:",
+    "disclosureTitle": "About these prices",
+    "disclosure1": "All prices are in euros (EUR) and are guide prices for shipments between Ireland and Cameroon.",
+    "disclosure2": "Listed prices include applicable VAT.",
+    "disclosure3": "The final price depends on the type of shipment, its weight, volume and destination. We confirm it in the written quotation we send you.",
+    "disclosure4": "“From” prices are starting prices. “Individual quotation” means we prepare a price for your specific shipment. Certain destinations, vehicles, specific goods and commercial freight are always quoted individually.",
+    "clarification": {
+      "P07": "Is your screen exactly 55 inches? We confirm its price in your quotation.",
+      "P09": "Free for the first 48 hours after your goods become available at our premises. Charged in CFA francs (XAF)."
+    },
+    "sections": {
+      "vehicles": {
+        "title": "Vehicle shipping",
+        "intro": "Guide prices by vehicle category, from Ireland to Cameroon.",
+        "note1": "Vehicle customs clearance is not included in the shipping price and is quoted separately.",
+        "note2": "Container shipping: personal effects may be left inside the vehicle. RORO (roll-on/roll-off) shipping: no personal effects may be left inside the vehicle.",
+        "note3": "The vehicle’s NCT must not have expired more than two years ago. If it expired more than two years ago, a technical conformity certificate is required.",
+        "note4": "The models listed are examples of each category. Tell us the exact make and model and we confirm the category in your quotation."
+      },
+      "parcels": {
+        "title": "Parcels and personal effects",
+        "intro": "Envelopes, electronics and parcels.",
+        "note1": "Customs clearance is included for parcels and personal effects.",
+        "note2": "There is no published price for parcels between 15 and 20 kg or over 50 kg: request a quote."
+      },
+      "barrels": {
+        "title": "Barrels",
+        "intro": "Barrels of household goods and personal belongings.",
+        "note1": "Door-to-door delivery is available in the main cities of Cameroon. Other destinations are quoted individually."
+      },
+      "cartons": {
+        "title": "Standard cartons",
+        "intro": "Prices depend on the destination city.",
+        "note1": "For destinations other than Douala and Yaoundé, request a quote."
+      },
+      "furniture": {
+        "title": "Furniture and appliances",
+        "intro": "Sofas, televisions, bicycles and mattresses.",
+        "note1": "Used, refurbished or second-hand electrical appliances are subject to a mandatory electrical certificate surcharge."
+      },
+      "sea_freight": {
+        "title": "Sea freight",
+        "intro": "Groupage and full containers.",
+        "note1": "Sea groupage and container prices depend on the volume or the category of goods."
+      },
+      "air_freight": {
+        "title": "Air freight",
+        "intro": "Express air freight, charged by the kilogram.",
+        "note1": "Express freight must be paid in full before dispatch."
+      },
+      "collection": {
+        "title": "Collection, delivery and storage",
+        "intro": "Getting your goods to us, and to their destination.",
+        "note1": "You can also drop off your goods at a collection point: ask us where."
+      }
+    },
+    "groups": {
+      "vehicle_categories": "Vehicle categories",
+      "vehicle_extras": "Customs and certificates",
+      "parcel_items": "Items",
+      "barrel_sizes": "Barrel sizes",
+      "cartons_douala": "Destination: Douala",
+      "cartons_yaounde": "Destination: Yaoundé",
+      "sofas": "Sofas",
+      "televisions": "Televisions",
+      "appliance_extras": "Electrical appliances",
+      "bicycles": "Bicycles",
+      "mattresses": "Mattresses",
+      "sea_options": "Sea freight",
+      "air_options": "Air freight",
+      "collection_delivery": "Collection, delivery and storage"
+    },
+    "items": {
+      "vehicles": {
+        "small_city_car": {
+          "label": "Small city car",
+          "examples": "Toyota Yaris, Peugeot 208, Ford Fiesta, Renault Clio, Opel Corsa, Hyundai i10"
+        },
+        "compact_saloon": {
+          "label": "Compact saloon",
+          "examples": "Toyota Corolla, VW Golf, Renault Mégane, Peugeot 308, Skoda Octavia, Hyundai i30"
+        },
+        "family_saloon": {
+          "label": "Family saloon",
+          "examples": "Toyota Camry, Peugeot 508, VW Passat, BMW 3 Series, Mercedes C-Class"
+        },
+        "compact_suv": {
+          "label": "Compact SUV",
+          "examples": "Nissan Qashqai, Hyundai Tucson, Kia Sportage, Peugeot 3008, VW Tiguan"
+        },
+        "midsize_suv": {
+          "label": "Mid-size SUV",
+          "examples": "Toyota RAV4, Honda CR-V, BMW X3, Audi Q5, Mercedes GLC"
+        },
+        "large_suv": {
+          "label": "Large SUV / 4x4",
+          "examples": "Toyota Prado, Toyota Land Cruiser, BMW X5, Range Rover Sport, Mercedes GLE"
+        },
+        "double_cab_pickup": {
+          "label": "Double-cab pickup",
+          "examples": "Toyota Hilux, Ford Ranger, Nissan Navara, Isuzu D-Max, Mitsubishi L200"
+        },
+        "light_van": {
+          "label": "Light commercial van",
+          "examples": "Ford Transit Custom, Renault Trafic, Opel Vivaro, Peugeot Expert"
+        },
+        "large_van": {
+          "label": "Large commercial van",
+          "examples": "Mercedes Sprinter, Ford Transit L4, Iveco Daily"
+        },
+        "specialist": {
+          "label": "Trucks and specialist vehicles",
+          "examples": "Backhoe loaders, loaders, mini excavators, tipper trucks, cranes, tractors"
+        },
+        "customs_clearance": {
+          "label": "Vehicle customs clearance"
+        },
+        "conformity_certificate": {
+          "label": "Technical conformity certificate (NCT expired more than two years ago)"
+        }
+      },
+      "parcels": {
+        "envelope": {
+          "label": "Envelope"
+        },
+        "mobile_phone": {
+          "label": "Mobile phone"
+        },
+        "tablet": {
+          "label": "Tablet"
+        },
+        "laptop": {
+          "label": "Laptop"
+        },
+        "small_parcel": {
+          "label": "Small parcel up to 15 kg"
+        },
+        "standard_parcel": {
+          "label": "Standard parcel, 20–50 kg"
+        }
+      },
+      "barrels": {
+        "barrel_120": {
+          "label": "120-litre barrel"
+        },
+        "barrel_220": {
+          "label": "220-litre barrel"
+        },
+        "barrel_220_supplied": {
+          "label": "220-litre barrel supplied by Marchelo Logistics"
+        }
+      },
+      "cartons": {
+        "douala_small": {
+          "label": "Small carton (Douala)"
+        },
+        "douala_medium": {
+          "label": "Medium carton (Douala)"
+        },
+        "douala_large": {
+          "label": "Large carton (Douala)"
+        },
+        "yaounde_small": {
+          "label": "Small carton (Yaoundé)"
+        },
+        "yaounde_medium": {
+          "label": "Medium carton (Yaoundé)"
+        },
+        "yaounde_large": {
+          "label": "Large carton (Yaoundé)"
+        }
+      },
+      "furniture": {
+        "sofa_1": {
+          "label": "One-seat sofa"
+        },
+        "sofa_2": {
+          "label": "Two-seat sofa"
+        },
+        "sofa_3": {
+          "label": "Three-seat sofa"
+        },
+        "sofa_6": {
+          "label": "Six-seat sofa"
+        },
+        "tv_28_32": {
+          "label": "Television, 28–32 inches"
+        },
+        "tv_33_37": {
+          "label": "Television, 33–37 inches"
+        },
+        "tv_43_45": {
+          "label": "Television, 43–45 inches"
+        },
+        "tv_47_55": {
+          "label": "Television, 47–55 inches"
+        },
+        "tv_55_65": {
+          "label": "Television, 55–65 inches"
+        },
+        "electrical_certificate": {
+          "label": "Electrical certificate for used, refurbished or second-hand appliances (mandatory)"
+        },
+        "bicycle_child": {
+          "label": "Children’s bicycle"
+        },
+        "bicycle_medium": {
+          "label": "Medium bicycle"
+        },
+        "bicycle_large": {
+          "label": "Large bicycle"
+        },
+        "mattress_140": {
+          "label": "Mattress, 140 × 200 cm"
+        },
+        "mattress_180": {
+          "label": "Mattress, 180 × 200 cm"
+        },
+        "mattress_200": {
+          "label": "Mattress, 200 × 200 cm (King Size)"
+        }
+      },
+      "sea_freight": {
+        "from_half_m3": {
+          "label": "From 0.5 m³"
+        },
+        "from_1_m3": {
+          "label": "1 m³ and above"
+        },
+        "groupage": {
+          "label": "Groupage"
+        },
+        "container_20": {
+          "label": "20-foot container"
+        },
+        "container_40": {
+          "label": "40-foot container"
+        }
+      },
+      "air_freight": {
+        "per_kg": {
+          "label": "Express air freight from 1 kg"
+        },
+        "wholesale": {
+          "label": "From 50 kg (wholesale rate)"
+        }
+      },
+      "collection": {
+        "home_collection_dublin": {
+          "label": "Home collection, Dublin region"
+        },
+        "collection_other_ireland": {
+          "label": "Collection elsewhere in Ireland"
+        },
+        "delivery_other_destinations": {
+          "label": "Delivery to remote or other destinations in Cameroon"
+        },
+        "storage_after_48h": {
+          "label": "Storage after the first 48 hours"
+        }
+      }
+    }
+  },
+  "pricesPage": {
+    "title": "Prices",
+    "intro": "Guide prices for our services between Ireland and Cameroon. Every shipment is confirmed in a written quotation.",
+    "onThisPage": "On this page",
+    "ctaTitle": "Ready to send?",
+    "ctaBody": "Tell us what you are sending and we prepare your quotation.",
+    "cta": "Request a quote",
+    "guideCta": "Payment, customs and collection"
+  },
+  "serviceDetail": {
+    "allServices": "All services",
+    "detailsCta": "Details and prices",
+    "whatTitle": "What we carry",
+    "optionsTitle": "Options",
+    "pricesTitle": "Prices",
+    "conditionsTitle": "Important conditions",
+    "collectionTitle": "Collection and delivery",
+    "infoTitle": "What to include in your quote request",
+    "noPrices": "This service is quoted individually. Tell us what you need and we prepare a price for you.",
+    "quoteCta": "Request a quote for this service",
+    "askCta": "Ask us about this service",
+    "pricesCta": "See all prices",
+    "prohibitedCta": "Check the prohibited goods list",
+    "collection1": "Drop off your goods at a collection point: ask us where.",
+    "collection2": "Home collection in the Dublin region; collection elsewhere in Ireland is quoted individually.",
+    "collection3": "Delivery in Cameroon. Remote or other destinations may need an individual quotation.",
+    "collection4": "Goods are kept free of charge for 48 hours once they are available at our premises. Storage is charged after that.",
+    "services": {
+      "air_freight": {
+        "intro": "Express air freight between Ireland and Cameroon, in both directions, charged by the kilogram.",
+        "what1": "Parcels and goods that need to travel quickly by air.",
+        "option1": "Express air freight from 1 kg, charged per kilogram.",
+        "option2": "A wholesale rate, on request, for shipments from 50 kg.",
+        "option3": "Monthly express departures in each direction.",
+        "condition1": "Express freight must be paid in full before dispatch.",
+        "condition2": "Lithium batteries must be declared. Damaged batteries cannot be shipped.",
+        "info1": "The approximate weight of each piece",
+        "info2": "Its dimensions (length, width and height)",
+        "info3": "A description of the contents",
+        "info4": "The destination city or town"
+      },
+      "sea_freight": {
+        "intro": "Sea freight between Ireland and Cameroon: groupage for smaller volumes, and full 20-foot or 40-foot containers.",
+        "what1": "Household goods, personal effects and commercial goods, shipped by volume.",
+        "option1": "Groupage (a shared container), from 0.5 m³.",
+        "option2": "Full 20-foot and 40-foot containers.",
+        "condition1": "Prices depend on the volume or the category of goods and are given in an individual quotation.",
+        "condition2": "Groupage bookings require a 20% deposit at booking. The balance must be paid before the shipment departs.",
+        "info1": "The volume in m³, or the dimensions of your goods",
+        "info2": "The type of goods",
+        "info3": "Groupage or a full container, and which size",
+        "info4": "The destination city or town"
+      },
+      "vehicle": {
+        "intro": "Shipping cars, SUVs, pickups, vans and specialist vehicles from Ireland to Cameroon, in a container or by RORO (roll-on/roll-off).",
+        "what1": "Cars, SUVs and 4x4s",
+        "what2": "Pickups and commercial vans",
+        "what3": "Trucks and specialist vehicles, such as loaders, mini excavators, cranes and tractors",
+        "option1": "Container shipping: you may leave personal effects inside the vehicle.",
+        "option2": "RORO shipping: no personal effects may be left inside the vehicle.",
+        "condition1": "The NCT must not have expired more than two years ago. Otherwise, a technical conformity certificate is required.",
+        "condition2": "Vehicle customs clearance is not included in the shipping price and is quoted separately.",
+        "info1": "The make, model and year",
+        "info2": "Whether the vehicle runs and can be driven",
+        "info3": "Container or RORO",
+        "info4": "The NCT expiry date",
+        "info5": "The destination city or town"
+      },
+      "barrels": {
+        "intro": "Barrels and standard cartons packed with household goods and personal belongings.",
+        "what1": "120-litre and 220-litre barrels: your own, or a 220-litre barrel supplied by us.",
+        "what2": "Standard cartons in three sizes, priced for Douala or Yaoundé.",
+        "option1": "Door-to-door delivery in the main cities of Cameroon.",
+        "option2": "Other destinations quoted individually.",
+        "condition1": "Read our shipping guide for packing advice and the prohibited goods list before you pack.",
+        "info1": "The number and size of your barrels or cartons",
+        "info2": "Whether you need a barrel supplied",
+        "info3": "The destination city or town",
+        "info4": "A list of the contents"
+      },
+      "parcels": {
+        "intro": "Envelopes, electronics, parcels and personal effects, as well as furniture, televisions, bicycles and mattresses.",
+        "what1": "Envelopes and documents",
+        "what2": "Mobile phones, tablets and laptops",
+        "what3": "Parcels and personal effects",
+        "what4": "Sofas, televisions, bicycles and mattresses",
+        "option1": "Customs clearance is included for parcels and personal effects.",
+        "option2": "Monthly express departures in each direction.",
+        "condition1": "Used, refurbished or second-hand electrical appliances need a mandatory electrical certificate, charged as a surcharge.",
+        "condition2": "Lithium batteries must be declared. Damaged batteries cannot be shipped.",
+        "info1": "The type and number of items",
+        "info2": "The approximate weight of each parcel",
+        "info3": "For televisions, the screen size in inches",
+        "info4": "The destination city or town"
+      },
+      "commercial_cargo": {
+        "intro": "Goods shipped for businesses and traders, by sea or by air, with customs clearance services available in Cameroon.",
+        "what1": "Commercial goods, shipped by volume (sea) or by weight (air).",
+        "option1": "Sea freight from 0.5 m³, groupage, or 20-foot and 40-foot containers.",
+        "option2": "Air freight charged per kilogram from 1 kg, with a wholesale rate from 50 kg.",
+        "option3": "Customs clearance services in Cameroon.",
+        "condition1": "Sea freight and air shipments from 50 kg are quoted individually.",
+        "condition2": "Groupage requires a 20% deposit at booking. Express freight is paid in full before dispatch.",
+        "info1": "The type and quantity of goods",
+        "info2": "The weight or volume",
+        "info3": "Sea or air",
+        "info4": "The destination city or town",
+        "info5": "Whether you need customs clearance"
+      },
+      "customs_clearance": {
+        "intro": "Customs clearance services in Cameroon: formalities, documentation and coordination.",
+        "what1": "Customs formalities and documents for goods arriving in Cameroon.",
+        "option1": "Included in the price of parcels and personal effects.",
+        "option2": "Vehicle customs clearance: quoted separately.",
+        "option3": "Commercial goods: ask us for a quotation.",
+        "condition1": "Customs authorities may inspect goods. Ask us what applies to your shipment.",
+        "info1": "A description of the goods and their value",
+        "info2": "Your shipment reference, if it is already booked",
+        "info3": "The destination city or town"
+      },
+      "warehousing": {
+        "intro": "Storage, goods reception, preparation and distribution.",
+        "what1": "Goods received on your behalf",
+        "what2": "Storage before or after shipping",
+        "what3": "Preparation and distribution",
+        "option1": "Goods are kept free of charge for 48 hours once they are available at our premises, then a daily storage charge applies.",
+        "info1": "The type and volume of goods",
+        "info2": "How long you need them stored",
+        "info3": "Where they are going next"
+      },
+      "ecommerce": {
+        "intro": "Shop online, have your purchases delivered to us in Ireland, and we forward them to Cameroon.",
+        "what1": "Purchases from online shops, received in Ireland.",
+        "option1": "Forwarding to Cameroon with our monthly departures.",
+        "condition1": "Check the prohibited goods list before you order.",
+        "info1": "What you are buying",
+        "info2": "The approximate weight and size",
+        "info3": "The destination city or town"
+      }
+    }
+  },
+  "prohibited": {
+    "title": "Prohibited goods",
+    "intro": "We do not ship the following goods:",
+    "item1": "Military uniforms, and tactical or military equipment",
+    "item2": "Firearms and ammunition",
+    "item3": "Explosives and fireworks",
+    "item4": "Hazardous chemicals, compressed gas, acids, corrosives, radioactive materials, fuels and flammable liquids",
+    "item5": "Undeclared lithium batteries, damaged batteries, non-compliant hoverboards or e-scooters, and unauthorised e-cigarettes",
+    "item6": "Narcotics, and medicines without a valid prescription",
+    "item7": "Perishable goods, and non-compliant meat or fish",
+    "item8": "Live animals, ivory, protected species, and trophies or skins without permits",
+    "item9": "Cash, undeclared gold, precious stones and travellers’ cheques",
+    "item10": "Counterfeit goods, pirated products and falsified documents",
+    "item11": "Industrial waste, infectious materials and toxic products",
+    "item12": "Any other goods prohibited by Cameroonian or EU regulations",
+    "disclaimer": "This list is not exhaustive and does not replace current customs and transport regulations. Ask us before packing anything you are unsure about."
   }
 }

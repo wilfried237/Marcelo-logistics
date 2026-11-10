@@ -2,6 +2,7 @@ import { z } from "zod";
 import { CANCELLATION_REASON_MAX } from "./quote-lifecycle";
 import { CURRENCIES, LOCALES, MILESTONE_CODES, QUOTE_STATUSES, SHIPMENT_STATUSES } from "./enums";
 import { SERVICE_CODES } from "./services";
+import { isSelectableFor } from "./catalogue";
 
 /*
  * Validation shared by forms (client) and server actions (server). Server-side
@@ -19,8 +20,15 @@ const optionalText = (max: number) =>
 const optionalNumber = (max: number) =>
   z.preprocess((v) => (v === "" || v === null ? undefined : v), z.coerce.number({ error: "invalid" }).positive("invalid").max(max, "too_large").optional());
 
+/** Optional catalogue choice, "<section>.<item>" (config/catalogue.ts); checked against the service below. */
+const catalogueItem = z.string().trim().max(80, "too_long").optional().transform((v) => (v ? v : undefined));
+
+/** Vehicle shipping method preference: container (personal effects allowed) or RORO. */
+export const VEHICLE_SHIPPING_METHODS = ["container", "roro"] as const;
+
 export const genericItemSchema = z
   .object({
+    catalogueItem,
     description: requiredText(200),
     quantity: z.coerce.number({ error: "invalid" }).int("invalid").min(1, "invalid").max(100, "too_large"),
     weightKg: optionalNumber(50_000),
@@ -37,6 +45,8 @@ export const vehicleItemSchema = z
     vehicleModel: requiredText(60),
     vehicleYear: z.coerce.number({ error: "invalid" }).int("invalid").min(1950, "invalid").max(currentYear + 1, "invalid"),
     running: z.boolean().optional(),
+    shippingMethod: z.enum(VEHICLE_SHIPPING_METHODS, { error: "invalid" }).optional(),
+    catalogueItem,
     description: optionalText(200),
   })
   .strict();
@@ -75,10 +85,19 @@ const baseFields = {
 
 const GENERIC_SERVICES = SERVICE_CODES.filter((c) => c !== "vehicle") as [Exclude<(typeof SERVICE_CODES)[number], "vehicle">, ...Exclude<(typeof SERVICE_CODES)[number], "vehicle">[]];
 
-export const quoteRequestInputSchema = z.discriminatedUnion("service", [
-  z.object({ service: z.literal("vehicle"), items: z.array(vehicleItemSchema).min(1, "required").max(5, "too_many"), ...baseFields }).strict(),
-  z.object({ service: z.enum(GENERIC_SERVICES), items: z.array(genericItemSchema).min(1, "required").max(20, "too_many"), ...baseFields }).strict(),
-]);
+export const quoteRequestInputSchema = z
+  .discriminatedUnion("service", [
+    z.object({ service: z.literal("vehicle"), items: z.array(vehicleItemSchema).min(1, "required").max(5, "too_many"), ...baseFields }).strict(),
+    z.object({ service: z.enum(GENERIC_SERVICES), items: z.array(genericItemSchema).min(1, "required").max(20, "too_many"), ...baseFields }).strict(),
+  ])
+  .superRefine((value, ctx) => {
+    // A catalogue choice must be a selectable item of the chosen service (never a surcharge or another service's item).
+    value.items.forEach((item, index) => {
+      if (item.catalogueItem && !isSelectableFor(value.service, item.catalogueItem)) {
+        ctx.addIssue({ code: "custom", message: "invalid", path: ["items", index, "catalogueItem"] });
+      }
+    });
+  });
 export type QuoteRequestInput = z.infer<typeof quoteRequestInputSchema>;
 
 /** Flattens Zod issues into { "contact.email": "invalid_email" } for the form. */

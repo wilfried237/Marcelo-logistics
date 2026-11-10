@@ -6,6 +6,8 @@ import { Container } from "@/components/app/page-header";
 import { PageBanner } from "@/components/app/page-banner";
 import { ContactChannels } from "@/components/contact/contact-channels";
 import { QuoteWizard } from "@/components/quote/quote-wizard";
+import { isServiceCode } from "@/lib/domain/services";
+import { isSelectableFor } from "@/lib/domain/catalogue";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -15,8 +17,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 // Availability depends on runtime configuration, so this page is rendered per request.
 export const dynamic = "force-dynamic";
 
-export default async function QuotePage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function QuotePage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { locale } = await params;
+  // Optional pre-selection from service and price links; anything unknown is ignored.
+  const query = await searchParams;
+  const service = typeof query.service === "string" && isServiceCode(query.service) ? query.service : undefined;
+  const item = service && typeof query.item === "string" && isSelectableFor(service, query.item) ? query.item : undefined;
   setRequestLocale(locale);
   const t = await getTranslations("quote");
   const available = quoteSubmissionStatus().available;
@@ -38,6 +44,8 @@ export default async function QuotePage({ params }: { params: Promise<{ locale: 
             available={available}
             routes={ownerConfig.operations.routes.map(({ origin, destination }) => ({ origin, destination }))}
             confirmedServices={[...ownerConfig.operations.confirmedServices]}
+            initialService={service}
+            initialItem={item}
           />
         </div>
       </Container>

@@ -16,6 +16,7 @@ function useMenus() {
   const send: MenuLink[] = [
     { href: "/quote", label: t("nav.quote"), description: t("header.sendQuoteDesc") },
     { href: "/services", label: t("nav.services"), description: t("header.sendServicesDesc") },
+    { href: "/prices", label: t("nav2.prices"), description: t("header.sendPricesDesc") },
     { href: "/shipping-guide", label: t("nav2.guide"), description: t("header.sendGuideDesc") },
   ];
   const help: MenuLink[] = [

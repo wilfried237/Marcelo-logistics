@@ -163,15 +163,16 @@ export default function HomePage({ params }: { params: Promise<{ locale: string 
         <div>
           <h2 className="text-3xl font-bold tracking-tight">{t("faq.heading")}</h2>
           <div className="mt-6 divide-y border-y">
-            {([6, 1, 3] as const).map((n) => (
-              <details key={n} className="group py-4">
+            {(["departures", "price", "currency"] as const).map((id) => (
+              <details key={id} className="group py-4">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold [&::-webkit-details-marker]:hidden">
-                  {faq(`q${n}`)}
+                  {faq(`items.${id}.q`)}
                   <span className="text-xl leading-none text-primary transition-transform group-open:rotate-45" aria-hidden>
                     +
                   </span>
                 </summary>
-                <p className="mt-3 text-muted-foreground">{faq(`a${n}`)}</p>
+                <p className="mt-3 text-muted-foreground">{faq(`items.${id}.a`)}</p>
+                {id === "departures" && <DepartureSchedule className="mt-4" />}
               </details>
             ))}
           </div>

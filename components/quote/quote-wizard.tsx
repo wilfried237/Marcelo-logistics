@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { useFieldArray, useForm, useWatch, type Control, type UseFormRegisterReturn } from "react-hook-form";
 import { useLocale, useTranslations } from "next-intl";
 import { Check, Plus, Trash2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -12,10 +12,15 @@ import { Alert } from "@/components/app/alert";
 import { FormField, inputClassName, selectClassName } from "@/components/app/form-field";
 import { SERVICE_CODES, type ServiceCode } from "@/lib/domain/services";
 import { quoteRequestInputSchema } from "@/lib/domain/quote-schema";
+import { findEntry, isSelectableFor, requiresQuotation, selectableEntriesFor, type CatalogueEntry } from "@/lib/domain/catalogue";
+import { usePriceText } from "@/components/pricing/price-table";
 import { submitQuoteAction, type QuoteActionResult } from "@/app/[locale]/(site)/quote/actions";
 import { cn } from "@/lib/utils";
 
 type ItemValues = {
+  /** Catalogue choice "<section>.<item>", or "" for "Other or not listed". */
+  catalogueItem: string;
+  shippingMethod: "" | "container" | "roro";
   description: string;
   quantity: string;
   weightKg: string;
@@ -40,7 +45,7 @@ type FormValues = {
   website: string;
 };
 
-const EMPTY_ITEM: ItemValues = { description: "", quantity: "1", weightKg: "", lengthCm: "", widthCm: "", heightCm: "", vehicleMake: "", vehicleModel: "", vehicleYear: "", running: true };
+const EMPTY_ITEM: ItemValues = { catalogueItem: "", shippingMethod: "", description: "", quantity: "1", weightKg: "", lengthCm: "", widthCm: "", heightCm: "", vehicleMake: "", vehicleModel: "", vehicleYear: "", running: true };
 const STEPS = ["service", "route", "items", "contact", "review"] as const;
 const STEP_FIELDS: Record<(typeof STEPS)[number], string[]> = {
   service: ["service"],
@@ -56,8 +61,17 @@ const blank = (v: string) => (v.trim() === "" ? undefined : v.trim());
 function toPayload(values: FormValues, locale: string, idempotencyKey: string) {
   const items =
     values.service === "vehicle"
-      ? values.items.map((i) => ({ vehicleMake: i.vehicleMake, vehicleModel: i.vehicleModel, vehicleYear: i.vehicleYear, running: i.running, description: blank(i.description) }))
+      ? values.items.map((i) => ({
+          vehicleMake: i.vehicleMake,
+          vehicleModel: i.vehicleModel,
+          vehicleYear: i.vehicleYear,
+          running: i.running,
+          shippingMethod: i.shippingMethod || undefined,
+          catalogueItem: blank(i.catalogueItem),
+          description: blank(i.description),
+        }))
       : values.items.map((i) => ({
+          catalogueItem: blank(i.catalogueItem),
           description: i.description,
           quantity: i.quantity,
           weightKg: blank(i.weightKg),
@@ -84,8 +98,13 @@ export function QuoteWizard({
   available,
   routes,
   confirmedServices,
+  initialService,
+  initialItem,
 }: {
   available: boolean;
+  /** Pre-selected from a service or price link (/quote?service=...&item=...); validated by the page. */
+  initialService?: ServiceCode;
+  initialItem?: string;
   /** Routes offered online, in both directions (config/owner.ts). */
   routes: { origin: string; destination: string }[];
   confirmedServices: string[];
@@ -95,6 +114,7 @@ export function QuoteWizard({
   const ts = useTranslations("services");
   const th = useTranslations("home.services");
   const tc = useTranslations("common");
+  const tcat = useTranslations("catalogue");
   const locale = useLocale();
   const countryName = useMemo(() => {
     const names = new Intl.DisplayNames([locale], { type: "region" });
@@ -111,11 +131,11 @@ export function QuoteWizard({
 
   const form = useForm<FormValues>({
     defaultValues: {
-      service: "",
+      service: initialService ?? "",
       originCountry: routes[0]?.origin ?? "",
       destinationCountry: routes[0]?.destination ?? "",
       destinationCity: "",
-      items: [{ ...EMPTY_ITEM }],
+      items: [{ ...EMPTY_ITEM, catalogueItem: initialService && initialItem && isSelectableFor(initialService, initialItem) ? initialItem : "" }],
       notes: "",
       contact: { name: "", email: "", phone: "" },
       privacyAccepted: false,
@@ -127,6 +147,14 @@ export function QuoteWizard({
   const service = useWatch({ control, name: "service" });
   const [originCountry, destinationCountry] = useWatch({ control, name: ["originCountry", "destinationCountry"] });
   const current = STEPS[step];
+  const catalogueOptions = useMemo(() => (service ? selectableEntriesFor(service) : []), [service]);
+
+  // A catalogue choice belongs to one service: clear choices that no longer apply after the service changes.
+  useEffect(() => {
+    getValues("items").forEach((item, index) => {
+      if (item.catalogueItem && (!service || !isSelectableFor(service, item.catalogueItem))) setValue(`items.${index}.catalogueItem`, "");
+    });
+  }, [service, getValues, setValue]);
 
   useEffect(() => {
     headingRef.current?.focus();
@@ -301,6 +329,14 @@ export function QuoteWizard({
               </h2>
             </legend>
             <p className="text-sm text-muted-foreground">{t("itemsHint")}</p>
+            {catalogueOptions.length > 0 && (
+              <p className="text-sm text-muted-foreground">
+                {t("guideNote")}{" "}
+                <Link href="/prices" target="_blank" className="font-medium text-primary underline-offset-4 hover:underline">
+                  {t("pricesLink")}
+                </Link>
+              </p>
+            )}
             {errors.items && (
               <Alert variant="danger" id="items-error">
                 {err("items")}
@@ -309,6 +345,24 @@ export function QuoteWizard({
             {fields.map((field, index) => (
               <fieldset key={field.id} className="space-y-4 rounded-lg border p-4">
                 <legend className="px-1 text-sm font-semibold">{t("itemLabel", { number: index + 1 })}</legend>
+                {catalogueOptions.length > 0 && (
+                  <CatalogueChoice
+                    index={index}
+                    label={service === "vehicle" ? t("vehicleCategoryLabel") : t("catalogueLabel")}
+                    options={catalogueOptions}
+                    error={err(`items.${index}.catalogueItem`)}
+                    control={control}
+                    field={register(`items.${index}.catalogueItem`, {
+                      onChange: (e: React.ChangeEvent<HTMLSelectElement>) => {
+                        // Pre-fill an empty description with the chosen item's name; the customer can still edit it.
+                        if (service !== "vehicle" && e.target.value && !getValues(`items.${index}.description`).trim()) {
+                          const entry = findEntry(e.target.value);
+                          if (entry) setValue(`items.${index}.description`, tcat(`items.${entry.section}.${entry.item.key}.label`));
+                        }
+                      },
+                    })}
+                  />
+                )}
                 {service === "vehicle" ? (
                   <div className="grid gap-4 sm:grid-cols-3">
                     <FormField id={`items.${index}.vehicleMake`} label={t("vehicleMake")} error={err(`items.${index}.vehicleMake`)}>
@@ -319,6 +373,15 @@ export function QuoteWizard({
                     </FormField>
                     <FormField id={`items.${index}.vehicleYear`} label={t("vehicleYear")} error={err(`items.${index}.vehicleYear`)}>
                       {(p) => <Input {...p} {...register(`items.${index}.vehicleYear`)} inputMode="numeric" maxLength={4} className={inputClassName} />}
+                    </FormField>
+                    <FormField id={`items.${index}.shippingMethod`} label={t("vehicleMethod")} optionalLabel={tc("optional")} error={err(`items.${index}.shippingMethod`)} className="sm:col-span-3">
+                      {(p) => (
+                        <select {...p} {...register(`items.${index}.shippingMethod`)} className={selectClassName}>
+                          <option value="">{t("vehicleMethodUnknown")}</option>
+                          <option value="container">{t("vehicleMethodContainer")}</option>
+                          <option value="roro">{t("vehicleMethodRoro")}</option>
+                        </select>
+                      )}
                     </FormField>
                     <label className="flex items-center gap-3 text-sm sm:col-span-3">
                       <input type="checkbox" {...register(`items.${index}.running`)} className="h-4 w-4" />
@@ -455,7 +518,13 @@ function ReviewStep({
   const t = useTranslations("quoteForm");
   const ts = useTranslations("services");
   const tc = useTranslations("common");
-  const row = (label: string, value: React.ReactNode, step: (typeof STEPS)[number]) => (
+  const tcat = useTranslations("catalogue");
+  const priceText = usePriceText();
+  const guide = (id: string) => {
+    const entry = findEntry(id);
+    return entry ? ` · ${tcat(`items.${entry.section}.${entry.item.key}.label`)} (${t("guidePrice", { price: priceText(entry.item.price) })})` : "";
+  };
+  const row =(label: string, value: React.ReactNode, step: (typeof STEPS)[number]) => (
     <div className="flex flex-col gap-1 border-b py-3 sm:flex-row sm:items-start sm:justify-between">
       <dt className="text-sm text-muted-foreground sm:w-40">{label}</dt>
       <dd className="flex-1 font-medium">{value}</dd>
@@ -486,6 +555,8 @@ function ReviewStep({
             {values.items.map((item, i) => (
               <li key={i}>
                 {values.service === "vehicle" ? `${item.vehicleMake} ${item.vehicleModel} (${item.vehicleYear})` : `${item.quantity} × ${item.description}${item.weightKg ? `, ~${item.weightKg} kg` : ""}`}
+                {item.catalogueItem ? guide(item.catalogueItem) : ""}
+                {values.service === "vehicle" && item.shippingMethod ? ` · ${t(item.shippingMethod === "roro" ? "vehicleMethodRoro" : "vehicleMethodContainer")}` : ""}
               </li>
             ))}
           </ul>,
@@ -500,5 +571,69 @@ function ReviewStep({
         </Link>
       </p>
     </section>
+  );
+}
+
+/**
+ * Optional catalogue choice for one item, grouped by catalogue section, with the
+ * guide price of the selected entry. Guidance only: nothing is totalled and the
+ * written quotation sets the price.
+ */
+function CatalogueChoice({
+  index,
+  label,
+  options,
+  error,
+  control,
+  field,
+}: {
+  index: number;
+  label: string;
+  options: CatalogueEntry[];
+  error?: string;
+  control: Control<FormValues>;
+  field: UseFormRegisterReturn;
+}) {
+  const t = useTranslations("quoteForm");
+  const tcat = useTranslations("catalogue");
+  const tc = useTranslations("common");
+  const priceText = usePriceText();
+  const selected = useWatch({ control, name: `items.${index}.catalogueItem` });
+  const entry = selected ? options.find((o) => o.id === selected) : undefined;
+  const groups = options.reduce<{ key: string; entries: CatalogueEntry[] }[]>((acc, option) => {
+    const last = acc[acc.length - 1];
+    if (last && last.key === option.group) last.entries.push(option);
+    else acc.push({ key: option.group, entries: [option] });
+    return acc;
+  }, []);
+  const guideId = `items-${index}-catalogue-guide`;
+  return (
+    <div className="space-y-2">
+      <FormField id={`items.${index}.catalogueItem`} label={label} optionalLabel={tc("optional")} hint={t("catalogueHint")} error={error}>
+        {(p) => (
+          <select {...p} {...field} aria-describedby={[p["aria-describedby"], guideId].filter(Boolean).join(" ")} className={selectClassName}>
+            <option value="">{t("catalogueNone")}</option>
+            {groups.map((group) => (
+              <optgroup key={group.key} label={tcat(`groups.${group.key}`)}>
+                {group.entries.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {tcat(`items.${option.section}.${option.item.key}.label`)}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        )}
+      </FormField>
+      <p id={guideId} aria-live="polite" className="text-sm">
+        {entry &&
+          (requiresQuotation(entry.item.price) ? (
+            <span className="font-medium text-muted-foreground">{t("guideQuote")}</span>
+          ) : (
+            <span className="font-semibold">{t("guidePrice", { price: priceText(entry.item.price) })}</span>
+          ))}
+        {entry?.item.clarification && <span className="mt-1 block text-accent-foreground">{tcat(`clarification.${entry.item.clarification.replace("-", "")}`)}</span>}
+      </p>
+    </div>
   );
 }

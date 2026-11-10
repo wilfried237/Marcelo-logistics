@@ -1,6 +1,6 @@
 # Decisions Required from the Owner
 
-_Last updated: 2026-11-09 (legal drafts: [docs/legal/](./legal/README.md); completion audit: [PROJECT-COMPLETION-AUDIT.md](./PROJECT-COMPLETION-AUDIT.md)) · This is the single consolidated list of open **business** decisions._
+_Last updated: 2026-11-10 (Stage 3 price list and customer information: see [section 9](#9-stage-3-client-information-2026-11-10); legal drafts: [docs/legal/](./legal/README.md); completion audit: [PROJECT-COMPLETION-AUDIT.md](./PROJECT-COMPLETION-AUDIT.md)) · This is the single consolidated list of open **business** decisions._
 
 **How to answer:** write your answer on the `Answer:` line under each decision (or reply by email quoting the ID). Answers already recorded here are preserved. Development continues on everything that does not depend on an answer.
 
@@ -13,15 +13,15 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 | ID | Decision | Blocks |
 |---|---|---|
 | B-01 ✓ | Official business name: **Marchelo Logistics** (answered 2026-11-03) | — |
-| B-02 ★ | Legal entity, registration and VAT details | Release (legal pages, footer) |
+| B-02 ★ | Legal entity, registration and VAT details (**partly answered 2026-11-10**: names and addresses; registration and VAT numbers still missing) | Release (legal pages, footer) |
 | S-01 ✓ | Which services are offered now | **Answered 2026-11-09: all nine services confirmed** |
 | S-02 | Routes and destination cities (routes and monthly windows answered 2026-11-03; cities open) | Quote form options |
-| S-03 | Prohibited and restricted items | Service pages, FAQ |
+| S-03 ✓ | Prohibited and restricted items | **Answered 2026-11-10** (list published; see L-09 for the proposed fee) |
 | S-04 | Quote form for the three new service categories (database change) | Online quotes for customs, warehousing, e-commerce |
 | P-01 ✓ | Who reviews quotes | **Answered 2026-11-09: the owner reviews every request and replies personally** (response-time wording still open) |
 | P-02 | Information required per service | Quote form fields |
 | P-03 | Currencies, VAT presentation, quote validity | Staff quote form defaults |
-| P-04 | Customs duties: included or not | Quote inclusions/exclusions wording |
+| P-04 ✓ | Customs duties: included or not | **Answered 2026-11-10** (included for parcels and personal effects; vehicles quoted separately; see L-11) |
 | T-01 | Tracking milestones shown to customers | Tracking page labels |
 | T-02 | Delivery-estimate policy | Whether ETAs are shown |
 | C-01 ✓ | Verify contact details | **Answered 2026-11-06; WhatsApp and opening hours answered 2026-11-09** |
@@ -34,8 +34,19 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 | L-05 | Liability, insurance and carriage regime | Terms, claims policy |
 | L-06 | Cancellation right for distance contracts | Payment and cancellation policy |
 | L-07 | Claim deadlines, complaint process, dispute resolution | Claims policy |
-| P-05 | Payment methods, deposit, due date | Payment policy |
-| P-06 | Refund rules and timelines | Payment policy |
+| P-05 ✓ | Payment methods, deposit, due date | **Answered 2026-11-10** (published in the shipping guide and FAQ; see P-10) |
+| P-06 | Refund rules and timelines (partly answered 2026-11-10; see L-10) | Payment policy |
+| P-07 | 55-inch televisions fall in two price bands | Price list, quote guidance |
+| P-08 | No price for parcels of 15–20 kg or over 50 kg | Price list |
+| P-09 | Storage charge stated in XAF; which premises | Price list, guide |
+| P-10 | Enforce “XAF only for Cameroon → Ireland” in the staff quote form? | Staff quote form |
+| S-05 | Quote-form grouping of furniture and cartons | Quote form guidance |
+| S-06 | Drop-off (collection point) addresses | Guide, service pages |
+| C-04 | Role of the additional Irish number | Contact details |
+| L-08 ★ | Standard trading conditions (BIFA/UKWA/RHA) | Terms |
+| L-09 | Proposed €150 fee for prohibited goods | Terms, guide |
+| L-10 ★ | Voucher instead of cash refund, €400 compensation limit | Terms, claims policy |
+| L-11 | VAT and customs statements as contractual assurances | Terms, price list |
 | A-01 ✓ | Logo in use on every page (2026-11-04); artwork wording vs name to confirm | — |
 | A-02 | Photographs | Visual quality only |
 | R-01 ◆ | Vercel and Supabase account ownership and EU region | Preview deployment, database |
@@ -63,7 +74,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **If delayed:** the footer shows "Business and legal details will be published once confirmed"; the launch build (`RELEASE_BUILD=true`) fails via L-01/L-02.
 - **Affected:** footer, `/privacy`, `/terms`.
 - **Development can continue:** yes.
-- **Answer:**
+- **Answer (partial, client, 2026-11-10):** legal entity **MARCHELO LOGISTICS CARGO LTD**, trading name **MARCHELO LOGISTICS DISTRIBUTION**; Ireland address 12 Griffeen Glen Chase, Lucan, Co. Dublin, Ireland; Cameroon address Ndogsimbi, Douala, face Station-Service Gulfil, Cameroun. Applied in `config/owner.ts` (`company`, `locations`), the About page and the footer. **Still open:** the company registration number and the VAT number (the client says a VAT number exists but did not supply it). Both stay `null`; never invent them.
 
 ## 2. Services, destinations and logistics operations
 
@@ -90,9 +101,9 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Decision needed:** the list of items you will not carry, or carry only with conditions.
 - **Why it matters:** customers need it before packing barrels and boxes; it reduces customs problems.
 - **If delayed:** no binding list is published. The shipping guide (`/shipping-guide`) shows general categories under “Ask us before packing these” (flammables and gas, loose batteries, weapons, medicines and chemicals, perishable food, cash and valuables) and says the final list is confirmed in the quote.
-- **Affected:** FAQ, shipping guide (`guide.restricted*` in `messages/*.json`), quote form guidance.
+- **Affected:** FAQ, shipping guide (`prohibited.*` in `messages/*.json`), service pages.
 - **Development can continue:** yes.
-- **Answer:**
+- **Answer (client, 2026-11-10):** twelve prohibited categories (military equipment; firearms; explosives; hazardous chemicals and flammables; undeclared or damaged batteries and non-compliant devices; narcotics and unprescribed medicines; perishables and non-compliant meat or fish; live animals and protected species; cash, undeclared gold, precious stones and travellers’ cheques; counterfeit goods and falsified documents; waste and toxic products; anything prohibited by Cameroonian or EU rules). Published at `/shipping-guide#prohibited` with a note that the list does not replace current regulations. The proposed €150 fee is **not** published (L-09).
 
 ### S-04 Online quotes for customs clearance, warehousing and e-commerce
 - **Decision needed:** approve the database change that lets customers choose the three new categories in the quote form.
@@ -136,17 +147,17 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 ### P-05 Payment methods and timing
 - **Decision needed:** which payment methods you accept (only those actually used), whether a deposit is taken, when payment is due, and whether a EUR quote can be paid in XAF. The website takes no online payments.
 - **Draft:** [docs/legal/payment-refund-cancellation.md](./legal/payment-refund-cancellation.md).
-- **Answer:**
+- **Answer (client, 2026-11-10):** bank transfer and Revolut; sea groupage 20% deposit at booking; express freight paid in full before dispatch; any balance paid before departure; XAF accepted only for shipments from Cameroon to Ireland. Published in the shipping guide and FAQ. The website still takes no payments.
 
 ### P-06 Refunds
 - **Decision needed:** when refunds are due (for example cancellation before departure, or a service not performed), how they are calculated, the method and the timeline.
-- **Answer:**
+- **Answer (partial, client, 2026-11-10):** cancellation is possible subject to conditions; a refund only if the shipment has not left the premises; delays are communicated by telephone, WhatsApp or email. Published with “These are our own business policies. They do not affect your statutory rights.” **Still open:** the conditions, how a refund is calculated, method and timeline; and the lost/damaged policy (L-10).
 
 ### P-04 Customs duties and destination charges
 - **Decision needed:** are Cameroon customs duties and taxes ever included in your quote, optional, or always paid by the recipient?
 - **If delayed:** staff state it per quote in inclusions/exclusions.
 - **Development can continue:** yes.
-- **Answer:**
+- **Answer (client, 2026-11-10):** customs clearance is included for parcels and personal effects; vehicle customs clearance is excluded and quoted separately; customs clearance services are available in Cameroon (no separate price supplied). Listed prices include applicable VAT. Published as customer information; see L-11 before using these statements as contractual terms.
 
 ## 4. Delivery estimates and shipment tracking
 
@@ -207,7 +218,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Decision needed:** data controller identity and contact; whether a solicitor or DPO reviews the notice. The site provides a factual draft of what data is collected and why, generated from the actual code.
 - **If delayed:** the privacy page shows the factual draft with the controller details marked as pending; the launch build (`RELEASE_BUILD=true`) fails.
 - **Development can continue:** yes.
-- **Answer:**
+- **Answer (partial, client, 2026-11-10):** the client names a data controller: the person named by the client (held privately, not recorded in this repository). **Not published yet:** under the GDPR the controller is normally the company (MARCHELO LOGISTICS CARGO LTD), with a named contact person. The lawyer should confirm the wording before the privacy notice is approved.
 
 ### L-03 ◆ Retention periods
 - **Decision needed:** how long to keep quote requests that never became shipments; shipment records; customer documents (IDs, invoices, photos); audit logs.
@@ -285,3 +296,62 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **N-01 Quote expiry reminders:** should customers get an email before a quotation expires, and how long before (e.g. 48 hours)? Built and tested; **off** until answered (`notifications.quoteExpiryReminderHours`).
 - **N-02 Staff notification inbox:** **updated 2026-11-09 (P-01):** quotation and other staff alerts go to the **owner/admin notification address** chosen by the owner, who reviews every request personally. Earlier answer (2026-11-04): a dedicated business inbox, not a personal address. The owner sets it in Vercel as `STAFF_NOTIFICATION_EMAIL` (comma-separated, max 10); no address is chosen, invented or hard-coded in the code. Until it is set, alerts are recorded as skipped, not sent. Linked to C-02 (the inbox should be on the business domain once it exists).
 - **N-03 Delivery speed of emails on the Hobby plan:** emails go out immediately after each action; failed ones are retried by a daily job (Hobby limit). A Pro plan allows retries every few minutes.
+
+## 9. Stage 3 client information (2026-11-10)
+
+The client supplied an official price list and customer information, confirmed by the owner. It is implemented in `config/catalogue.ts` (prices), `config/owner.ts` (company, addresses) and `messages/*.json` (guide, FAQ, service pages). See [STAGE-3-PRICING-CATALOGUE.md](./STAGE-3-PRICING-CATALOGUE.md). The questions below came up while implementing it. Until they are answered, the site shows the safe behaviour described.
+
+### P-07 Overlapping television bands
+- **Issue:** the client lists 47–55 inches at €100 and 55–65 inches at €150. A 55-inch screen falls in both.
+- **Today:** both bands are shown exactly as supplied, each with the note “Is your screen exactly 55 inches? We confirm its price in your quotation.” The site never assigns a 55-inch screen to a band.
+- **Answer:**
+
+### P-08 Parcel weights without a price
+- **Issue:** a small parcel is “up to 15 kg, from €40” and a standard parcel “20–50 kg, individual quotation”. Nothing is stated for 15–20 kg or over 50 kg.
+- **Today:** the price list says there is no published price for these weights and asks the customer to request a quote.
+- **Answer:**
+
+### P-09 Storage charge in XAF
+- **Issue:** goods are kept free for 48 hours, then storage costs 2,000 XAF per day. Every other price is in EUR, and the premises are not named (Douala is assumed from the currency, but not stated on the site).
+- **Today:** shown as “2,000 XAF per day” with a note that it is charged in CFA francs. It is never converted to euros.
+- **Answer:**
+
+### P-10 XAF in the staff quotation form
+- **Issue:** XAF is accepted only for shipments from Cameroon to Ireland. The staff quotation form currently allows EUR or XAF on any route.
+- **Proposed:** refuse XAF quotations on the Ireland → Cameroon route, on the server and in the form. Not implemented, because it changes live staff behaviour; awaiting approval.
+- **Answer:**
+
+### S-05 Quote-form grouping
+- **Issue:** the quote form has six service codes. In the quote form, furniture, televisions, bicycles and mattresses appear under “Parcels and personal effects”, and standard cartons under “Barrels and boxes” (`QUOTE_SERVICE_SECTIONS` in `config/catalogue.ts`).
+- **Answer:** confirm, or say which service they belong to.
+
+### S-06 Drop-off points
+- **Issue:** drop-off at collection points is possible, but no addresses were supplied.
+- **Today:** the site says “ask us where”. No address is invented.
+- **Answer:**
+
+### C-04 Additional Irish phone number
+- **Issue:** the client supplied an extra Irish number, +353 896 160 927 (the same digits as +353 89 616 0927 on the old website). Its role is not stated.
+- **Today:** not published anywhere on the site.
+- **Answer:** its role (calls, WhatsApp, a person), and whether to publish it.
+
+### L-08 ★ Standard trading conditions (BIFA, UKWA, RHA)
+- **Issue:** the client refers to BIFA, UKWA and RHA standard trading conditions via a third-party (Kuehne+Nagel) link. The published BIFA 2025 conditions are for current BIFA members only. No membership is evidenced.
+- **Today:** not referenced or copied anywhere; no membership is claimed.
+- **Needed:** confirmation of membership and the right to use any standard conditions, or bespoke terms drafted by a lawyer (L-01).
+- **Answer:**
+
+### L-09 Proposed fee for prohibited goods
+- **Issue:** the client proposes a €150 “administrative fine” when prohibited goods are found.
+- **Today:** not published. It must not be presented as a statutory or government fine. If it is kept, it needs to be a contractual charge in approved terms.
+- **Answer:**
+
+### L-10 ★ Lost or damaged goods
+- **Issue:** the client’s policy is a shipping voucher for future shipments rather than a cash refund, with compensation capped at €400 per shipment.
+- **Today:** not published. The guide says the policy is being finalised and asks customers to contact the business straight away. Legal review is needed against Irish consumer law and the carriage conventions (L-05, L-07).
+- **Answer:**
+
+### L-11 VAT and customs statements
+- **Issue:** “listed prices include applicable VAT” and “customs clearance is included for parcels and personal effects” are published as customer information on the price list, guide and FAQ.
+- **Needed:** legal and accounting review before they are used as contractual assurances in terms or quotations; the VAT number (B-02).
+- **Answer:**

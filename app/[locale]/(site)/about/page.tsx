@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { PageBanner } from "@/components/app/page-banner";
 import { PHOTOS, Photo, photoProps } from "@/components/brand/photos";
+import { ownerConfig } from "@/config/owner";
 import { ContactChannels } from "@/components/contact/contact-channels";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -12,7 +13,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 /**
- * Only facts from the project brief; company history waits for the owner (B-02).
+ * Only facts supplied by the client. The registration and VAT numbers were not
+ * supplied (B-02) and are not shown until they are.
  * The photograph shows the industry, not our premises, and no people are
  * presented as our staff.
  */
@@ -46,6 +48,13 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
             {t("whereTitle")}
           </h2>
           <ContactChannels className="mt-6" />
+          <h3 className="mt-10 text-xl font-semibold">{t("companyTitle")}</h3>
+          <dl className="mt-3 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
+            <dt className="text-muted-foreground">{t("legalEntity")}</dt>
+            <dd className="font-medium">{ownerConfig.company.legalName}</dd>
+            <dt className="text-muted-foreground">{t("tradingName")}</dt>
+            <dd className="font-medium">{ownerConfig.company.tradingName}</dd>
+          </dl>
         </section>
       </div>
     </>

@@ -127,6 +127,38 @@ describe("quote submission", () => {
     expect(audit.rows).toHaveLength(1);
   });
 
+  it("stores the customer's catalogue choice and vehicle method with the request, and rejects a mismatched choice", async () => {
+    const contact = (name: string) => ({ name, email: `${name}@example.test`, phone: "+353 89 000 0000" });
+    const barrel = await submitQuoteRequest(
+      db,
+      validInput({ items: [{ catalogueItem: "barrels.barrel_220_supplied", description: "220-litre barrel supplied", quantity: "1" }], contact: contact("catalogue") }),
+      { user: null, clientId: "1.1.2.1" },
+      AVAILABLE,
+    );
+    expect(barrel.ok).toBe(true);
+    if (!barrel.ok) return;
+    const stored = await t.client.query<{ items: unknown }>("select items from public.quote_requests where reference = $1", [barrel.reference]);
+    expect(stored.rows[0].items).toEqual([{ catalogueItem: "barrels.barrel_220_supplied", description: "220-litre barrel supplied", quantity: 1 }]);
+
+    const car = await submitQuoteRequest(
+      db,
+      validInput({ service: "vehicle", items: [{ vehicleMake: "Toyota", vehicleModel: "Yaris", vehicleYear: "2015", running: true, catalogueItem: "vehicles.small_city_car", shippingMethod: "container" }], contact: contact("vehicle-catalogue") }),
+      { user: null, clientId: "1.1.2.2" },
+      AVAILABLE,
+    );
+    expect(car.ok).toBe(true);
+
+    const before = await count("quote_requests");
+    const mismatched = await submitQuoteRequest(
+      db,
+      validInput({ items: [{ catalogueItem: "vehicles.small_city_car", description: "x", quantity: "1" }], contact: contact("mismatch") }),
+      { user: null, clientId: "1.1.2.3" },
+      AVAILABLE,
+    );
+    expect(mismatched).toMatchObject({ ok: false, code: "invalid", fieldErrors: { "items.0.catalogueItem": "invalid" } });
+    expect(await count("quote_requests")).toBe(before);
+  });
+
   it("treats a retried submission (same idempotency key) as one request", async () => {
     const input = validInput();
     const first = await submitQuoteRequest(db, input, { user: null, clientId: "1.1.1.7" }, AVAILABLE);

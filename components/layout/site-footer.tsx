@@ -1,3 +1,4 @@
+import { ownerConfig } from "@/config/owner";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/brand/logo";
@@ -44,6 +45,7 @@ export function SiteFooter() {
           links={[
             { href: "/quote", label: t("nav.quote") },
             { href: "/services", label: t("nav.services") },
+            { href: "/prices", label: t("nav2.prices") },
             { href: "/shipping-guide", label: t("nav2.guide") },
             { href: "/track", label: t("nav.track") },
           ]}
@@ -69,7 +71,8 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-ink-foreground/15">
         <p className="mx-auto max-w-7xl px-4 py-5 text-xs text-ink-muted md:px-6">
-          © {new Date().getFullYear()} <BrandName />. {t("footer.rights")}
+          © {new Date().getFullYear()} <BrandName />. {t("footer.rights")}{" "}
+          {t("footer.legalLine", { legalName: ownerConfig.company.legalName, tradingName: ownerConfig.company.tradingName })}
         </p>
       </div>
     </footer>

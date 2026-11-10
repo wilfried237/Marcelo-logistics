@@ -41,3 +41,23 @@ These are added to `docs/DECISIONS-REQUIRED.md`.
 - **L-07:** claim deadlines, the complaint-handling process and any dispute-resolution body.
 - **P-05:** accepted payment methods, deposit, and when payment is due.
 - **P-06:** refund rules and timelines.
+
+## Stage 3 client-supplied terms (2026-11-10)
+
+The client supplied the business policies below. The **operational** ones are published as customer information in the shipping guide and FAQ, with the statement that they do not affect statutory rights. The **contractual** ones are recorded here for the lawyer and are **not published**.
+
+| Client statement | Status on the website | Decision |
+| --- | --- | --- |
+| Payment by bank transfer or Revolut; 20% deposit for sea groupage; express paid in full before dispatch; balance before departure; XAF only for Cameroon → Ireland | Published (guide, FAQ) | P-05 answered; P-10 open |
+| Listed prices include applicable VAT | Published as information (price list, guide, FAQ) | L-11: review before contractual use; VAT number missing (B-02) |
+| Customs clearance included for parcels and personal effects; vehicles excluded | Published as information | L-11 |
+| Cancellation possible subject to conditions; refund only before the shipment leaves the premises; delays notified by telephone, WhatsApp or email | Published, with “does not affect your statutory rights” | P-06 (conditions, method, timeline still open); L-06 |
+| Lost or damaged goods: a shipping voucher, not a cash refund; maximum €400 per shipment | **Not published.** The guide says the policy is being finalised | L-10: check against consumer law (Consumer Rights Act 2022) and the carriage conventions (L-05) |
+| €150 “administrative fine” for prohibited goods | **Not published.** It must never be presented as a statutory or government fine | L-09 |
+| BIFA, UKWA and RHA standard trading conditions (via a Kuehne+Nagel link) | **Not referenced or copied.** No membership claimed | L-08: the BIFA 2025 conditions are for current BIFA members only |
+| Data controller: the person named by the client (held privately) | **Not published** | L-02: the controller is normally the company, with a named contact |
+
+**Drafts to update after the answers:**
+- `payment-refund-cancellation.md`: payment methods, deposit, and the refund-before-departure rule (P-05, P-06).
+- `customs-prohibited-goods.md`: the official prohibited list (S-03) and the customs inclusions (P-04).
+- `claims-complaints.md`: the voucher and the €400 limit, only if approved (L-10).

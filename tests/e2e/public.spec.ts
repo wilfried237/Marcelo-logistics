@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const PAGES = ["/en", "/fr", "/en/services", "/en/quote", "/fr/quote", "/en/track", "/en/about", "/fr/faq", "/en/privacy", "/en/cookies", "/fr/cookies", "/en/contact", "/en/login", "/en/how-it-works", "/fr/how-it-works", "/en/shipping-guide", "/fr/shipping-guide"];
+const PAGES = ["/en", "/fr", "/en/services", "/en/prices", "/fr/prices", "/en/services/vehicle", "/fr/services/barrels", "/en/services/customs_clearance", "/en/quote", "/fr/quote", "/en/track", "/en/about", "/fr/faq", "/en/privacy", "/en/cookies", "/fr/cookies", "/en/contact", "/en/login", "/en/how-it-works", "/fr/how-it-works", "/en/shipping-guide", "/fr/shipping-guide"];
 
 test.describe("public pages", () => {
   for (const path of PAGES) {
@@ -20,7 +20,7 @@ test.describe("public pages", () => {
     });
   }
 
-  for (const path of ["/en", "/fr", "/en/services", "/fr/services", "/en/quote", "/en/track", "/en/login", "/en/faq", "/en/how-it-works", "/fr/shipping-guide", "/en/about", "/en/contact", "/en/cookies", "/fr/cookies"]) {
+  for (const path of ["/en", "/fr", "/en/services", "/fr/services", "/en/prices", "/fr/prices", "/en/services/vehicle", "/fr/services/parcels", "/en/shipping-guide", "/fr/faq", "/en/quote", "/en/track", "/en/login", "/en/faq", "/en/how-it-works", "/fr/shipping-guide", "/en/about", "/en/contact", "/en/cookies", "/fr/cookies"]) {
     test(`${path} has no serious or critical accessibility violations`, async ({ page }) => {
       await page.goto(path);
       const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
@@ -142,7 +142,7 @@ test.describe("navigation", () => {
     await page.keyboard.press("Enter");
     await expect(send).toHaveAttribute("aria-expanded", "true");
     const panel = page.locator(`#${await send.getAttribute("aria-controls")}`);
-    await expect(panel.getByRole("link")).toHaveCount(3);
+    await expect(panel.getByRole("link")).toHaveCount(4);
     await page.keyboard.press("Escape");
     await expect(send).toHaveAttribute("aria-expanded", "false");
     await expect(send).toBeFocused();
@@ -173,8 +173,8 @@ test.describe("business information supplied by the client", () => {
     test(`/${locale}/contact and the footer show both locations with working tel: and mailto: links`, async ({ page }) => {
       await page.goto(`/${locale}/contact`);
       const main = page.locator("main");
-      await expect(main.getByText("12 Griffeen Glen Chase, Lucan")).toBeVisible();
-      await expect(main.getByText("Douala – Ndogsimbi")).toBeVisible();
+      await expect(main.getByText("12 Griffeen Glen Chase, Lucan, Co. Dublin, Ireland")).toBeVisible();
+      await expect(main.getByText("Ndogsimbi, Douala, face Station-Service Gulfil, Cameroun")).toBeVisible();
       await expect(main.locator('a[href="tel:+353894840017"]')).toHaveText("+353 89 484 0017");
       await expect(main.locator('a[href="tel:+237659685479"]')).toHaveText("+237 6 59 68 54 79");
       await expect(main.locator('a[href="mailto:info.cargo@marchelo-logistics.com"]')).toHaveText("info.cargo@marchelo-logistics.com");

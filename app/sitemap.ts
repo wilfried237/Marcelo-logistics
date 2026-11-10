@@ -2,9 +2,10 @@ import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import { ownerConfig } from "@/config/owner";
 import { getSiteUrl } from "@/lib/config/env";
+import { SERVICE_OFFERINGS } from "@/lib/domain/services";
 
 /** Public, indexable pages in every locale. Terms are listed only once approved (L-01). */
-const PAGES = ["", "/services", "/how-it-works", "/shipping-guide", "/quote", "/track", "/about", "/faq", "/contact", "/privacy", "/cookies"];
+const PAGES = ["", "/services", ...SERVICE_OFFERINGS.map((s) => `/services/${s.key}`), "/prices", "/how-it-works", "/shipping-guide", "/quote", "/track", "/about", "/faq", "/contact", "/privacy", "/cookies"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getSiteUrl();

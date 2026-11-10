@@ -32,6 +32,18 @@ export const ownerConfig = {
     logo: { src: "/brand/marchelo-logo.svg", reversedSrc: "/brand/marchelo-logo-reversed.svg", markSrc: "/brand/marchelo-mark.svg", width: 2528, height: 1360, approved: true },
   },
 
+  /**
+   * Company identity supplied by the client on 2026-11-10 (B-02, partly answered).
+   * The company registration number and the VAT number were not supplied and must
+   * never be invented: they stay null until the owner provides them.
+   */
+  company: {
+    legalName: "MARCHELO LOGISTICS CARGO LTD",
+    tradingName: "MARCHELO LOGISTICS DISTRIBUTION",
+    registrationNumber: null as string | null,
+    vatNumber: null as string | null,
+  },
+
   contact: {
     // Supplied by the client on 2026-11-06 (C-01). `display` keeps the client's own spacing.
     irelandPhone: { value: "+353894840017", display: "+353 89 484 0017", verified: true } satisfies ContactChannel,
@@ -51,11 +63,12 @@ export const ownerConfig = {
   hours: { open24x7: true },
 
   /**
-   * Where the business operates, exactly as supplied by the client on 2026-11-06.
+   * Where the business operates, exactly as supplied by the client (full
+   * addresses confirmed on 2026-11-10).
    */
   locations: {
-    ireland: { country: "IE", place: "12 Griffeen Glen Chase, Lucan", kind: "office", phone: "irelandPhone", whatsapp: "irelandWhatsApp" },
-    cameroon: { country: "CM", place: "Douala – Ndogsimbi", kind: "location", phone: "cameroonPhone", whatsapp: "cameroonWhatsApp" },
+    ireland: { country: "IE", place: "12 Griffeen Glen Chase, Lucan, Co. Dublin, Ireland", kind: "office", phone: "irelandPhone", whatsapp: "irelandWhatsApp" },
+    cameroon: { country: "CM", place: "Ndogsimbi, Douala, face Station-Service Gulfil, Cameroun", kind: "location", phone: "cameroonPhone", whatsapp: "cameroonWhatsApp" },
   },
 
   operations: {

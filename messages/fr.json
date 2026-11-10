@@ -247,7 +247,8 @@
     "send": "Envoyer",
     "help": "Aide",
     "company": "Entreprise",
-    "contact": "Contact"
+    "contact": "Contact",
+    "legalLine": "{legalName}, exerçant sous le nom {tradingName}"
   },
   "preview": {
     "banner": "Aperçu uniquement : cet espace n’est pas relié à des données réelles et n’est pas accessible aux clients."
@@ -393,7 +394,19 @@
     },
     "routeLabel": "Trajet",
     "phoneHint": "Indiquez l’indicatif du pays, par exemple +353 89 123 4567 ou +237 6 95 73 90 33.",
-    "consentLabel": "J’ai pris connaissance de l’utilisation de mes informations pour préparer mon devis."
+    "consentLabel": "J’ai pris connaissance de l’utilisation de mes informations pour préparer mon devis.",
+    "catalogueLabel": "Type d’article",
+    "vehicleCategoryLabel": "Catégorie de véhicule",
+    "catalogueNone": "Autre ou non listé",
+    "catalogueHint": "Choisissez l’article le plus proche pour voir son prix indicatif, ou laissez « Autre ou non listé ».",
+    "guidePrice": "Prix indicatif : {price}",
+    "guideQuote": "Cet article fait l’objet d’un devis individuel.",
+    "guideNote": "Prix indicatifs uniquement. Votre devis écrit confirme le prix final.",
+    "vehicleMethod": "Mode d’expédition",
+    "vehicleMethodUnknown": "Je ne sais pas encore",
+    "vehicleMethodContainer": "Conteneur (effets personnels autorisés à l’intérieur)",
+    "vehicleMethodRoro": "RORO (aucun effet personnel à l’intérieur)",
+    "pricesLink": "Voir tous les tarifs"
   },
   "trackPage": {
     "invalid": "Ceci ne ressemble pas à une référence d’envoi. Les références commencent par ML suivi de 10 lettres ou chiffres.",
@@ -685,23 +698,96 @@
     "intro": "Marchelo Logistics est une entreprise de logistique et de transit qui travaille entre l’Irlande et le Cameroun, avec un bureau à Lucan et une implantation à Douala.",
     "howWeWorkTitle": "Notre façon de travailler",
     "howWeWork": "Chaque devis est établi personnellement pour votre envoi. Les prix ne sont jamais calculés automatiquement.",
-    "whereTitle": "Où nous travaillons"
+    "whereTitle": "Où nous travaillons",
+    "companyTitle": "Informations sur l’entreprise",
+    "legalEntity": "Entité juridique",
+    "tradingName": "Nom commercial",
+    "irelandAddress": "Irlande",
+    "cameroonAddress": "Cameroun"
   },
   "faq": {
     "title": "Questions fréquentes",
-    "intro": "Réponses sur l’utilisation de ce site. Pour toute question sur un envoi précis, contactez-nous.",
-    "q1": "Comment obtenir un prix ?",
-    "a1": "Envoyez une demande de devis en décrivant ce que vous souhaitez expédier. Nous l’examinons personnellement et vous envoyons un devis. Les prix ne sont pas calculés automatiquement.",
-    "q2": "Ai-je besoin d’un compte ?",
-    "a2": "Non. Vous pouvez demander un devis et suivre un envoi sans compte.",
-    "q3": "Où trouver ma référence de suivi ?",
-    "a3": "Les références d’envoi commencent par ML et vous sont communiquées lors de la réservation. Les références de demande de devis commencent par QR.",
-    "q4": "Puis-je envoyer n’importe quel article ?",
-    "a4": "Certains articles ne peuvent pas être expédiés. Décrivez vos articles dans votre demande et nous vous indiquerons si certains ne peuvent pas être transportés.",
-    "q5": "Dans quelles langues puis-je utiliser le site ?",
-    "a5": "Vous pouvez utiliser le site en anglais ou en français.",
-    "q6": "Quand les envois partent-ils ?",
-    "a6": "Nous organisons un envoi express chaque mois dans chaque sens. Les périodes de départ sont :"
+    "intro": "Prix, paiement, douane, enlèvement et utilisation de ce site. Pour une question sur un envoi précis, contactez-nous.",
+    "groups": {
+      "rates": "Prix et devis",
+      "payment": "Paiement",
+      "customs": "TVA et douane",
+      "collection": "Enlèvement, livraison et stockage",
+      "shipping": "Expédition",
+      "website": "Utiliser ce site"
+    },
+    "items": {
+      "price": {
+        "q": "Comment obtenir un prix ?",
+        "a": "Consultez nos prix indicatifs, puis envoyez une demande de devis décrivant ce que vous souhaitez expédier. Nous l’examinons personnellement et vous envoyons un devis écrit."
+      },
+      "currency": {
+        "q": "Vos prix sont-ils en euros et incluent-ils la TVA ?",
+        "a": "Oui. Tous nos prix sont en euros (EUR) et les prix affichés incluent la TVA applicable."
+      },
+      "individual": {
+        "q": "Pourquoi certains services nécessitent-ils un devis individuel ?",
+        "a": "Les prix dépendent du type d’envoi, de son poids, de son volume et de sa destination. Certaines destinations, certains véhicules, certaines marchandises et le fret commercial font toujours l’objet d’un devis individuel."
+      },
+      "methods": {
+        "q": "Comment puis-je payer ?",
+        "a": "Par virement bancaire ou Revolut."
+      },
+      "when": {
+        "q": "Quand dois-je payer ?",
+        "a": "Pour le groupage maritime, un acompte de 20 % est dû à la réservation. Le fret express est payé intégralement avant l’expédition. Tout solde restant doit être réglé avant le départ de l’envoi."
+      },
+      "xaf": {
+        "q": "Puis-je payer en francs CFA (XAF) ?",
+        "a": "Uniquement pour les envois du Cameroun vers l’Irlande."
+      },
+      "customs": {
+        "q": "Le dédouanement est-il inclus ?",
+        "a": "Pour les colis et les effets personnels, oui. Le dédouanement des véhicules n’est pas inclus et fait l’objet d’un devis séparé. Nous proposons aussi des services de dédouanement au Cameroun."
+      },
+      "home": {
+        "q": "Pouvez-vous enlever mes marchandises à domicile ?",
+        "a": "Oui, dans la région de Dublin, pour un tarif fixe indiqué sur notre page des tarifs. Ailleurs en Irlande, l’enlèvement fait l’objet d’un devis individuel. Vous pouvez aussi déposer vos marchandises dans un point de collecte : demandez-nous lequel."
+      },
+      "delivery": {
+        "q": "Livrez-vous au Cameroun ?",
+        "a": "Oui. Les fûts sont livrés à domicile dans les principales villes du Cameroun. Les zones éloignées ou les autres destinations peuvent nécessiter un devis individuel."
+      },
+      "storage": {
+        "q": "Combien de temps mes marchandises peuvent-elles rester dans vos locaux ?",
+        "a": "48 heures gratuitement après leur mise à disposition. Ensuite, le stockage est facturé par jour, comme indiqué sur notre page des tarifs."
+      },
+      "departures": {
+        "q": "Quand partent les envois ?",
+        "a": "Nous organisons un envoi express chaque mois dans chaque sens. Les périodes de départ sont :"
+      },
+      "prohibited": {
+        "q": "Qu’est-ce que je ne peux pas envoyer ?",
+        "a": "Certaines marchandises ne peuvent jamais être expédiées, comme les armes, les explosifs, les produits chimiques dangereux et les denrées périssables. Consultez la liste complète des marchandises interdites dans notre guide d’expédition."
+      },
+      "cancel": {
+        "q": "Puis-je annuler un envoi ?",
+        "a": "Oui, sous conditions. Un remboursement n’est possible que si l’envoi n’a pas encore quitté nos locaux. Cela n’affecte pas vos droits légaux."
+      },
+      "delay": {
+        "q": "Que se passe-t-il si mon envoi est retardé ?",
+        "a": "Nous vous prévenons par téléphone, WhatsApp ou e-mail."
+      },
+      "account": {
+        "q": "Ai-je besoin d’un compte ?",
+        "a": "Non. Vous pouvez demander un devis et suivre un envoi sans compte."
+      },
+      "reference": {
+        "q": "Où trouver ma référence de suivi ?",
+        "a": "Les références d’envoi commencent par ML et vous sont communiquées lors de la réservation. Les références de demande de devis commencent par QR."
+      },
+      "languages": {
+        "q": "Dans quelles langues puis-je utiliser le site ?",
+        "a": "Vous pouvez utiliser le site en anglais ou en français."
+      }
+    },
+    "guideLink": "Lire le guide d’expédition",
+    "pricesLink": "Voir nos tarifs"
   },
   "privacyPage": {
     "title": "Informations sur la confidentialité",
@@ -918,7 +1004,8 @@
     "company": "Entreprise",
     "howItWorks": "Comment ça marche",
     "guide": "Guide d’expédition",
-    "cookies": "Cookies"
+    "cookies": "Cookies",
+    "prices": "Tarifs"
   },
   "media": {
     "containerShipAlt": "Vue aérienne d’un porte-conteneurs chargé de conteneurs empilés, naviguant sur une mer d’un bleu profond.",
@@ -970,18 +1057,39 @@
     "label3": "Une fois votre envoi réservé, ajoutez votre référence ML sur chaque colis.",
     "listTitle": "Gardez une liste du contenu",
     "listBody": "Notez ce que contient chaque fût ou carton et sa valeur approximative. Vous aurez besoin de ces informations pour votre demande de devis, et elles sont utiles si la douane pose des questions.",
-    "restrictedTitle": "Demandez-nous avant d’emballer ces articles",
-    "restrictedBody": "Certaines marchandises ne peuvent jamais être expédiées et d’autres demandent un traitement particulier. N’emballez aucun des articles suivants sans nous demander d’abord :",
-    "restricted1": "Liquides inflammables, bouteilles de gaz, aérosols et carburant",
-    "restricted2": "Piles et batteries en vrac, en particulier au lithium",
-    "restricted3": "Armes, munitions et tout ce qui y ressemble",
-    "restricted4": "Médicaments, drogues et produits chimiques",
-    "restricted5": "Denrées fraîches ou périssables",
-    "restricted6": "Argent liquide, bijoux et documents importants",
-    "restrictedNote": "La liste définitive pour votre envoi est confirmée dans votre devis.",
-    "customsTitle": "Douane et droits",
-    "customsBody": "Les marchandises qui arrivent au Cameroun ou en Irlande peuvent faire l’objet de contrôles douaniers, de droits et de taxes. Votre devis précise ce qui est inclus et ce qui ne l’est pas : n’hésitez pas à nous poser vos questions.",
-    "cta": "Demander un devis"
+    "customsTitle": "TVA et douane",
+    "cta": "Demander un devis",
+    "onThisPage": "Sur cette page",
+    "packingNav": "Emballage",
+    "ratesTitle": "Tarifs et devis",
+    "rates1": "Les prix dépendent du type d’envoi, de son poids, de son volume et de sa destination.",
+    "rates2": "Le fret aérien express est facturé au kilogramme.",
+    "rates3": "Les prix du groupage maritime et des conteneurs dépendent du volume ou de la catégorie de marchandises.",
+    "rates4": "Tous nos prix sont en euros (EUR).",
+    "rates5": "Certaines destinations, certains véhicules, certaines marchandises et le fret commercial nécessitent un devis individuel.",
+    "pricesCta": "Voir nos prix indicatifs",
+    "paymentTitle": "Paiement",
+    "payment1": "Nous acceptons le virement bancaire et Revolut.",
+    "payment2": "Groupage maritime : un acompte de 20 % est dû à la réservation.",
+    "payment3": "Fret express : le paiement intégral est dû avant l’expédition.",
+    "payment4": "Tout solde restant doit être réglé avant le départ de l’envoi.",
+    "payment5": "Le paiement en francs CFA (XAF) n’est accepté que pour les envois du Cameroun vers l’Irlande.",
+    "customs1": "Les prix affichés incluent la TVA applicable.",
+    "customs2": "Le dédouanement est inclus pour les colis et les effets personnels.",
+    "customs3": "Le dédouanement des véhicules n’est pas inclus et fait l’objet d’un devis séparé.",
+    "customs4": "Les autorités douanières peuvent inspecter les marchandises. Votre devis précise ce qui est inclus : n’hésitez pas à nous poser vos questions.",
+    "collectionTitle": "Enlèvement et livraison",
+    "collection1": "Vous pouvez déposer vos marchandises dans un point de collecte : demandez-nous lequel.",
+    "collection2": "L’enlèvement à domicile est disponible dans la région de Dublin pour un tarif fixe. Ailleurs en Irlande, l’enlèvement fait l’objet d’un devis individuel.",
+    "collection3": "Nous livrons au Cameroun. Les zones éloignées ou les autres destinations peuvent nécessiter un devis individuel.",
+    "collection4": "Les marchandises sont conservées gratuitement pendant 48 heures dès leur mise à disposition dans nos locaux. Ensuite, le stockage est facturé par jour.",
+    "scheduleTitle": "Calendrier des départs",
+    "cancelTitle": "Annulations, remboursements et retards",
+    "cancel1": "Vous pouvez annuler un envoi, sous conditions.",
+    "cancel2": "Un remboursement n’est possible que si l’envoi n’a pas encore quitté nos locaux.",
+    "cancel3": "Si votre envoi est retardé, nous vous prévenons par téléphone, WhatsApp ou e-mail.",
+    "cancel4": "Notre politique en cas de marchandises perdues ou endommagées est en cours de finalisation. Contactez-nous immédiatement en cas de problème avec votre envoi.",
+    "cancelNote": "Il s’agit de nos propres règles commerciales. Elles n’affectent pas vos droits légaux."
   },
   "header": {
     "mainNav": "Navigation principale",
@@ -995,7 +1103,8 @@
     "helpFaqDesc": "Réponses aux questions fréquentes",
     "helpContactDesc": "Contactez notre équipe",
     "trackDesc": "Suivez un envoi grâce à sa référence",
-    "corridor": "Expéditions entre l’Irlande et le Cameroun"
+    "corridor": "Expéditions entre l’Irlande et le Cameroun",
+    "sendPricesDesc": "Prix indicatifs pour chaque service"
   },
   "breadcrumb": {
     "label": "Fil d’Ariane"
@@ -1134,7 +1243,8 @@
       "support": "Douane, entreposage et achats en ligne"
     },
     "quoteCta": "Demander un devis",
-    "askCta": "Nous consulter pour ce service"
+    "askCta": "Nous consulter pour ce service",
+    "pricesCta": "Voir nos tarifs"
   },
   "consent": {
     "bannerLabel": "Consentement aux cookies",
@@ -1208,5 +1318,437 @@
     "manage": "Vous pouvez modifier ou retirer votre choix à tout moment via « Préférences cookies » en bas de chaque page. Vous pouvez aussi supprimer les cookies dans les réglages de votre navigateur ; si vous supprimez les cookies strictement nécessaires, vous serez déconnecté et votre choix de langue sera oublié.",
     "questionsTitle": "Questions",
     "questions": "Pour toute question sur les cookies ou vos données personnelles, contactez-nous grâce aux coordonnées indiquées sur notre page de contact. La page de confidentialité explique comment nous utilisons les données personnelles."
+  },
+  "catalogue": {
+    "price": {
+      "fixed": "{amount}",
+      "from": "À partir de {amount}",
+      "range": "{min} à {max}",
+      "per_kg": "{amount} par kg (à partir de {minKg} kg)",
+      "per_day": "{amount} par jour",
+      "quote": "Sur devis"
+    },
+    "tableItem": "Article",
+    "tablePrice": "Prix indicatif",
+    "examplesLabel": "Exemples :",
+    "disclosureTitle": "À propos de ces prix",
+    "disclosure1": "Tous les prix sont en euros (EUR) et sont des prix indicatifs pour les envois entre l’Irlande et le Cameroun.",
+    "disclosure2": "Les prix affichés incluent la TVA applicable.",
+    "disclosure3": "Le prix final dépend du type d’envoi, de son poids, de son volume et de sa destination. Nous le confirmons dans le devis écrit que nous vous envoyons.",
+    "disclosure4": "Les prix « à partir de » sont des prix de départ. « Sur devis » signifie que nous établissons un prix pour votre envoi. Certaines destinations, certains véhicules, certaines marchandises et le fret commercial font toujours l’objet d’un devis individuel.",
+    "clarification": {
+      "P07": "Votre écran mesure exactement 55 pouces ? Nous confirmons son prix dans votre devis.",
+      "P09": "Gratuit pendant les 48 heures qui suivent la mise à disposition de vos marchandises dans nos locaux. Facturé en francs CFA (XAF)."
+    },
+    "sections": {
+      "vehicles": {
+        "title": "Transport de véhicules",
+        "intro": "Prix indicatifs par catégorie de véhicule, de l’Irlande vers le Cameroun.",
+        "note1": "Le dédouanement du véhicule n’est pas inclus dans le prix du transport et fait l’objet d’un devis séparé.",
+        "note2": "Expédition en conteneur : des effets personnels peuvent être laissés dans le véhicule. Expédition RORO (roulier) : aucun effet personnel ne peut être laissé dans le véhicule.",
+        "note3": "Le NCT du véhicule ne doit pas avoir expiré depuis plus de deux ans. S’il a expiré depuis plus de deux ans, un certificat de conformité technique est exigé.",
+        "note4": "Les modèles cités sont des exemples de chaque catégorie. Indiquez-nous la marque et le modèle exacts et nous confirmons la catégorie dans votre devis."
+      },
+      "parcels": {
+        "title": "Colis et effets personnels",
+        "intro": "Enveloppes, appareils électroniques et colis.",
+        "note1": "Le dédouanement est inclus pour les colis et les effets personnels.",
+        "note2": "Il n’y a pas de prix publié pour les colis de 15 à 20 kg ni de plus de 50 kg : demandez un devis."
+      },
+      "barrels": {
+        "title": "Fûts",
+        "intro": "Fûts d’articles ménagers et d’effets personnels.",
+        "note1": "La livraison à domicile est disponible dans les principales villes du Cameroun. Les autres destinations font l’objet d’un devis individuel."
+      },
+      "cartons": {
+        "title": "Cartons standard",
+        "intro": "Les prix dépendent de la ville de destination.",
+        "note1": "Pour une destination autre que Douala ou Yaoundé, demandez un devis."
+      },
+      "furniture": {
+        "title": "Meubles et appareils",
+        "intro": "Canapés, téléviseurs, vélos et matelas.",
+        "note1": "Les appareils électriques d’occasion, reconditionnés ou de seconde main font l’objet d’un supplément obligatoire pour certificat électrique."
+      },
+      "sea_freight": {
+        "title": "Fret maritime",
+        "intro": "Groupage et conteneurs complets.",
+        "note1": "Les prix du groupage maritime et des conteneurs dépendent du volume ou de la catégorie de marchandises."
+      },
+      "air_freight": {
+        "title": "Fret aérien",
+        "intro": "Fret aérien express, facturé au kilogramme.",
+        "note1": "Le fret express doit être payé intégralement avant l’expédition."
+      },
+      "collection": {
+        "title": "Enlèvement, livraison et stockage",
+        "intro": "L’acheminement de vos marchandises jusqu’à nous, puis jusqu’à destination.",
+        "note1": "Vous pouvez aussi déposer vos marchandises dans un point de collecte : demandez-nous lequel."
+      }
+    },
+    "groups": {
+      "vehicle_categories": "Catégories de véhicules",
+      "vehicle_extras": "Douane et certificats",
+      "parcel_items": "Articles",
+      "barrel_sizes": "Tailles de fûts",
+      "cartons_douala": "Destination : Douala",
+      "cartons_yaounde": "Destination : Yaoundé",
+      "sofas": "Canapés",
+      "televisions": "Téléviseurs",
+      "appliance_extras": "Appareils électriques",
+      "bicycles": "Vélos",
+      "mattresses": "Matelas",
+      "sea_options": "Fret maritime",
+      "air_options": "Fret aérien",
+      "collection_delivery": "Enlèvement, livraison et stockage"
+    },
+    "items": {
+      "vehicles": {
+        "small_city_car": {
+          "label": "Petite citadine",
+          "examples": "Toyota Yaris, Peugeot 208, Ford Fiesta, Renault Clio, Opel Corsa, Hyundai i10"
+        },
+        "compact_saloon": {
+          "label": "Berline compacte",
+          "examples": "Toyota Corolla, VW Golf, Renault Mégane, Peugeot 308, Skoda Octavia, Hyundai i30"
+        },
+        "family_saloon": {
+          "label": "Berline familiale",
+          "examples": "Toyota Camry, Peugeot 508, VW Passat, BMW Série 3, Mercedes Classe C"
+        },
+        "compact_suv": {
+          "label": "SUV compact",
+          "examples": "Nissan Qashqai, Hyundai Tucson, Kia Sportage, Peugeot 3008, VW Tiguan"
+        },
+        "midsize_suv": {
+          "label": "SUV intermédiaire",
+          "examples": "Toyota RAV4, Honda CR-V, BMW X3, Audi Q5, Mercedes GLC"
+        },
+        "large_suv": {
+          "label": "Grand SUV / 4x4",
+          "examples": "Toyota Prado, Toyota Land Cruiser, BMW X5, Range Rover Sport, Mercedes GLE"
+        },
+        "double_cab_pickup": {
+          "label": "Pick-up double cabine",
+          "examples": "Toyota Hilux, Ford Ranger, Nissan Navara, Isuzu D-Max, Mitsubishi L200"
+        },
+        "light_van": {
+          "label": "Utilitaire léger",
+          "examples": "Ford Transit Custom, Renault Trafic, Opel Vivaro, Peugeot Expert"
+        },
+        "large_van": {
+          "label": "Grand utilitaire",
+          "examples": "Mercedes Sprinter, Ford Transit L4, Iveco Daily"
+        },
+        "specialist": {
+          "label": "Camions et engins spéciaux",
+          "examples": "Tractopelles, chargeuses, mini-pelles, camions-bennes, grues, tracteurs"
+        },
+        "customs_clearance": {
+          "label": "Dédouanement du véhicule"
+        },
+        "conformity_certificate": {
+          "label": "Certificat de conformité technique (NCT expiré depuis plus de deux ans)"
+        }
+      },
+      "parcels": {
+        "envelope": {
+          "label": "Enveloppe"
+        },
+        "mobile_phone": {
+          "label": "Téléphone portable"
+        },
+        "tablet": {
+          "label": "Tablette"
+        },
+        "laptop": {
+          "label": "Ordinateur portable"
+        },
+        "small_parcel": {
+          "label": "Petit colis jusqu’à 15 kg"
+        },
+        "standard_parcel": {
+          "label": "Colis standard, de 20 à 50 kg"
+        }
+      },
+      "barrels": {
+        "barrel_120": {
+          "label": "Fût de 120 litres"
+        },
+        "barrel_220": {
+          "label": "Fût de 220 litres"
+        },
+        "barrel_220_supplied": {
+          "label": "Fût de 220 litres fourni par Marchelo Logistics"
+        }
+      },
+      "cartons": {
+        "douala_small": {
+          "label": "Petit carton (Douala)"
+        },
+        "douala_medium": {
+          "label": "Carton moyen (Douala)"
+        },
+        "douala_large": {
+          "label": "Grand carton (Douala)"
+        },
+        "yaounde_small": {
+          "label": "Petit carton (Yaoundé)"
+        },
+        "yaounde_medium": {
+          "label": "Carton moyen (Yaoundé)"
+        },
+        "yaounde_large": {
+          "label": "Grand carton (Yaoundé)"
+        }
+      },
+      "furniture": {
+        "sofa_1": {
+          "label": "Canapé une place"
+        },
+        "sofa_2": {
+          "label": "Canapé deux places"
+        },
+        "sofa_3": {
+          "label": "Canapé trois places"
+        },
+        "sofa_6": {
+          "label": "Canapé six places"
+        },
+        "tv_28_32": {
+          "label": "Téléviseur, 28 à 32 pouces"
+        },
+        "tv_33_37": {
+          "label": "Téléviseur, 33 à 37 pouces"
+        },
+        "tv_43_45": {
+          "label": "Téléviseur, 43 à 45 pouces"
+        },
+        "tv_47_55": {
+          "label": "Téléviseur, 47 à 55 pouces"
+        },
+        "tv_55_65": {
+          "label": "Téléviseur, 55 à 65 pouces"
+        },
+        "electrical_certificate": {
+          "label": "Certificat électrique pour appareils d’occasion, reconditionnés ou de seconde main (obligatoire)"
+        },
+        "bicycle_child": {
+          "label": "Vélo enfant"
+        },
+        "bicycle_medium": {
+          "label": "Vélo moyen"
+        },
+        "bicycle_large": {
+          "label": "Grand vélo"
+        },
+        "mattress_140": {
+          "label": "Matelas, 140 × 200 cm"
+        },
+        "mattress_180": {
+          "label": "Matelas, 180 × 200 cm"
+        },
+        "mattress_200": {
+          "label": "Matelas, 200 × 200 cm (King Size)"
+        }
+      },
+      "sea_freight": {
+        "from_half_m3": {
+          "label": "À partir de 0,5 m³"
+        },
+        "from_1_m3": {
+          "label": "1 m³ et plus"
+        },
+        "groupage": {
+          "label": "Groupage"
+        },
+        "container_20": {
+          "label": "Conteneur 20 pieds"
+        },
+        "container_40": {
+          "label": "Conteneur 40 pieds"
+        }
+      },
+      "air_freight": {
+        "per_kg": {
+          "label": "Fret aérien express à partir de 1 kg"
+        },
+        "wholesale": {
+          "label": "À partir de 50 kg (tarif de gros)"
+        }
+      },
+      "collection": {
+        "home_collection_dublin": {
+          "label": "Enlèvement à domicile, région de Dublin"
+        },
+        "collection_other_ireland": {
+          "label": "Enlèvement ailleurs en Irlande"
+        },
+        "delivery_other_destinations": {
+          "label": "Livraison vers des zones éloignées ou d’autres destinations au Cameroun"
+        },
+        "storage_after_48h": {
+          "label": "Stockage au-delà des 48 premières heures"
+        }
+      }
+    }
+  },
+  "pricesPage": {
+    "title": "Tarifs",
+    "intro": "Prix indicatifs de nos services entre l’Irlande et le Cameroun. Chaque envoi est confirmé par un devis écrit.",
+    "onThisPage": "Sur cette page",
+    "ctaTitle": "Prêt à expédier ?",
+    "ctaBody": "Dites-nous ce que vous envoyez et nous préparons votre devis.",
+    "cta": "Demander un devis",
+    "guideCta": "Paiement, douane et enlèvement"
+  },
+  "serviceDetail": {
+    "allServices": "Tous les services",
+    "detailsCta": "Détails et tarifs",
+    "whatTitle": "Ce que nous transportons",
+    "optionsTitle": "Options",
+    "pricesTitle": "Tarifs",
+    "conditionsTitle": "Conditions importantes",
+    "collectionTitle": "Enlèvement et livraison",
+    "infoTitle": "Ce qu’il faut indiquer dans votre demande de devis",
+    "noPrices": "Ce service fait l’objet d’un devis individuel. Dites-nous ce dont vous avez besoin et nous établissons un prix pour vous.",
+    "quoteCta": "Demander un devis pour ce service",
+    "askCta": "Nous poser une question sur ce service",
+    "pricesCta": "Voir tous les tarifs",
+    "prohibitedCta": "Consulter la liste des marchandises interdites",
+    "collection1": "Déposez vos marchandises dans un point de collecte : demandez-nous lequel.",
+    "collection2": "Enlèvement à domicile dans la région de Dublin ; ailleurs en Irlande, l’enlèvement fait l’objet d’un devis individuel.",
+    "collection3": "Livraison au Cameroun. Les zones éloignées ou les autres destinations peuvent nécessiter un devis individuel.",
+    "collection4": "Les marchandises sont conservées gratuitement pendant 48 heures dès leur mise à disposition dans nos locaux. Le stockage est ensuite facturé.",
+    "services": {
+      "air_freight": {
+        "intro": "Fret aérien express entre l’Irlande et le Cameroun, dans les deux sens, facturé au kilogramme.",
+        "what1": "Les colis et marchandises qui doivent voyager rapidement par avion.",
+        "option1": "Fret aérien express à partir de 1 kg, facturé au kilogramme.",
+        "option2": "Un tarif de gros, sur demande, pour les envois à partir de 50 kg.",
+        "option3": "Des départs express mensuels dans chaque sens.",
+        "condition1": "Le fret express doit être payé intégralement avant l’expédition.",
+        "condition2": "Les batteries au lithium doivent être déclarées. Les batteries endommagées ne peuvent pas être expédiées.",
+        "info1": "Le poids approximatif de chaque colis",
+        "info2": "Ses dimensions (longueur, largeur et hauteur)",
+        "info3": "Une description du contenu",
+        "info4": "La ville ou localité de destination"
+      },
+      "sea_freight": {
+        "intro": "Fret maritime entre l’Irlande et le Cameroun : groupage pour les petits volumes, et conteneurs complets de 20 ou 40 pieds.",
+        "what1": "Articles ménagers, effets personnels et marchandises commerciales, expédiés au volume.",
+        "option1": "Groupage (conteneur partagé), à partir de 0,5 m³.",
+        "option2": "Conteneurs complets de 20 et 40 pieds.",
+        "condition1": "Les prix dépendent du volume ou de la catégorie de marchandises et sont indiqués dans un devis individuel.",
+        "condition2": "Le groupage exige un acompte de 20 % à la réservation. Le solde doit être réglé avant le départ de l’envoi.",
+        "info1": "Le volume en m³, ou les dimensions de vos marchandises",
+        "info2": "Le type de marchandises",
+        "info3": "Groupage ou conteneur complet, et sa taille",
+        "info4": "La ville ou localité de destination"
+      },
+      "vehicle": {
+        "intro": "Transport de voitures, SUV, pick-up, utilitaires et engins spéciaux de l’Irlande vers le Cameroun, en conteneur ou en RORO (roulier).",
+        "what1": "Voitures, SUV et 4x4",
+        "what2": "Pick-up et utilitaires",
+        "what3": "Camions et engins spéciaux, comme les chargeuses, mini-pelles, grues et tracteurs",
+        "option1": "Expédition en conteneur : vous pouvez laisser des effets personnels dans le véhicule.",
+        "option2": "Expédition RORO : aucun effet personnel ne peut être laissé dans le véhicule.",
+        "condition1": "Le NCT ne doit pas avoir expiré depuis plus de deux ans. Sinon, un certificat de conformité technique est exigé.",
+        "condition2": "Le dédouanement du véhicule n’est pas inclus dans le prix du transport et fait l’objet d’un devis séparé.",
+        "info1": "La marque, le modèle et l’année",
+        "info2": "Si le véhicule roule et peut être conduit",
+        "info3": "Conteneur ou RORO",
+        "info4": "La date d’expiration du NCT",
+        "info5": "La ville ou localité de destination"
+      },
+      "barrels": {
+        "intro": "Fûts et cartons standard remplis d’articles ménagers et d’effets personnels.",
+        "what1": "Fûts de 120 et 220 litres : les vôtres, ou un fût de 220 litres fourni par nos soins.",
+        "what2": "Cartons standard en trois tailles, avec un prix pour Douala ou Yaoundé.",
+        "option1": "Livraison à domicile dans les principales villes du Cameroun.",
+        "option2": "Autres destinations sur devis individuel.",
+        "condition1": "Lisez notre guide d’expédition pour les conseils d’emballage et la liste des marchandises interdites avant d’emballer.",
+        "info1": "Le nombre et la taille de vos fûts ou cartons",
+        "info2": "Si vous avez besoin d’un fût fourni",
+        "info3": "La ville ou localité de destination",
+        "info4": "La liste du contenu"
+      },
+      "parcels": {
+        "intro": "Enveloppes, appareils électroniques, colis et effets personnels, ainsi que meubles, téléviseurs, vélos et matelas.",
+        "what1": "Enveloppes et documents",
+        "what2": "Téléphones portables, tablettes et ordinateurs portables",
+        "what3": "Colis et effets personnels",
+        "what4": "Canapés, téléviseurs, vélos et matelas",
+        "option1": "Le dédouanement est inclus pour les colis et les effets personnels.",
+        "option2": "Des départs express mensuels dans chaque sens.",
+        "condition1": "Les appareils électriques d’occasion, reconditionnés ou de seconde main nécessitent un certificat électrique obligatoire, facturé en supplément.",
+        "condition2": "Les batteries au lithium doivent être déclarées. Les batteries endommagées ne peuvent pas être expédiées.",
+        "info1": "Le type et le nombre d’articles",
+        "info2": "Le poids approximatif de chaque colis",
+        "info3": "Pour les téléviseurs, la taille de l’écran en pouces",
+        "info4": "La ville ou localité de destination"
+      },
+      "commercial_cargo": {
+        "intro": "Marchandises expédiées pour les entreprises et les commerçants, par mer ou par avion, avec des services de dédouanement au Cameroun.",
+        "what1": "Marchandises commerciales, expédiées au volume (mer) ou au poids (avion).",
+        "option1": "Fret maritime à partir de 0,5 m³, groupage, ou conteneurs de 20 et 40 pieds.",
+        "option2": "Fret aérien facturé au kilogramme à partir de 1 kg, avec un tarif de gros à partir de 50 kg.",
+        "option3": "Services de dédouanement au Cameroun.",
+        "condition1": "Le fret maritime et les envois aériens à partir de 50 kg font l’objet d’un devis individuel.",
+        "condition2": "Le groupage exige un acompte de 20 % à la réservation. Le fret express est payé intégralement avant l’expédition.",
+        "info1": "Le type et la quantité de marchandises",
+        "info2": "Le poids ou le volume",
+        "info3": "Mer ou avion",
+        "info4": "La ville ou localité de destination",
+        "info5": "Si vous avez besoin du dédouanement"
+      },
+      "customs_clearance": {
+        "intro": "Services de dédouanement au Cameroun : formalités, documents et coordination.",
+        "what1": "Formalités et documents douaniers pour les marchandises arrivant au Cameroun.",
+        "option1": "Inclus dans le prix des colis et des effets personnels.",
+        "option2": "Dédouanement des véhicules : devis séparé.",
+        "option3": "Marchandises commerciales : demandez-nous un devis.",
+        "condition1": "Les autorités douanières peuvent inspecter les marchandises. Demandez-nous ce qui s’applique à votre envoi.",
+        "info1": "Une description des marchandises et leur valeur",
+        "info2": "La référence de votre envoi, s’il est déjà réservé",
+        "info3": "La ville ou localité de destination"
+      },
+      "warehousing": {
+        "intro": "Stockage, réception de marchandises, préparation et distribution.",
+        "what1": "Marchandises réceptionnées pour votre compte",
+        "what2": "Stockage avant ou après l’expédition",
+        "what3": "Préparation et distribution",
+        "option1": "Les marchandises sont conservées gratuitement pendant 48 heures dès leur mise à disposition dans nos locaux, puis un tarif de stockage journalier s’applique.",
+        "info1": "Le type et le volume des marchandises",
+        "info2": "La durée de stockage souhaitée",
+        "info3": "Leur destination suivante"
+      },
+      "ecommerce": {
+        "intro": "Achetez en ligne, faites livrer vos achats chez nous en Irlande, et nous les acheminons au Cameroun.",
+        "what1": "Achats sur des boutiques en ligne, réceptionnés en Irlande.",
+        "option1": "Acheminement vers le Cameroun avec nos départs mensuels.",
+        "condition1": "Consultez la liste des marchandises interdites avant de commander.",
+        "info1": "Ce que vous achetez",
+        "info2": "Le poids et la taille approximatifs",
+        "info3": "La ville ou localité de destination"
+      }
+    }
+  },
+  "prohibited": {
+    "title": "Marchandises interdites",
+    "intro": "Nous n’expédions pas les marchandises suivantes :",
+    "item1": "Uniformes militaires, et équipements tactiques ou militaires",
+    "item2": "Armes à feu et munitions",
+    "item3": "Explosifs et feux d’artifice",
+    "item4": "Produits chimiques dangereux, gaz comprimés, acides, produits corrosifs, matières radioactives, carburants et liquides inflammables",
+    "item5": "Batteries au lithium non déclarées, batteries endommagées, hoverboards ou trottinettes électriques non conformes, et cigarettes électroniques non autorisées",
+    "item6": "Stupéfiants, et médicaments sans ordonnance valable",
+    "item7": "Denrées périssables, et viande ou poisson non conformes",
+    "item8": "Animaux vivants, ivoire, espèces protégées, et trophées ou peaux sans permis",
+    "item9": "Espèces, or non déclaré, pierres précieuses et chèques de voyage",
+    "item10": "Contrefaçons, produits piratés et faux documents",
+    "item11": "Déchets industriels, matières infectieuses et produits toxiques",
+    "item12": "Toute autre marchandise interdite par la réglementation camerounaise ou européenne",
+    "disclaimer": "Cette liste n’est pas exhaustive et ne remplace pas la réglementation douanière et de transport en vigueur. Demandez-nous avant d’emballer un article en cas de doute."
   }
 }

@@ -28,6 +28,9 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         <Button asChild size="lg">
           <Link href="/quote">{t("hero.quoteCta")}</Link>
         </Button>
+        <Button asChild size="lg" variant="outline">
+          <Link href="/prices">{page("pricesCta")}</Link>
+        </Button>
       </PageBanner>
       <div className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-16">
         <h2 className="sr-only">{page("listHeading")}</h2>
