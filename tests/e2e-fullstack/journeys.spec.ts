@@ -62,6 +62,8 @@ test.describe.serial("MVP journeys", () => {
     await page.getByLabel(/barrels and boxes/i).check();
     await page.getByRole("button", { name: "Continue" }).click();
     await page.getByRole("button", { name: "Continue" }).click(); // route: Ireland -> Cameroon (default)
+    await page.getByLabel(/item type/i).first().selectOption("barrels.barrel_220");
+    await expect(page.getByText("Guide price: €200")).toBeVisible();
     await page.getByLabel(/^description/i).first().fill("Two barrels of clothes and kitchenware");
     await page.getByLabel(/^quantity/i).first().fill("2");
     await page.getByRole("button", { name: "Continue" }).click();
@@ -98,6 +100,8 @@ test.describe.serial("MVP journeys", () => {
   test("B. staff review the request, add a note and issue a calculated quotation", async ({ page }) => {
     await signIn(page, "demo.staff@example.test");
     await page.goto(`/en/admin/quotes/${state.reference}`);
+    // Staff see the customer's catalogue choice with today's guide price, labelled as a reference only.
+    await expect(page.getByText("Current guide price (reference only): €200")).toBeVisible();
     await expect(page.getByText("Journey Customer").first()).toBeVisible();
     await page.getByRole("button", { name: "Apply" }).click(); // SUBMITTED -> UNDER_REVIEW
     await expect(page.getByText("Status updated.")).toBeVisible();

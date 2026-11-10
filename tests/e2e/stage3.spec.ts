@@ -34,8 +34,11 @@ test.describe("prices", () => {
     await expect(script).toHaveCount(1);
     // Browsers hide the nonce attribute after parsing; the value stays on the element's property.
     expect(await script.evaluate((el) => (el as HTMLScriptElement).nonce)).toBeTruthy();
-    const data = JSON.parse((await script.textContent()) ?? "{}");
+    const text = (await script.textContent()) ?? "{}";
+    const data = JSON.parse(text);
     expect(data["@type"]).toBe("OfferCatalog");
+    // No machine-readable VAT assertion until legal review (L-11).
+    expect(text).not.toContain("valueAddedTaxIncluded");
     expect((await request.get("/robots.txt")).ok()).toBe(true);
     expect(await (await request.get("/robots.txt")).text()).toMatch(/Disallow: \//);
   });
@@ -62,6 +65,26 @@ test.describe("service pages", () => {
     await expect(page.getByRole("radio", { name: /Vehicle shipping/ })).toBeChecked();
   });
 
+  test("collection, storage and express-departure wording appears only where it is supported", async ({ page }) => {
+    for (const path of ["/en/services/vehicle", "/en/services/sea_freight", "/en/services/air_freight", "/en/services/commercial_cargo", "/en/services/warehousing", "/en/services/ecommerce"]) {
+      await page.goto(path);
+      const main = page.locator("main");
+      await expect(main.getByRole("heading", { name: "Collection and delivery" }), path).toHaveCount(0);
+      await expect(main.getByText(/Home collection|Storage after the first 48 hours|kept free of charge for 48 hours/), path).toHaveCount(0);
+      await expect(main.getByText(/Monthly express departures|monthly departures/i), path).toHaveCount(0);
+    }
+    for (const path of ["/en/services/parcels", "/en/services/barrels"]) {
+      await page.goto(path);
+      const main = page.locator("main");
+      await expect(main.getByRole("heading", { name: "Collection and delivery" }), path).toBeVisible();
+      await expect(main.getByRole("row", { name: /Home collection, Dublin region/ }), path).toContainText("€25");
+      await expect(main.getByText(/Monthly express departures/i), path).toHaveCount(0);
+    }
+    // The confirmed monthly schedule stays on the general pages.
+    await page.goto("/en/shipping-guide");
+    await expect(page.locator("#schedule")).toContainText("Between the 10th and the 15th of each month");
+  });
+
   test("support services without an online quote send customers to the contact page", async ({ page }) => {
     await page.goto("/fr/services/customs_clearance");
     await expect(page.locator("h1")).toHaveText("Dédouanement");
@@ -82,6 +105,19 @@ test.describe("shipping guide and FAQ", () => {
     await expect(main.locator("#prohibited li")).toHaveCount(12);
     await expect(main.getByText(/does not replace current customs and transport regulations/)).toBeVisible();
     await expect(main.getByText("These are our own business policies. They do not affect your statutory rights.")).toBeVisible();
+  });
+
+  test("FAQ structured data matches the page, including the departure windows", async ({ page }) => {
+    for (const [locale, window] of [["en", "Between the 10th and the 15th of each month"], ["fr", "Entre le 10 et le 15 de chaque mois"]] as const) {
+      await page.goto(`/${locale}/faq`);
+      const data = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent()) ?? "{}");
+      expect(data["@type"]).toBe("FAQPage");
+      const answers: string[] = data.mainEntity.map((q: { acceptedAnswer: { text: string } }) => q.acceptedAnswer.text);
+      expect(answers.every((a) => !/:\s*$/.test(a))).toBe(true); // no answer ends on a dangling colon
+      expect(answers.some((a) => a.includes(window))).toBe(true);
+      // Every question in the data is a visible question on the page.
+      for (const q of data.mainEntity as { name: string }[]) await expect(page.locator("main summary", { hasText: q.name })).toHaveCount(1);
+    }
   });
 
   test("the French FAQ is grouped by topic and answers the XAF question", async ({ page }) => {

@@ -7,11 +7,16 @@ import { SERVICE_OFFERINGS, type ServiceKey } from "@/lib/domain/services";
 import { Button } from "@/components/ui/button";
 import { PageBanner } from "@/components/app/page-banner";
 import { PriceTable, PricingDisclosure } from "@/components/pricing/price-table";
-import { DepartureSchedule } from "@/components/schedule/departure-schedule";
 
-/** Services whose page shows the monthly express departures and the collection/delivery block. */
-const SHOWS_SCHEDULE: readonly ServiceKey[] = ["air_freight", "parcels"];
-const SHOWS_COLLECTION: readonly ServiceKey[] = ["air_freight", "sea_freight", "vehicle", "barrels", "parcels", "commercial_cargo", "warehousing", "ecommerce"];
+/**
+ * Services whose page shows the general collection, delivery and storage block.
+ * Only parcels and personal effects, and barrels and cartons: the client's rules
+ * (drop-off points, Dublin home collection, delivery in Cameroon, 48-hour storage)
+ * are not confirmed for vehicles, full containers, warehousing or e-commerce (S-07).
+ * The monthly departure schedule is not tied to any one service here: which
+ * services the "express" departures cover is still open (S-02).
+ */
+const SHOWS_COLLECTION: readonly ServiceKey[] = ["barrels", "parcels"];
 const MAX_LIST = 8;
 
 function findService(key: string) {
@@ -43,7 +48,6 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
   setRequestLocale(locale);
   const t = await getTranslations("serviceDetail");
   const ts = await getTranslations("services");
-  const schedule = await getTranslations("schedule");
   const base = `services.${service.key}`;
   const list = (prefix: string) => Array.from({ length: MAX_LIST }, (_, i) => `${base}.${prefix}${i + 1}`).filter((k) => t.has(k)).map((k) => t(k));
   const sections = SERVICE_SECTIONS[service.key];
@@ -64,15 +68,6 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           <div className="space-y-10">
             <ListSection title={t("whatTitle")} items={list("what")} />
             <ListSection title={t("optionsTitle")} items={list("option")} />
-            {SHOWS_SCHEDULE.includes(service.key) && (
-              <section aria-labelledby="schedule-heading">
-                <h2 id="schedule-heading" className="border-b pb-2 text-2xl font-bold tracking-tight">
-                  {schedule("heading")}
-                </h2>
-                <DepartureSchedule className="mt-4" />
-                <p className="mt-3 text-sm text-muted-foreground">{schedule("askExact")}</p>
-              </section>
-            )}
             <ListSection title={t("conditionsTitle")} items={list("condition")}>
               <Link href={{ pathname: "/shipping-guide", hash: "prohibited" }} className="mt-3 inline-block font-semibold text-primary underline-offset-4 hover:underline">
                 {t("prohibitedCta")}

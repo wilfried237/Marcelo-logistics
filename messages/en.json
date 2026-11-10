@@ -406,7 +406,8 @@
     "vehicleMethodUnknown": "Not sure yet",
     "vehicleMethodContainer": "Container (personal effects allowed inside)",
     "vehicleMethodRoro": "RORO (no personal effects inside)",
-    "pricesLink": "See all prices"
+    "pricesLink": "See all prices",
+    "currentGuidePrice": "Current guide price (reference only): {price}"
   },
   "trackPage": {
     "invalid": "This does not look like a shipment reference. References start with ML followed by 10 letters or digits.",
@@ -1378,7 +1379,7 @@
       "air_freight": {
         "title": "Air freight",
         "intro": "Express air freight, charged by the kilogram.",
-        "note1": "Express freight must be paid in full before dispatch."
+        "note1": "Express air freight is charged by the kilogram."
       },
       "collection": {
         "title": "Collection, delivery and storage",
@@ -1626,13 +1627,11 @@
         "what1": "Parcels and goods that need to travel quickly by air.",
         "option1": "Express air freight from 1 kg, charged per kilogram.",
         "option2": "A wholesale rate, on request, for shipments from 50 kg.",
-        "option3": "Monthly express departures in each direction.",
-        "condition1": "Express freight must be paid in full before dispatch.",
-        "condition2": "Lithium batteries must be declared. Damaged batteries cannot be shipped.",
         "info1": "The approximate weight of each piece",
         "info2": "Its dimensions (length, width and height)",
         "info3": "A description of the contents",
-        "info4": "The destination city or town"
+        "info4": "The destination city or town",
+        "condition1": "Lithium batteries must be declared. Damaged batteries cannot be shipped."
       },
       "sea_freight": {
         "intro": "Sea freight between Ireland and Cameroon: groupage for smaller volumes, and full 20-foot or 40-foot containers.",
@@ -1680,7 +1679,6 @@
         "what3": "Parcels and personal effects",
         "what4": "Sofas, televisions, bicycles and mattresses",
         "option1": "Customs clearance is included for parcels and personal effects.",
-        "option2": "Monthly express departures in each direction.",
         "condition1": "Used, refurbished or second-hand electrical appliances need a mandatory electrical certificate, charged as a surcharge.",
         "condition2": "Lithium batteries must be declared. Damaged batteries cannot be shipped.",
         "info1": "The type and number of items",
@@ -1718,7 +1716,6 @@
         "what1": "Goods received on your behalf",
         "what2": "Storage before or after shipping",
         "what3": "Preparation and distribution",
-        "option1": "Goods are kept free of charge for 48 hours once they are available at our premises, then a daily storage charge applies.",
         "info1": "The type and volume of goods",
         "info2": "How long you need them stored",
         "info3": "Where they are going next"
@@ -1726,7 +1723,6 @@
       "ecommerce": {
         "intro": "Shop online, have your purchases delivered to us in Ireland, and we forward them to Cameroon.",
         "what1": "Purchases from online shops, received in Ireland.",
-        "option1": "Forwarding to Cameroon with our monthly departures.",
         "condition1": "Check the prohibited goods list before you order.",
         "info1": "What you are buying",
         "info2": "The approximate weight and size",

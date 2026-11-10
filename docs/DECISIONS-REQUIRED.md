@@ -42,6 +42,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 | P-10 | Enforce “XAF only for Cameroon → Ireland” in the staff quote form? | Staff quote form |
 | S-05 | Quote-form grouping of furniture and cartons | Quote form guidance |
 | S-06 | Drop-off (collection point) addresses | Guide, service pages |
+| S-07 | Which services the collection, delivery and storage rules apply to | Service pages |
 | C-04 | Role of the additional Irish number | Contact details |
 | L-08 ★ | Standard trading conditions (BIFA/UKWA/RHA) | Terms |
 | L-09 | Proposed €150 fee for prohibited goods | Terms, guide |
@@ -95,7 +96,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **If delayed:** the form offers Ireland → Cameroon with a free-text destination city.
 - **Affected:** `config/owner.ts` → `operations.routes`.
 - **Development can continue:** yes.
-- **Answer (partial, 2026-11-03, client message relayed by the developer):** « On fait déjà express shipping tous les mois : Irlande → Cameroun entre le 10 et le 15 de chaque mois, Cameroun → Irlande entre le 20 et le 25 de chaque mois. » Applied: both directions are offered online, with these monthly departure windows shown on the home, services, how-it-works and FAQ pages. **Still open:** destination cities or collection points; whether “express” means air or sea freight, and which services it covers.
+- **Answer (partial, 2026-11-03, client message relayed by the developer):** « On fait déjà express shipping tous les mois : Irlande → Cameroun entre le 10 et le 15 de chaque mois, Cameroun → Irlande entre le 20 et le 25 de chaque mois. » Applied: both directions are offered online, with these monthly departure windows shown on the home, services, how-it-works and FAQ pages. **Still open:** destination cities or collection points; whether “express” means air or sea freight, and which services it covers. **Until answered (2026-11-10):** the service pages make no claim about which services use the monthly departures; the schedule appears only on the general pages (home, services overview, shipping guide, FAQ, how it works).
 
 ### S-03 Prohibited and restricted items
 - **Decision needed:** the list of items you will not carry, or carry only with conditions.
@@ -354,4 +355,10 @@ The client supplied an official price list and customer information, confirmed b
 ### L-11 VAT and customs statements
 - **Issue:** “listed prices include applicable VAT” and “customs clearance is included for parcels and personal effects” are published as customer information on the price list, guide and FAQ.
 - **Needed:** legal and accounting review before they are used as contractual assurances in terms or quotations; the VAT number (B-02).
+- **Structured data:** the machine-readable price list (`/prices`, schema.org `OfferCatalog`) deliberately carries **no** `valueAddedTaxIncluded` property until this review approves that representation. The visible text is unchanged.
 - **Answer:**
+
+### S-07 Which services the collection, delivery and storage rules apply to
+- **Issue:** the client's rules (drop-off at collection points, home collection in the Dublin region for €25, quotations for other Irish locations, delivery in Cameroon, 48 hours' free storage then 2,000 XAF per day) were supplied in general terms.
+- **Today:** they appear on the full price list, the shipping guide and the FAQ as general information. On the service pages, the collection block and the collection price table appear **only for parcels and personal effects, and barrels and cartons**. They are not shown for vehicles, sea freight (including full containers), air freight, commercial cargo, warehousing or e-commerce.
+- **Answer:** for each of vehicles, full containers, air freight, commercial cargo, warehousing and e-commerce: do drop-off, home collection, delivery in Cameroon and the storage rule apply, and on what terms?

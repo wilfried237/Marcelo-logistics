@@ -4,6 +4,7 @@ import { Container } from "@/components/app/page-header";
 import { PageBanner } from "@/components/app/page-banner";
 import { JsonLd } from "@/components/app/json-ld";
 import { DepartureSchedule } from "@/components/schedule/departure-schedule";
+import { ownerConfig } from "@/config/owner";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -27,6 +28,14 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
   const t = await getTranslations("faq");
   const schedule = await getTranslations("schedule");
   const all = Object.values(GROUPS).flat();
+  // Structured data must say what the page shows: the departures answer is followed
+  // on the page by the schedule, so the windows are appended to that answer.
+  const regions = new Intl.DisplayNames([locale], { type: "region" });
+  const country = (code: string) => regions.of(code) ?? code;
+  const windows = ownerConfig.operations.routes
+    .map((r) => `${schedule("routeLabel", { origin: country(r.origin), destination: country(r.destination) })}: ${schedule("window", { from: r.departureDays.from, to: r.departureDays.to })}.`)
+    .join(" ");
+  const answer = (id: string) => (id === "departures" ? `${t(`items.${id}.a`)} ${windows} ${schedule("askExact")}` : t(`items.${id}.a`));
 
   return (
     <>
@@ -73,7 +82,7 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
         data={{
           "@context": "https://schema.org",
           "@type": "FAQPage",
-          mainEntity: all.map((id) => ({ "@type": "Question", name: t(`items.${id}.q`), acceptedAnswer: { "@type": "Answer", text: t(`items.${id}.a`) } })),
+          mainEntity: all.map((id) => ({ "@type": "Question", name: t(`items.${id}.q`), acceptedAnswer: { "@type": "Answer", text: answer(id) } })),
         }}
       />
     </>

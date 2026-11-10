@@ -54,7 +54,7 @@ export default async function AdminQuoteDetail({ params }: { params: Promise<{ l
       <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
         <div className="space-y-6">
           <Section id="request" title={t("requestDetails")}>
-            <ItemsList items={request.items} />
+            <ItemsList items={request.items} showCurrentGuidePrice />
             {request.notes && <p className="mt-4 whitespace-pre-line text-sm">{request.notes}</p>}
             {request.cancellationReason && (
               <Alert variant="warning" className="mt-4">

@@ -246,16 +246,20 @@ export const CATALOGUE: readonly CatalogueSection[] = [
   },
 ];
 
-/** Price sections shown on each service page, in order. */
+/**
+ * Price sections shown on each service page, in order. The collection, delivery
+ * and storage section appears only for parcels and barrels: its applicability to
+ * the other services is not confirmed (S-07). It stays on the full price list.
+ */
 export const SERVICE_SECTIONS: Record<ServiceKey, readonly CatalogueSectionKey[]> = {
-  air_freight: ["air_freight", "collection"],
-  sea_freight: ["sea_freight", "collection"],
+  air_freight: ["air_freight"],
+  sea_freight: ["sea_freight"],
   vehicle: ["vehicles"],
   barrels: ["barrels", "cartons", "collection"],
   parcels: ["parcels", "furniture", "collection"],
   commercial_cargo: ["sea_freight", "air_freight"],
   customs_clearance: [],
-  warehousing: ["collection"],
+  warehousing: [],
   // No price was supplied for forwarding online purchases: quoted individually.
   ecommerce: [],
 };

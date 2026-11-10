@@ -1,6 +1,6 @@
 # Stage 3: official price catalogue and customer information
 
-_Implemented 2026-11-10 on branch `feat/stage-3-pricing-catalogue` (from `master` @ `f215ff0`). Not merged, pushed or deployed._
+_Implemented 2026-11-10 on branch `feat/stage-3-pricing-catalogue` (from `master` @ `f215ff0`), corrected after the release review the same day. Not merged, pushed or deployed._
 
 ## Source
 
@@ -35,7 +35,7 @@ The client's price list and customer information, confirmed as official by the o
 | Header “Send” menu, footer | New “Prices” link |
 | Sitemap | Adds `/prices` and the nine service pages (robots still blocks indexing until the launch build) |
 
-JSON-LD is rendered with the per-request CSP nonce (`components/app/json-ld.tsx`).
+JSON-LD is rendered with the per-request CSP nonce (`components/app/json-ld.tsx`). The FAQ data includes the departure windows that the page shows under the departures answer. The price list data has no VAT property (L-11).
 
 ## Quotation workflow integration
 
@@ -47,7 +47,8 @@ There is no second quotation system and no automatic price. Changes are additive
 - The review step shows the choice and its guide price.
 - **Server validation:** `quoteRequestInputSchema` accepts optional `catalogueItem` (generic and vehicle items) and `shippingMethod` (vehicle). A `superRefine` rejects a catalogue key that is not a selectable item of the chosen service. The honeypot, rate limits, idempotency and route checks are unchanged.
 - **Storage:** the new keys are stored in the existing `quote_requests.items` JSON column. **No migration.** The existing check (array of 1–50 items, ≤ 32 KB) still applies.
-- **Staff and customer views** (`ItemsList`) show the catalogue label, the guide price and the vehicle method. Older requests render as before.
+- **Customer views** (portal request page) show the chosen item **by name only**. **Staff views** add `Current guide price (reference only): …`, read from today's catalogue (not stored with the request). The written quotation is the only price that applies. Older requests render as before.
+- The quote form shows the guide price while the customer is filling it in (items step and review), where it is current by definition.
 - **Emails are unchanged.** Templates do not render items.
 
 ## Not published (legal review)
@@ -77,3 +78,15 @@ The following are not on the website: BIFA, UKWA and RHA conditions; the €150 
 - The live quote form changes: new optional fields are added and nothing is removed. Requests in flight during a deploy still validate, because the new fields are optional.
 - Visible content changes: the guide's “Ask us before packing these” list is replaced by the official prohibited list. The FAQ is restructured. The footer gains the legal-entity line.
 - Rollback: Instant Rollback to the previous production deployment. No data needs undoing, because stored items with `catalogueItem` remain valid JSON and older code ignores unknown keys when rendering.
+- **Known rollback edge case (stale form):** after a rollback, a visitor who still has the Stage 3 quote page open and chose an item type (or a vehicle shipping method) submits fields the previous server does not accept. Its strict validation returns “Please correct the highlighted fields.” and nothing is stored or emailed. Reloading the page loads the previous form, and the submission then works. No data is lost or corrupted; the visitor's entries are kept on screen.
+
+## Corrections after the release review (2026-11-10)
+
+| Review item | Change |
+|---|---|
+| S3-1 Personal name in a public repository | Removed from `docs/DECISIONS-REQUIRED.md`, `docs/legal/README.md` and `cspell.json`, and from the Stage 3 commit itself (the unpushed commit was rewritten; `master` untouched) |
+| S3-2 Collection block scope | Collection block and collection price table only on the parcels and barrels pages; warehousing no longer shows the storage line. Question recorded as S-07 |
+| S3-3 Express wording | “Monthly express departures” removed from the parcels, air freight and e-commerce pages; the schedule is no longer attached to individual services. The air section note now repeats the client's statement “Express air freight is charged by the kilogram.” The confirmed schedule remains on the general pages |
+| S3-4 Guide price on requests | Customers see the item name only; staff see “Current guide price (reference only)” |
+| S3-5 FAQ structured data | The departures answer includes the windows and the “ask us for the exact date” line shown on the page |
+| S3-6 VAT structured data | `valueAddedTaxIncluded` removed; recorded under L-11 |

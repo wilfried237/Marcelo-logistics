@@ -71,7 +71,11 @@ export default async function PricesPage({ params }: { params: Promise<{ locale:
   );
 }
 
-/** An OfferCatalog of the published guide prices (items with no published price are omitted). */
+/**
+ * An OfferCatalog of the published guide prices (items with no published price are
+ * omitted). No machine-readable VAT assertion (valueAddedTaxIncluded) until legal
+ * review approves that representation (L-11); the visible text is unchanged.
+ */
 async function PricesJsonLd() {
   const locale = await getLocale();
   const c = await getTranslations({ locale, namespace: "catalogue" });
@@ -81,7 +85,7 @@ async function PricesJsonLd() {
         const price = structuredPrice(item.price);
         if (!price) return [];
         const spec = price.price ? { "@type": "PriceSpecification", price: price.price, priceCurrency: price.priceCurrency } : { "@type": "PriceSpecification", ...price };
-        return [{ "@type": "Offer", name: c(`items.${section.key}.${item.key}.label`), priceSpecification: { ...spec, valueAddedTaxIncluded: true } }];
+        return [{ "@type": "Offer", name: c(`items.${section.key}.${item.key}.label`), priceSpecification: spec }];
       }),
     ),
   );

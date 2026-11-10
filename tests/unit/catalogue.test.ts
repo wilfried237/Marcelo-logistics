@@ -67,6 +67,11 @@ describe("official price catalogue (client price list, 2026-11-10)", () => {
     for (const code of SERVICE_CODES) expect(selectableEntriesFor(code).length, code).toBeGreaterThan(0);
   });
 
+  it("shows the collection, delivery and storage prices only on the parcels and barrels service pages (S-07)", () => {
+    const withCollection = Object.entries(SERVICE_SECTIONS).filter(([, sections]) => sections.includes("collection")).map(([key]) => key).sort();
+    expect(withCollection).toEqual(["barrels", "parcels"]);
+  });
+
   it("never offers surcharges or fees as the item being shipped", () => {
     for (const code of SERVICE_CODES) for (const e of selectableEntriesFor(code)) expect(e.item.selectable).not.toBe(false);
     expect(isSelectableFor("vehicle", "vehicles.conformity_certificate")).toBe(false);

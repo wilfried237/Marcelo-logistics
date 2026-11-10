@@ -406,7 +406,8 @@
     "vehicleMethodUnknown": "Je ne sais pas encore",
     "vehicleMethodContainer": "Conteneur (effets personnels autorisés à l’intérieur)",
     "vehicleMethodRoro": "RORO (aucun effet personnel à l’intérieur)",
-    "pricesLink": "Voir tous les tarifs"
+    "pricesLink": "Voir tous les tarifs",
+    "currentGuidePrice": "Prix indicatif actuel (référence uniquement) : {price}"
   },
   "trackPage": {
     "invalid": "Ceci ne ressemble pas à une référence d’envoi. Les références commencent par ML suivi de 10 lettres ou chiffres.",
@@ -1378,7 +1379,7 @@
       "air_freight": {
         "title": "Fret aérien",
         "intro": "Fret aérien express, facturé au kilogramme.",
-        "note1": "Le fret express doit être payé intégralement avant l’expédition."
+        "note1": "Le fret aérien express est facturé au kilogramme."
       },
       "collection": {
         "title": "Enlèvement, livraison et stockage",
@@ -1626,13 +1627,11 @@
         "what1": "Les colis et marchandises qui doivent voyager rapidement par avion.",
         "option1": "Fret aérien express à partir de 1 kg, facturé au kilogramme.",
         "option2": "Un tarif de gros, sur demande, pour les envois à partir de 50 kg.",
-        "option3": "Des départs express mensuels dans chaque sens.",
-        "condition1": "Le fret express doit être payé intégralement avant l’expédition.",
-        "condition2": "Les batteries au lithium doivent être déclarées. Les batteries endommagées ne peuvent pas être expédiées.",
         "info1": "Le poids approximatif de chaque colis",
         "info2": "Ses dimensions (longueur, largeur et hauteur)",
         "info3": "Une description du contenu",
-        "info4": "La ville ou localité de destination"
+        "info4": "La ville ou localité de destination",
+        "condition1": "Les batteries au lithium doivent être déclarées. Les batteries endommagées ne peuvent pas être expédiées."
       },
       "sea_freight": {
         "intro": "Fret maritime entre l’Irlande et le Cameroun : groupage pour les petits volumes, et conteneurs complets de 20 ou 40 pieds.",
@@ -1680,7 +1679,6 @@
         "what3": "Colis et effets personnels",
         "what4": "Canapés, téléviseurs, vélos et matelas",
         "option1": "Le dédouanement est inclus pour les colis et les effets personnels.",
-        "option2": "Des départs express mensuels dans chaque sens.",
         "condition1": "Les appareils électriques d’occasion, reconditionnés ou de seconde main nécessitent un certificat électrique obligatoire, facturé en supplément.",
         "condition2": "Les batteries au lithium doivent être déclarées. Les batteries endommagées ne peuvent pas être expédiées.",
         "info1": "Le type et le nombre d’articles",
@@ -1718,7 +1716,6 @@
         "what1": "Marchandises réceptionnées pour votre compte",
         "what2": "Stockage avant ou après l’expédition",
         "what3": "Préparation et distribution",
-        "option1": "Les marchandises sont conservées gratuitement pendant 48 heures dès leur mise à disposition dans nos locaux, puis un tarif de stockage journalier s’applique.",
         "info1": "Le type et le volume des marchandises",
         "info2": "La durée de stockage souhaitée",
         "info3": "Leur destination suivante"
@@ -1726,7 +1723,6 @@
       "ecommerce": {
         "intro": "Achetez en ligne, faites livrer vos achats chez nous en Irlande, et nous les acheminons au Cameroun.",
         "what1": "Achats sur des boutiques en ligne, réceptionnés en Irlande.",
-        "option1": "Acheminement vers le Cameroun avec nos départs mensuels.",
         "condition1": "Consultez la liste des marchandises interdites avant de commander.",
         "info1": "Ce que vous achetez",
         "info2": "Le poids et la taille approximatifs",

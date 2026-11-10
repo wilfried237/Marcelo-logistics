@@ -73,8 +73,14 @@ export function ShipmentList({
   );
 }
 
-/** Renders validated quote items (generic or vehicle) as a readable list. */
-export function ItemsList({ items }: { items: unknown }) {
+/**
+ * Renders validated quote items (generic or vehicle) as a readable list.
+ * The customer's optional catalogue choice is shown by name. The guide price is
+ * shown only with `showCurrentGuidePrice` (staff views), labelled as today's
+ * reference: it is read from the current catalogue, not stored with the request,
+ * and the written quotation is the only price that applies to the customer.
+ */
+export function ItemsList({ items, showCurrentGuidePrice = false }: { items: unknown; showCurrentGuidePrice?: boolean }) {
   const t = useTranslations("quoteForm");
   const tcat = useTranslations("catalogue");
   const priceText = usePriceText();
@@ -85,7 +91,8 @@ export function ItemsList({ items }: { items: unknown }) {
     if (!entry) return null;
     return (
       <span className="mt-1 block text-muted-foreground">
-        {tcat(`items.${entry.section}.${entry.item.key}.label`)} · {t("guidePrice", { price: priceText(entry.item.price) })}
+        {tcat(`items.${entry.section}.${entry.item.key}.label`)}
+        {showCurrentGuidePrice && ` · ${t("currentGuidePrice", { price: priceText(entry.item.price) })}`}
       </span>
     );
   };
