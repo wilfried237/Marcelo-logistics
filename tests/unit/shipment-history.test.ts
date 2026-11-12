@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { toShipmentHistory, type AuditRow } from "@/lib/domain/shipment-history";
-import { SHIPMENT_TRANSITIONS, canMoveShipment } from "@/lib/domain/shipment-lifecycle";
-import { SHIPMENT_STATUSES } from "@/lib/domain/enums";
+import { SHIPMENT_TRANSITIONS, STATUS_MILESTONES, canMoveShipment, isDuplicateMilestone } from "@/lib/domain/shipment-lifecycle";
+import { MILESTONE_CODES, SHIPMENT_STATUSES } from "@/lib/domain/enums";
 
 const at = new Date("2026-11-11T10:00:00Z");
 const row = (action: string, before: unknown, after: unknown, actor: string | null = "u1"): AuditRow => ({ action, actor, before, after, at });
@@ -52,5 +52,25 @@ describe("shipment lifecycle", () => {
     expect(canMoveShipment("IN_TRANSIT", "BOOKED")).toBe(false);
     expect(canMoveShipment("AT_DESTINATION", "CANCELLED")).toBe(false);
     expect(canMoveShipment("ON_HOLD", "CANCELLED")).toBe(true);
+  });
+});
+
+describe("milestone offered with a status change (option C)", () => {
+  it("maps only In transit, On hold and Delivered, to existing milestone codes, with the approved defaults", () => {
+    expect(STATUS_MILESTONES).toEqual({
+      IN_TRANSIT: { milestone: "IN_TRANSIT", record: false, public: false },
+      ON_HOLD: { milestone: "ON_HOLD", record: false, public: false },
+      DELIVERED: { milestone: "DELIVERED", record: true, public: true },
+    });
+    for (const m of Object.values(STATUS_MILESTONES)) expect(MILESTONE_CODES).toContain(m!.milestone);
+    expect(STATUS_MILESTONES.CANCELLED).toBeUndefined();
+  });
+
+  it("never allows a second Delivered; other milestones repeat only after something else happened", () => {
+    expect(isDuplicateMilestone("DELIVERED", [])).toBe(false);
+    expect(isDuplicateMilestone("DELIVERED", ["IN_TRANSIT", "DELIVERED"])).toBe(true);
+    expect(isDuplicateMilestone("ON_HOLD", ["ON_HOLD", "IN_TRANSIT"])).toBe(true);
+    expect(isDuplicateMilestone("ON_HOLD", ["IN_TRANSIT", "ON_HOLD"])).toBe(false);
+    expect(isDuplicateMilestone("IN_TRANSIT", [])).toBe(false);
   });
 });

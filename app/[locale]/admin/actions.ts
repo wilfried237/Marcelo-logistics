@@ -146,9 +146,14 @@ export async function updateShipmentAction(_prev: ActionState, fd: FormData): Pr
     etaFrom: fd.get("etaFrom") ?? "",
     etaTo: fd.get("etaTo") ?? "",
     etaVisible: bool(fd, "etaVisible"),
+    recordMilestone: bool(fd, "recordMilestone"),
+    milestonePublic: bool(fd, "milestonePublic"),
   });
   revalidatePath(`/${locale}/admin`, "layout");
-  return toState(locale, result, tc("saved"));
+  const tsh = await getTranslations({ locale, namespace: "admin.shipment" });
+  const milestone = result.ok ? result.data?.milestone : undefined;
+  const message = milestone === "recorded" ? tsh("savedWithMilestone") : milestone === "skipped" ? tsh("savedMilestoneExists") : tc("saved");
+  return toState(locale, result, message);
 }
 
 export async function addEventAction(_prev: ActionState, fd: FormData): Promise<ActionState> {

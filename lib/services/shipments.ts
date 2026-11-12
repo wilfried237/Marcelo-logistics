@@ -8,6 +8,7 @@ import { MAX_REFERENCE_ATTEMPTS, SHIPMENT_REFERENCE_PATTERN, generateShipmentRef
 import type { ShipmentStatus } from "@/lib/domain/enums";
 import { toShipmentHistory } from "@/lib/domain/shipment-history";
 import { likeLiteral } from "@/lib/db/like";
+import { STATUS_MILESTONES, isDuplicateMilestone } from "@/lib/domain/shipment-lifecycle";
 import type { StaffActionResult } from "./quote-requests";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -127,7 +128,8 @@ export async function getShipmentForStaff(db: Database, user: AppUser, rawRefere
     const audit = await tx.auditLog.findMany({
       where: { OR: [{ entity: "shipments", entityId: shipment.id }, { entity: "shipment_events", entityId: { in: events.map((e) => e.id) } }] },
       select: { action: true, actor: true, before: true, after: true, at: true },
-      orderBy: { at: "asc" },
+      // Rows from one transaction share a timestamp; the id keeps their real order.
+      orderBy: [{ at: "asc" }, { id: "asc" }],
       take: 500,
     });
     // Staff names come from their linked customer record, as on the users page.
@@ -227,20 +229,44 @@ export async function setShipmentEventVisibility(db: Database, user: AppUser, ev
   }
 }
 
-export async function updateShipment(db: Database, user: AppUser, raw: unknown): Promise<StaffActionResult> {
+export type MilestoneOutcome = "recorded" | "skipped" | "none";
+
+/**
+ * Updates status and ETA and, when asked, records the milestone matching the
+ * new status, in ONE transaction: if the transition is refused or the
+ * milestone insert fails, nothing is saved. The database triggers still check
+ * the transition, write both audit rows with the acting staff member, and
+ * queue the customer email for a public milestone (once, keyed by its id).
+ */
+export async function updateShipment(db: Database, user: AppUser, raw: unknown): Promise<StaffActionResult<{ milestone: MilestoneOutcome }>> {
   assertStaff(user);
   const parsed = shipmentUpdateInputSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, code: "invalid", fieldErrors: fieldErrors(parsed.error) };
   const input = parsed.data;
   const toDate = (v?: string) => (v ? new Date(`${v}T00:00:00Z`) : null);
   try {
-    const updated = await withUser(db, user.id, (tx) =>
-      tx.shipment.updateMany({
+    const outcome = await withUser(db, user.id, async (tx): Promise<MilestoneOutcome | null> => {
+      const current = await tx.shipment.findUnique({ where: { id: input.shipmentId }, select: { status: true } });
+      if (!current) return null;
+      await tx.shipment.updateMany({
         where: { id: input.shipmentId },
         data: { status: input.status, etaFrom: toDate(input.etaFrom), etaTo: toDate(input.etaTo), etaVisible: input.etaVisible },
-      }),
-    );
-    return updated.count ? { ok: true } : { ok: false, code: "not_found" };
+      });
+      const mapping = STATUS_MILESTONES[input.status];
+      if (!input.recordMilestone || !mapping || current.status === input.status) return "none";
+      const existing = await tx.shipmentEvent.findMany({
+        where: { shipmentId: input.shipmentId },
+        select: { milestoneCode: true },
+        orderBy: [{ occurredAt: "desc" }, { createdAt: "desc" }],
+      });
+      if (isDuplicateMilestone(mapping.milestone, existing.map((e) => e.milestoneCode))) return "skipped";
+      await tx.shipmentEvent.create({
+        data: { shipmentId: input.shipmentId, milestoneCode: mapping.milestone, occurredAt: new Date(), public: input.milestonePublic, createdBy: user.id },
+        select: { id: true },
+      });
+      return "recorded";
+    });
+    return outcome ? { ok: true, data: { milestone: outcome } } : { ok: false, code: "not_found" };
   } catch (error) {
     return { ok: false, code: domainErrorCode(error) };
   }

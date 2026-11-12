@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { devices, expect, test, type Browser, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
-import { createLocalShipment, resetLocalLoginLimits } from "./local-db";
+import { createLocalShipment, localShipmentEmails, resetLocalLoginLimits } from "./local-db";
 
 /*
  * Stage 5: shipment management in a real browser, against the production build
@@ -128,9 +128,17 @@ test.describe.serial("Stage 5 shipment management", () => {
 
     // Only allowed next statuses are offered; DELIVERED is not reachable from BOOKED.
     await expect(page.locator("#status option[value='DELIVERED']")).toHaveCount(0);
+    // No milestone option until another status is chosen; In transit offers its milestone, unticked and internal by default.
+    const milestoneGroup = page.getByRole("group", { name: "Milestone for this status change" });
+    await expect(milestoneGroup).toHaveCount(0);
     await page.locator("#status").selectOption("IN_TRANSIT");
+    await expect(milestoneGroup.getByLabel("Also record the “In transit” milestone")).not.toBeChecked();
+    await expect(milestoneGroup.getByLabel("Visible to the customer")).not.toBeChecked();
+    const emailsBefore = await localShipmentEmails(fixture.shipmentRef);
     await page.getByRole("button", { name: "Save changes" }).click();
     await expect(page.getByText("Changes saved.")).toBeVisible();
+    // An ordinary status change sends the customer nothing.
+    expect(await localShipmentEmails(fixture.shipmentRef)).toEqual(emailsBefore);
     await page.reload();
     await expect(history.getByText("Status changed from Booked to In transit")).toBeVisible();
     await expect(history.getByText("You").last()).toBeVisible();
@@ -146,6 +154,34 @@ test.describe.serial("Stage 5 shipment management", () => {
     await page.context().clearCookies();
     await signIn(page, STAFF, STAFF_PASSWORD);
     for (const bad of ["MLZZZZZZZZZZ", "not-a-reference"]) expect((await page.goto(`/en/admin/shipments/${bad}`))?.status(), bad).toBe(404);
+  });
+
+  test("marking the shipment delivered records a public Delivered milestone with the status, and emails the customer once", async ({ page }) => {
+    await signIn(page, STAFF, STAFF_PASSWORD);
+    await page.goto(`/en/admin/shipments/${fixture.shipmentRef}`);
+    await page.locator("#status").selectOption("DELIVERED");
+    const group = page.getByRole("group", { name: "Milestone for this status change" });
+    await expect(group.getByLabel("Also record the “Delivered” milestone")).toBeChecked();
+    await expect(group.getByLabel("Visible to the customer")).toBeChecked();
+    expect((await localShipmentEmails(fixture.shipmentRef)).filter((x) => x === "shipment_delivered")).toHaveLength(0);
+    await page.getByRole("button", { name: "Save changes" }).click();
+    await expect(page.getByText("Changes saved and milestone recorded.")).toBeVisible();
+    await page.reload();
+    const history = page.locator("section", { has: page.getByRole("heading", { name: "History" }) });
+    await expect(history.getByText("Status changed from In transit to Delivered")).toBeVisible();
+    await expect(history.getByText("Milestone recorded: Delivered (Visible to customer)")).toBeVisible();
+    // Delivered is final: no further status and no milestone option are offered.
+    await expect(page.locator("#status option")).toHaveCount(1);
+    await expect(group).toHaveCount(0);
+    expect((await localShipmentEmails(fixture.shipmentRef)).filter((x) => x === "shipment_delivered")).toHaveLength(1);
+
+    // The customer sees the status, the Delivered milestone, and the delivery date on public tracking.
+    await page.context().clearCookies();
+    await signIn(page, owner.email, owner.password);
+    await page.goto(`/en/portal/shipments/${fixture.shipmentRef}`);
+    await expect(page.locator("main").getByText("Delivered").first()).toBeVisible();
+    await page.goto(`/en/track/${fixture.shipmentRef}`);
+    await expect(page.locator("main dt", { hasText: "Delivered" })).toBeVisible();
   });
 
   test("shipment pages work on a phone and have no serious accessibility violations", async ({ browser }) => {

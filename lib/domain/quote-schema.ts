@@ -202,5 +202,8 @@ export const shipmentUpdateInputSchema = z
     etaFrom: z.iso.date("invalid").optional().or(z.literal("").transform(() => undefined)),
     etaTo: z.iso.date("invalid").optional().or(z.literal("").transform(() => undefined)),
     etaVisible: z.boolean(),
+    /** Also record the milestone matching the new status (STATUS_MILESTONES); ignored when the status does not change. */
+    recordMilestone: z.boolean().default(false),
+    milestonePublic: z.boolean().default(false),
   })
   .refine((v) => !v.etaFrom || !v.etaTo || v.etaTo >= v.etaFrom, { message: "invalid_range", path: ["etaTo"] });

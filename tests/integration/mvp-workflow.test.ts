@@ -300,11 +300,11 @@ describe("shipments: transitions, issue reports, tracking (Phases 4-5)", () => {
     expect(await emails(`entity_id = '${shipmentId}'`)).toEqual([{ template: "shipment_confirmed", audience: "customer" }]);
 
     expect(await updateShipment(db, staff, { shipmentId, status: "DELIVERED", etaVisible: false })).toMatchObject({ ok: false, code: "invalid_shipment_transition" });
-    expect(await updateShipment(db, staff, { shipmentId, status: "IN_TRANSIT", etaVisible: false })).toEqual({ ok: true });
+    expect(await updateShipment(db, staff, { shipmentId, status: "IN_TRANSIT", etaVisible: false })).toEqual({ ok: true, data: { milestone: "none" } });
     await addShipmentEvent(db, staff, { shipmentId, milestone: "DELAYED", occurredAt: new Date().toISOString(), public: false, noteEn: "INTERNAL: carrier strike" });
     expect((await emails(`template = 'staff_shipment_exception'`)).length).toBeGreaterThanOrEqual(1);
     await addShipmentEvent(db, staff, { shipmentId, milestone: "DELIVERED", occurredAt: new Date().toISOString(), public: true, location: "Douala" });
-    expect(await updateShipment(db, staff, { shipmentId, status: "DELIVERED", etaVisible: false })).toEqual({ ok: true });
+    expect(await updateShipment(db, staff, { shipmentId, status: "DELIVERED", etaVisible: false })).toEqual({ ok: true, data: { milestone: "none" } });
     expect(await updateShipment(db, staff, { shipmentId, status: "IN_TRANSIT", etaVisible: false })).toMatchObject({ ok: false, code: "invalid_shipment_transition" });
 
     expect(await reportShipmentIssue(db, customerA, ref, "One box arrived damaged.")).toEqual({ ok: true });

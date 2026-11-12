@@ -257,7 +257,7 @@ describe("staff review, manual quote, acceptance, shipment and tracking", () => 
     const [{ id: shipmentId }] = (await t.client.query<{ id: string }>("select id from public.shipments where reference = $1", [shipmentReference])).rows;
     expect(await addShipmentEvent(db, staff, { shipmentId, milestone: "RECEIVED_AT_DEPOT", location: "Dublin", occurredAt: new Date().toISOString(), noteEn: "Received", noteFr: "Reçu", public: true })).toEqual({ ok: true });
     expect(await addShipmentEvent(db, staff, { shipmentId, milestone: "RECEIVED_AT_DEPOT", occurredAt: new Date().toISOString(), noteEn: "Internal check", public: false })).toEqual({ ok: true });
-    expect(await updateShipment(db, staff, { shipmentId, status: "IN_TRANSIT", etaFrom: "2030-01-10", etaTo: "2030-01-20", etaVisible: false })).toEqual({ ok: true });
+    expect(await updateShipment(db, staff, { shipmentId, status: "IN_TRANSIT", etaFrom: "2030-01-10", etaTo: "2030-01-20", etaVisible: false })).toEqual({ ok: true, data: { milestone: "none" } });
 
     const customerView = await getCustomerShipment(db, customerA, shipmentReference);
     expect(customerView?.events).toHaveLength(1);

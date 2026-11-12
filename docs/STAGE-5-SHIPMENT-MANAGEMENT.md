@@ -50,7 +50,27 @@ Not added on purpose: new statuses or milestones (T-01), ETA wording or disclaim
 
 These are the existing rules (no new statuses). They are enforced by the database trigger and offered by the staff form.
 
-Status and milestones are independent: the status is the operational state; milestones are the dated progress entries that customers see (when public). Setting the status to Delivered does not add a Delivered milestone, and the reverse is also true.
+## Status and milestones (option C, approved 2026-11-12)
+
+The status is the operational state; milestones are the dated progress entries that customers see (when public). Public tracking shows a delivery date only from a public Delivered milestone, so the two must not drift apart.
+
+When staff choose a new status in the form, the matching milestone is offered:
+
+| New status | Milestone offered | Ticked by default | Visible to the customer by default |
+|---|---|---|---|
+| Delivered | Delivered | Yes | Yes |
+| In transit | In transit | No | No |
+| On hold | On hold | No | No |
+| Booked, At destination, Cancelled | none (no matching code; no new codes, T-01) | — | — |
+
+- **One transaction** (`updateShipment`, inside `withUser`): status and ETA update, then the milestone insert. If the transition is refused or the insert fails, nothing is saved, and no audit row or email is left behind.
+- **No duplicates:** no second Delivered milestone ever; for In transit and On hold, none when the most recent milestone already has that code (a shipment can go on hold twice with progress in between). The form then says the milestone already existed.
+- **Nothing automatic:** unticked means no milestone; an unchanged status records nothing even if the box is ticked.
+- **Audit:** the status change and the milestone are two audit rows with the same staff member, shown in the shipment history in order.
+- **Emails, unchanged:** a public milestone queues `shipment_update`, or `shipment_delivered` for Delivered, once (keyed by the milestone id). Status changes alone still send customers nothing (SH-03); On hold still alerts staff only.
+- **No migration:** staff already may insert milestones (RLS and column grants); the existing triggers do the rest.
+
+**Rule for staff:** to mark a shipment delivered, keep the Delivered box ticked. If the Delivered milestone was already recorded by hand, it is not added again.
 
 ## Permissions
 
@@ -76,6 +96,8 @@ Every server action checks the role again (`context()` in `app/[locale]/admin/ac
 | Full stack (`tests/e2e-fullstack/shipments.spec.ts`, 5 tests) | Real browser, production build, local Supabase: customer list and detail in EN and FR with "not shared yet"; no staff controls for customers; another customer, a signed-out visitor and malformed references get 404 or the login page; staff search, filter, details, history, status change through the form (only allowed options), FR history; the customer sees the update; phone layout and axe checks on customer and staff shipment pages |
 
 The full-stack fixture (`createLocalShipment` in `tests/e2e-fullstack/local-db.ts`) runs only against a local database and creates its data through the same RLS roles and triggers as the application.
+
+**Option C tests:** unit (mapping, defaults, duplicate rule); integration (7 tests: status and public Delivered milestone in one transaction with history and exactly one delivery email; no second Delivered milestone or email; On hold repeat rule; nothing recorded when unticked, unchanged or unmapped, including Cancelled; refused transition saves nothing; forced milestone failure rolls back the status and leaves no audit row; customers refused, bad input refused); full stack (defaults in the form, no customer email for an ordinary status change, Delivered recorded with the status and emailed once, the customer and public tracking show it).
 
 ## Production release (when approved)
 

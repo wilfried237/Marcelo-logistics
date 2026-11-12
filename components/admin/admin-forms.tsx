@@ -10,7 +10,7 @@ import { SubmitButton } from "@/components/app/submit-button";
 import { CURRENCIES, MILESTONE_CODES, SHIPMENT_STATUSES, USER_ROLES, type QuoteStatus, type ShipmentStatus, type UserRole } from "@/lib/domain/enums";
 import { QUOTE_TRANSITIONS } from "@/lib/domain/quote-lifecycle";
 import { calculateQuote, formatMinor, type LineInput } from "@/lib/domain/pricing";
-import { canMoveShipment } from "@/lib/domain/shipment-lifecycle";
+import { STATUS_MILESTONES, canMoveShipment } from "@/lib/domain/shipment-lifecycle";
 import { Button } from "@/components/ui/button";
 import {
   addEventAction,
@@ -372,7 +372,10 @@ export function UpdateShipmentForm({
 }) {
   const t = useTranslations("admin.shipment");
   const ts = useTranslations("status.shipment");
+  const tm = useTranslations("milestones");
   const tc = useTranslations("common");
+  const [selected, setSelected] = useState<ShipmentStatus>(status);
+  const offered = selected !== status ? STATUS_MILESTONES[selected] : undefined;
   return (
     <ActionForm action={updateShipmentAction} className="space-y-4">
       {(state) => {
@@ -383,7 +386,7 @@ export function UpdateShipmentForm({
             <input type="hidden" name="shipmentId" value={shipmentId} />
             <FormField id="status" label={tc("status")}>
               {(p) => (
-                <select {...p} name="status" defaultValue={status} className={selectClassName}>
+                <select {...p} name="status" value={selected} onChange={(e) => setSelected(e.target.value as ShipmentStatus)} className={selectClassName}>
                   {SHIPMENT_STATUSES.filter((s) => canMoveShipment(status, s)).map((s) => (
                     <option key={s} value={s}>
                       {ts(s)}
@@ -392,6 +395,21 @@ export function UpdateShipmentForm({
                 </select>
               )}
             </FormField>
+            {offered && (
+              // Keyed by status so the approved defaults apply each time another status is chosen.
+              <fieldset key={selected} className="space-y-2 rounded-md border p-3">
+                <legend className="px-1 text-sm font-medium">{t("statusMilestoneLegend")}</legend>
+                <label className="flex items-center gap-3 text-sm">
+                  <input type="checkbox" name="recordMilestone" defaultChecked={offered.record} className="h-4 w-4" />
+                  {t("recordMilestone", { milestone: tm(offered.milestone) })}
+                </label>
+                <label className="flex items-center gap-3 text-sm">
+                  <input type="checkbox" name="milestonePublic" defaultChecked={offered.public} className="h-4 w-4" />
+                  {t("milestonePublic")}
+                </label>
+                <p className="text-xs text-muted-foreground">{t("recordMilestoneHint")}</p>
+              </fieldset>
+            )}
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField id="etaFrom" label={t("etaFrom")} error={fe?.etaFrom}>
                 {(p) => <Input {...p} name="etaFrom" type="date" defaultValue={etaFrom ?? ""} className={inputClassName} />}

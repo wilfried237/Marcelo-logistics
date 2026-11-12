@@ -134,12 +134,12 @@ describe("status transitions and history", () => {
   it("applies only permitted transitions and records each change with the acting staff member", async () => {
     const { reference, id } = await shipmentFor(customerA);
     expect(await updateShipment(db, staff, { shipmentId: id, status: "DELIVERED", etaVisible: false })).toMatchObject({ ok: false, code: "invalid_shipment_transition" });
-    expect(await updateShipment(db, staff, { shipmentId: id, status: "IN_TRANSIT", etaFrom: inDays(20), etaTo: inDays(30), etaVisible: true })).toEqual({ ok: true });
+    expect(await updateShipment(db, staff, { shipmentId: id, status: "IN_TRANSIT", etaFrom: inDays(20), etaTo: inDays(30), etaVisible: true })).toEqual({ ok: true, data: { milestone: "none" } });
     expect(await updateShipment(db, admin, { shipmentId: id, status: "BOOKED", etaFrom: inDays(20), etaTo: inDays(30), etaVisible: true })).toMatchObject({
       ok: false,
       code: "invalid_shipment_transition",
     });
-    expect(await updateShipment(db, admin, { shipmentId: id, status: "ON_HOLD", etaFrom: inDays(20), etaTo: inDays(30), etaVisible: true })).toEqual({ ok: true });
+    expect(await updateShipment(db, admin, { shipmentId: id, status: "ON_HOLD", etaFrom: inDays(20), etaTo: inDays(30), etaVisible: true })).toEqual({ ok: true, data: { milestone: "none" } });
     expect(await addShipmentEvent(db, staff, { shipmentId: id, milestone: "DELAYED", occurredAt: new Date().toISOString(), public: false, noteEn: "INTERNAL: paperwork" })).toEqual({ ok: true });
 
     const view = (await getShipmentForStaff(db, staff, reference))!;
@@ -161,7 +161,7 @@ describe("status transitions and history", () => {
     await addShipmentEvent(db, staff, { shipmentId: id, milestone: "RECEIVED_AT_DEPOT", occurredAt: new Date().toISOString(), public: false });
     const eventId = (await t.client.query<{ id: string }>("select id from public.shipment_events where shipment_id = $1", [id])).rows[0].id;
     expect(await setShipmentEventVisibility(db, staff, eventId, true)).toEqual({ ok: true });
-    expect(await updateShipment(db, staff, { shipmentId: id, status: "BOOKED", etaFrom: inDays(5), etaTo: inDays(9), etaVisible: false })).toEqual({ ok: true });
+    expect(await updateShipment(db, staff, { shipmentId: id, status: "BOOKED", etaFrom: inDays(5), etaTo: inDays(9), etaVisible: false })).toEqual({ ok: true, data: { milestone: "none" } });
     const kinds = (await getShipmentForStaff(db, staff, reference))!.history.map((h) => (h.kind === "visibility" ? `visibility:${h.public}` : h.kind));
     expect(kinds).toEqual(["created", "milestone", "visibility:true", "eta"]);
   });
@@ -169,12 +169,12 @@ describe("status transitions and history", () => {
   it("DELIVERED and CANCELLED are final", async () => {
     const delivered = await shipmentFor(customerA);
     await updateShipment(db, staff, { shipmentId: delivered.id, status: "IN_TRANSIT", etaVisible: false });
-    expect(await updateShipment(db, staff, { shipmentId: delivered.id, status: "DELIVERED", etaVisible: false })).toEqual({ ok: true });
+    expect(await updateShipment(db, staff, { shipmentId: delivered.id, status: "DELIVERED", etaVisible: false })).toEqual({ ok: true, data: { milestone: "none" } });
     for (const to of ["BOOKED", "IN_TRANSIT", "AT_DESTINATION", "ON_HOLD", "CANCELLED"] as const) {
       expect(await updateShipment(db, staff, { shipmentId: delivered.id, status: to, etaVisible: false }), to).toMatchObject({ ok: false, code: "invalid_shipment_transition" });
     }
     const cancelled = await shipmentFor(customerA);
-    expect(await updateShipment(db, staff, { shipmentId: cancelled.id, status: "CANCELLED", etaVisible: false })).toEqual({ ok: true });
+    expect(await updateShipment(db, staff, { shipmentId: cancelled.id, status: "CANCELLED", etaVisible: false })).toEqual({ ok: true, data: { milestone: "none" } });
     expect(await updateShipment(db, staff, { shipmentId: cancelled.id, status: "BOOKED", etaVisible: false })).toMatchObject({ ok: false, code: "invalid_shipment_transition" });
   });
 
@@ -254,7 +254,7 @@ describe("customer access", () => {
       ["list", () => listShipmentsForStaff(db, customerA)],
       ["get", () => getShipmentForStaff(db, customerA, reference)],
       ["create", () => createShipmentForRequest(db, customerA, r.requestId)],
-      ["update", () => updateShipment(db, customerA, { shipmentId: id, status: "DELIVERED", etaVisible: false })],
+      ["update", () => updateShipment(db, customerA, { shipmentId: id, status: "DELIVERED", etaVisible: false, recordMilestone: true, milestonePublic: true })],
       ["event", () => addShipmentEvent(db, customerA, { shipmentId: id, milestone: "DELIVERED", occurredAt: new Date().toISOString(), public: true })],
       ["visibility", () => setShipmentEventVisibility(db, customerA, randomUUID(), true)],
     ];
@@ -282,5 +282,116 @@ describe("database isolation (RLS and column privileges)", () => {
     await expectDbError(asUser(t.client, staff.id, "update public.shipments set customer_id = $2 where id = $1", [own.id, customerB.customerId]), /permission denied/);
     await expectDbError(asUser(t.client, staff.id, "update public.shipments set status = 'DELIVERED' where id = $1", [own.id]), /invalid_shipment_transition/);
     await expectDbError(asUser(t.client, staff.id, "delete from public.shipments where id = $1", [own.id]), /permission denied/);
+  });
+});
+
+describe("status change with its milestone (option C, one transaction)", () => {
+  type Ev = { milestone_code: string; public: boolean; created_by: string };
+  const events = async (shipmentId: string) =>
+    (await t.client.query<Ev>("select milestone_code::text, public, created_by from public.shipment_events where shipment_id = $1 order by created_at", [shipmentId])).rows;
+  const status = async (shipmentId: string) => (await t.client.query<{ status: string }>("select status::text from public.shipments where id = $1", [shipmentId])).rows[0].status;
+  const customerEmails = async (shipmentId: string) =>
+    (
+      await t.client.query<{ template: string }>(
+        `select template from public.email_deliveries
+          where audience = 'customer' and (entity_id = $1 or entity_id in (select id::text from public.shipment_events where shipment_id = $1::uuid))
+          order by created_at`,
+        [shipmentId],
+      )
+    ).rows.map((r) => r.template);
+  const move = (shipmentId: string, to: string, extra: Record<string, unknown> = {}) => updateShipment(db, staff, { shipmentId, status: to, etaVisible: false, ...extra });
+
+  it("records the status and a public Delivered milestone together, audited under the staff member, with one delivery email", async () => {
+    const s = await shipmentFor(customerB);
+    expect(await move(s.id, "IN_TRANSIT")).toEqual({ ok: true, data: { milestone: "none" } });
+    expect(await move(s.id, "DELIVERED", { recordMilestone: true, milestonePublic: true })).toEqual({ ok: true, data: { milestone: "recorded" } });
+    expect(await status(s.id)).toBe("DELIVERED");
+    expect(await events(s.id)).toEqual([{ milestone_code: "DELIVERED", public: true, created_by: staff.id }]);
+    // One customer email per change that has one: confirmation, then the delivery email. Status changes alone send none.
+    expect(await customerEmails(s.id)).toEqual(["shipment_confirmed", "shipment_delivered"]);
+    const view = (await getShipmentForStaff(db, staff, s.reference))!;
+    expect(view.history.slice(-2)).toMatchObject([
+      { kind: "status", from: "IN_TRANSIT", to: "DELIVERED", actor: staff.id },
+      { kind: "milestone", milestone: "DELIVERED", public: true, actor: staff.id },
+    ]);
+    const customerView = (await getCustomerShipment(db, customerB, s.reference))!;
+    expect(customerView.status).toBe("DELIVERED");
+    expect(customerView.events.map((e) => e.milestone)).toEqual(["DELIVERED"]);
+  });
+
+  it("never adds a second Delivered milestone or a second delivery email", async () => {
+    const s = await shipmentFor(customerB);
+    await move(s.id, "IN_TRANSIT");
+    // Staff first record the Delivered milestone by hand, then set the status with the box ticked.
+    await addShipmentEvent(db, staff, { shipmentId: s.id, milestone: "DELIVERED", occurredAt: new Date().toISOString(), public: true });
+    expect(await move(s.id, "DELIVERED", { recordMilestone: true, milestonePublic: true })).toEqual({ ok: true, data: { milestone: "skipped" } });
+    expect((await events(s.id)).filter((e) => e.milestone_code === "DELIVERED")).toHaveLength(1);
+    expect((await customerEmails(s.id)).filter((x) => x === "shipment_delivered")).toHaveLength(1);
+  });
+
+  it("skips On hold only when the latest milestone is already On hold; records it again after progress", async () => {
+    const s = await shipmentFor(customerB);
+    expect(await move(s.id, "ON_HOLD", { recordMilestone: true })).toEqual({ ok: true, data: { milestone: "recorded" } });
+    expect(await move(s.id, "BOOKED")).toMatchObject({ ok: true });
+    expect(await move(s.id, "ON_HOLD", { recordMilestone: true })).toEqual({ ok: true, data: { milestone: "skipped" } });
+    await move(s.id, "IN_TRANSIT", { recordMilestone: true });
+    expect(await move(s.id, "ON_HOLD", { recordMilestone: true })).toEqual({ ok: true, data: { milestone: "recorded" } });
+    expect((await events(s.id)).map((e) => `${e.milestone_code}:${e.public}`)).toEqual(["ON_HOLD:false", "IN_TRANSIT:false", "ON_HOLD:false"]);
+    // Internal milestones are invisible to the customer and send no customer email.
+    expect((await getCustomerShipment(db, customerB, s.reference))!.events).toEqual([]);
+    expect(await customerEmails(s.id)).toEqual(["shipment_confirmed"]);
+  });
+
+  it("adds nothing when the box is unticked, when the status does not change, or for statuses without a milestone", async () => {
+    const s = await shipmentFor(customerB);
+    expect(await move(s.id, "IN_TRANSIT")).toEqual({ ok: true, data: { milestone: "none" } });
+    expect(await move(s.id, "IN_TRANSIT", { recordMilestone: true, milestonePublic: true })).toEqual({ ok: true, data: { milestone: "none" } });
+    expect(await move(s.id, "AT_DESTINATION", { recordMilestone: true, milestonePublic: true })).toEqual({ ok: true, data: { milestone: "none" } });
+    expect(await move(s.id, "DELIVERED")).toEqual({ ok: true, data: { milestone: "none" } });
+    expect(await events(s.id)).toEqual([]);
+    expect(await customerEmails(s.id)).toEqual(["shipment_confirmed"]);
+    const c = await shipmentFor(customerB);
+    expect(await move(c.id, "CANCELLED", { recordMilestone: true, milestonePublic: true })).toEqual({ ok: true, data: { milestone: "none" } });
+    expect(await events(c.id)).toEqual([]);
+    expect(await customerEmails(c.id)).toEqual(["shipment_confirmed"]); // no automatic email for a cancellation (SH-03)
+  });
+
+  it("a refused transition saves neither the status nor the milestone", async () => {
+    const s = await shipmentFor(customerB);
+    expect(await move(s.id, "DELIVERED", { recordMilestone: true, milestonePublic: true })).toMatchObject({ ok: false, code: "invalid_shipment_transition" });
+    expect(await status(s.id)).toBe("BOOKED");
+    expect(await events(s.id)).toEqual([]);
+    expect(await customerEmails(s.id)).toEqual(["shipment_confirmed"]);
+  });
+
+  it("when the milestone cannot be saved, the status change is rolled back too", async () => {
+    const s = await shipmentFor(customerB);
+    // Test database only: force every milestone insert for this shipment to fail.
+    await t.client.exec(`
+      create function public.test_fail_milestone() returns trigger language plpgsql as $$ begin raise exception 'test_forced_failure'; end $$;
+      create trigger test_fail_milestone before insert on public.shipment_events for each row
+        when (new.shipment_id = '${s.id}') execute function public.test_fail_milestone();`);
+    try {
+      expect(await move(s.id, "IN_TRANSIT", { recordMilestone: true, milestonePublic: true })).toMatchObject({ ok: false });
+      expect(await status(s.id)).toBe("BOOKED");
+      expect(await events(s.id)).toEqual([]);
+      const history = (await getShipmentForStaff(db, staff, s.reference))!.history;
+      expect(history.map((h) => h.kind)).toEqual(["created"]); // no audit row for the rolled-back status change
+    } finally {
+      await t.client.exec("drop trigger test_fail_milestone on public.shipment_events; drop function public.test_fail_milestone();");
+    }
+    // Without the forced failure the same request succeeds.
+    expect(await move(s.id, "IN_TRANSIT", { recordMilestone: true, milestonePublic: true })).toEqual({ ok: true, data: { milestone: "recorded" } });
+  });
+
+  it("only staff can do it: a customer's attempt changes nothing; bad input is refused", async () => {
+    const s = await shipmentFor(customerB);
+    await expect(updateShipment(db, customerB, { shipmentId: s.id, status: "IN_TRANSIT", etaVisible: false, recordMilestone: true, milestonePublic: true })).rejects.toBeInstanceOf(
+      AuthorizationError,
+    );
+    expect(await status(s.id)).toBe("BOOKED");
+    expect(await events(s.id)).toEqual([]);
+    expect(await move(randomUUID(), "IN_TRANSIT", { recordMilestone: true })).toEqual({ ok: false, code: "not_found" });
+    expect(await move(s.id, "IN_TRANSIT", { recordMilestone: "yes" })).toMatchObject({ ok: false, code: "invalid" });
   });
 });

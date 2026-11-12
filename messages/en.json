@@ -594,7 +594,13 @@
       "actorStaff": "Staff member {id}",
       "invalidTransition": "This status change is not allowed from the current status.",
       "alreadyExists": "A shipment already exists for this request.",
-      "notAccepted": "Only an accepted quotation can become a shipment."
+      "notAccepted": "Only an accepted quotation can become a shipment.",
+      "statusMilestoneLegend": "Milestone for this status change",
+      "recordMilestone": "Also record the “{milestone}” milestone",
+      "milestonePublic": "Visible to the customer",
+      "recordMilestoneHint": "A visible milestone is shown to the customer and sends them an update email. The status and the milestone are saved together, or not at all.",
+      "savedWithMilestone": "Changes saved and milestone recorded.",
+      "savedMilestoneExists": "Changes saved. This milestone was already recorded, so it was not added again."
     },
     "users": {
       "intro": "Only administrators can change roles. Every change is recorded in the audit log.",

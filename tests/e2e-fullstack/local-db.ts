@@ -90,3 +90,23 @@ export async function createLocalShipment(customerUserId: string, staffEmail: st
     await client.end();
   }
 }
+
+/** Customer emails queued for a shipment and its milestones, by template (local database only). */
+export async function localShipmentEmails(shipmentRef: string): Promise<string[]> {
+  const client = new pg.Client({ connectionString: localUrl("localShipmentEmails") });
+  await client.connect();
+  try {
+    const { rows } = await client.query<{ template: string }>(
+      `select d.template from public.email_deliveries d
+        where d.audience = 'customer'
+          and d.entity_id in (select s.id::text from public.shipments s where s.reference = $1
+                              union all
+                              select e.id::text from public.shipment_events e join public.shipments s on s.id = e.shipment_id where s.reference = $1)
+        order by d.created_at`,
+      [shipmentRef],
+    );
+    return rows.map((r) => r.template);
+  } finally {
+    await client.end();
+  }
+}
