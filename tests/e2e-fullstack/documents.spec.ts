@@ -206,4 +206,23 @@ test.describe.serial("Stage 6 documents", () => {
     await expect(shipmentDocs.getByText("photo.jpg", { exact: true })).toBeVisible();
     await expect(shipmentDocs.getByText("scan.png", { exact: true })).toBeVisible();
   });
+
+  test("staff upload a document to the shipment; the customer sees it as added by the business", async ({ page }) => {
+    await signIn(page, STAFF, process.env.SEED_USER_PASSWORD ?? "local-only-demo-password");
+    await page.goto(`/en/admin/shipments/${fixture.shipmentRef}`);
+    const docs = page.locator("section", { has: page.getByRole("heading", { name: "Documents" }) });
+    await docs.getByLabel("File (PDF, JPG or PNG, up to 4 MB)").setInputFiles({ name: "delivery-note.pdf", mimeType: "application/pdf", buffer: pdf(50 * 1024) });
+    await docs.getByRole("button", { name: "Upload a document" }).click();
+    await expect(page.getByText("Document uploaded.")).toBeVisible();
+    await page.reload();
+    await expect(docs.getByText("delivery-note.pdf", { exact: true })).toBeVisible();
+    await expect(docs.getByText(/Uploaded by (?!the customer)/).first()).toBeVisible();
+
+    await page.context().clearCookies();
+    await signIn(page, owner.email, owner.password);
+    await page.goto(`/en/portal/shipments/${fixture.shipmentRef}`);
+    const mine = page.locator("section", { has: page.getByRole("heading", { name: "Documents" }) });
+    await expect(mine.getByText("delivery-note.pdf", { exact: true })).toBeVisible();
+    await expect(mine.getByText("Added by Marchelo Logistics")).toBeVisible();
+  });
 });

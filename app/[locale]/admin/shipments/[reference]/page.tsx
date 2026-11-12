@@ -4,7 +4,8 @@ import { Link } from "@/i18n/navigation";
 import { getDb } from "@/lib/db/client";
 import { pageStaff } from "@/lib/auth/page-user";
 import { getShipmentForStaff } from "@/lib/services/shipments";
-import { AddEventForm, EventVisibilityToggle, NoteForm, UpdateShipmentForm } from "@/components/admin/admin-forms";
+import { AddEventForm, EventVisibilityToggle, NoteForm, StaffUploadForm, UpdateShipmentForm } from "@/components/admin/admin-forms";
+import { documentUploadsAvailable } from "@/lib/config/env";
 import { listShipmentMessages } from "@/lib/services/cases";
 import { listRecordDocumentsForStaff } from "@/lib/services/documents";
 import { DocumentList } from "@/components/app/document-list";
@@ -36,6 +37,7 @@ export default async function AdminShipmentDetail({ params }: { params: Promise<
   const messages = await listShipmentMessages(getDb(), user, shipment.id);
   const tsh = await getTranslations("status.shipment");
   const tdoc = await getTranslations("documents");
+  const tpd = await getTranslations("portal.documents");
   const documents = await listRecordDocumentsForStaff(getDb(), user, "shipment", shipment.id);
   const dateTime = (d: Date | string) => format.dateTime(new Date(d), { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Dublin" });
   const statusLabel = (s: ShipmentStatus | null) => (s ? tsh(s) : "—");
@@ -181,6 +183,11 @@ export default async function AdminShipmentDetail({ params }: { params: Promise<
           {tdoc("title")}
         </h2>
         <DocumentList documents={documents} audience="staff" />
+        {documentUploadsAvailable() ? (
+          <StaffUploadForm locale={locale} ownerType="shipment" ownerId={shipment.id} />
+        ) : (
+          <p className="mt-3 text-xs text-muted-foreground">{tpd("unavailable")}</p>
+        )}
       </section>
       <section aria-labelledby="case" className="rounded-xl border bg-card p-5 md:p-6">
         <h2 id="case" className="mb-4 text-lg font-semibold">

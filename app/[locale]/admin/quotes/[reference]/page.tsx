@@ -5,7 +5,8 @@ import { getDb } from "@/lib/db/client";
 import { pageStaff } from "@/lib/auth/page-user";
 import { formatMoney } from "@/lib/domain/money";
 import { getQuoteRequestForStaff } from "@/lib/services/quote-requests";
-import { CreateShipmentForm, QuoteCalculatorForm, NoteForm, RequestInfoForm, AssignForm, TransitionForm } from "@/components/admin/admin-forms";
+import { CreateShipmentForm, QuoteCalculatorForm, NoteForm, RequestInfoForm, AssignForm, TransitionForm, StaffUploadForm } from "@/components/admin/admin-forms";
+import { documentUploadsAvailable } from "@/lib/config/env";
 import { Alert } from "@/components/app/alert";
 import { PageHeader } from "@/components/app/page-header";
 import { ItemsList } from "@/components/app/record-lists";
@@ -46,6 +47,7 @@ export default async function AdminQuoteDetail({ params }: { params: Promise<{ l
   const staff = await listAssignableStaff(getDb(), user);
   const emails = await listEmailsForRequest(getDb(), user, request.id);
   const tdoc = await getTranslations("documents");
+  const tpd = await getTranslations("portal.documents");
   const documents = await listRecordDocumentsForStaff(getDb(), user, "quote_request", request.id);
 
   return (
@@ -172,6 +174,11 @@ export default async function AdminQuoteDetail({ params }: { params: Promise<{ l
           </Section>
           <Section id="documents" title={tdoc("title")}>
             <DocumentList documents={documents} audience="staff" />
+            {documentUploadsAvailable() ? (
+              <StaffUploadForm locale={locale} ownerType="quote_request" ownerId={request.id} />
+            ) : (
+              <p className="mt-3 text-xs text-muted-foreground">{tpd("unavailable")}</p>
+            )}
           </Section>
           <Section id="workflow" title={t("workflow")}>
             <TransitionForm locale={locale} requestId={request.id} status={request.status} />

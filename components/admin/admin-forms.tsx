@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ActionForm, ConfirmSubmit } from "@/components/app/action-form";
 import { FormField, inputClassName, selectClassName } from "@/components/app/form-field";
 import { SubmitButton } from "@/components/app/submit-button";
+import { DocumentFileInput } from "@/components/app/document-file-input";
 import { CURRENCIES, MILESTONE_CODES, SHIPMENT_STATUSES, USER_ROLES, type QuoteStatus, type ShipmentStatus, type UserRole } from "@/lib/domain/enums";
 import { QUOTE_TRANSITIONS } from "@/lib/domain/quote-lifecycle";
 import { calculateQuote, formatMinor, type LineInput } from "@/lib/domain/pricing";
@@ -22,6 +23,7 @@ import {
   assignAction,
   contactStatusAction,
   setRoleAction,
+  staffUploadDocumentAction,
   toggleEventVisibilityAction,
   transitionAction,
   updateShipmentAction,
@@ -564,6 +566,24 @@ export function InviteForm({ locale }: { locale: string }) {
             </FormField>
           </div>
           <SubmitButton pendingLabel={t("inviteSend")}>{t("inviteSend")}</SubmitButton>
+        </>
+      )}
+    </ActionForm>
+  );
+}
+
+/** Staff upload to one quote request or shipment. Shown only while uploads are available; the action re-checks that. */
+export function StaffUploadForm({ locale, ownerType, ownerId }: { locale: string; ownerType: "quote_request" | "shipment"; ownerId: string }) {
+  const t = useTranslations("portal.documents");
+  return (
+    <ActionForm action={staffUploadDocumentAction} className="mt-4 space-y-3">
+      {() => (
+        <>
+          <input type="hidden" name="locale" value={locale} />
+          <input type="hidden" name="ownerType" value={ownerType} />
+          <input type="hidden" name="ownerId" value={ownerId} />
+          <DocumentFileInput id={`file-${ownerType}`} />
+          <SubmitButton pendingLabel={t("uploading")}>{t("upload")}</SubmitButton>
         </>
       )}
     </ActionForm>
