@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { devices, expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
-import { asLocalUser, createLocalShipment, resetLocalLoginLimits } from "./local-db";
+import { asLocalUser, createLocalShipment, localQuery, resetLocalLoginLimits } from "./local-db";
 
 /*
  * Stage 6: staff supporting pages (audit history, notifications, job health) in a
@@ -103,6 +103,30 @@ test.describe.serial("Stage 6 staff supporting pages", () => {
     }
     await page.goto("/fr/admin/notifications");
     await expect(page.getByRole("button", { name: "Appliquer les filtres" })).toBeVisible();
+  });
+
+  test("job health: a stuck run raises the failure banner; normal successful runs raise no alarm", async ({ page }) => {
+    // Local job_runs only: a run that started 20 minutes ago and never finished, then healthy runs.
+    const stuck = await localQuery<{ id: string }>("insert into public.job_runs (job, started_at) values ('process-emails', now() - interval '20 minutes') returning id::text");
+    try {
+      await signIn(page, STAFF, STAFF_PASSWORD);
+      await page.goto("/en/admin/notifications");
+      await expect(page.getByRole("alert").filter({ hasText: "A scheduled job failed or did not finish within 15 minutes." })).toBeVisible();
+      const health = page.locator("section", { has: page.getByRole("heading", { name: "Scheduled jobs" }) });
+      await expect(health.getByText("1 run unfinished after 15 minutes")).toBeVisible();
+      await expect(health.getByText("Send queued emails (daily)")).toBeVisible();
+      await expect(health.getByText("Expire quotations (daily)")).toBeVisible();
+
+      await localQuery("update public.job_runs set finished_at = now(), ok = true where id = $1::bigint", [stuck[0].id]);
+      await localQuery("insert into public.job_runs (job, started_at, finished_at, ok) values ('expire-quotes', now() - interval '1 minute', now(), true), ('process-emails', now() - interval '1 minute', now(), true)");
+      await page.reload();
+      await expect(page.getByText("All scheduled jobs completed successfully in the last 36 hours.")).toBeVisible();
+      await expect(page.locator("main").getByRole("alert")).toHaveCount(0); // the route announcer is role=alert too
+      await page.goto("/fr/admin/notifications");
+      await expect(page.getByText("Envoi des e-mails en attente (quotidien)")).toBeVisible();
+    } finally {
+      await localQuery("update public.job_runs set finished_at = coalesce(finished_at, now()), ok = coalesce(ok, true) where id = $1::bigint", [stuck[0].id]);
+    }
   });
 
   test("audit is staff-only", async ({ page }) => {

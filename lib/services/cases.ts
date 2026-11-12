@@ -367,19 +367,4 @@ export async function listShipmentMessages(db: Database, user: AppUser, shipment
   );
 }
 
-/** Email outbox and job history for the staff notification page (never shows the internal inbox address). */
-export async function getNotificationOverview(db: Database, user: AppUser) {
-  assertStaff(user);
-  const [emails, problems, jobs] = await Promise.all([
-    withUser(db, user.id, (tx) =>
-      tx.emailDelivery.findMany({
-        select: { id: true, template: true, audience: true, status: true, attempts: true, entity: true, createdAt: true, sentAt: true, nextAttemptAt: true, lastEvent: true, error: true },
-        orderBy: { createdAt: "desc" },
-        take: 100,
-      }),
-    ),
-    withUser(db, user.id, (tx) => tx.emailDelivery.count({ where: { status: { in: ["FAILED", "DEAD", "BOUNCED", "COMPLAINED"] } } })),
-    withUser(db, user.id, (tx) => tx.jobRun.findMany({ select: { id: true, job: true, startedAt: true, finishedAt: true, ok: true, error: true }, orderBy: { startedAt: "desc" }, take: 30 })),
-  ]);
-  return { emails, problems, jobs: jobs.map((j) => ({ ...j, id: String(j.id) })) };
-}
+// The staff notification page uses lib/services/notifications.ts (emails) and getJobHealth in jobs.ts (Stage 6).

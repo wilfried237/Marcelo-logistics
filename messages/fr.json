@@ -808,6 +808,31 @@
       "audiences": {
         "customer": "Client",
         "staff": "Équipe"
+      },
+      "health": {
+        "bannerFailed": "Une tâche planifiée a échoué ou ne s’est pas terminée en {minutes} minutes.",
+        "bannerWarning": "Une tâche planifiée ne s’est pas terminée avec succès depuis {hours} heures.",
+        "seeDetails": "Voir le détail des tâches",
+        "allOk": "Toutes les tâches planifiées se sont terminées avec succès au cours des {hours} dernières heures.",
+        "title": "État des tâches planifiées",
+        "job": "Tâche",
+        "lastSuccess": "Dernier succès",
+        "lastRun": "Dernière exécution",
+        "state": "État",
+        "never": "Jamais",
+        "recent": "Exécutions récentes",
+        "stuck": "{count, plural, one {# exécution} other {# exécutions}} non terminée(s) après {minutes} minutes",
+        "lastRunFailed": "La dernière exécution a échoué",
+        "noRecentSuccess": "Aucun succès depuis {hours} heures",
+        "states": {
+          "ok": "Normal",
+          "warning": "Avertissement",
+          "failed": "Problème"
+        },
+        "jobNames": {
+          "expire-quotes": "Expiration des devis (quotidienne)",
+          "process-emails": "Envoi des e-mails en attente (quotidien)"
+        }
       }
     }
   },

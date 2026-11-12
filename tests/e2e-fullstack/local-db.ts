@@ -128,3 +128,14 @@ export async function asLocalUser(userId: string, sql: string, params: unknown[]
     await client.end();
   }
 }
+
+/** A privileged statement on the LOCAL database only (test set-up and clean-up). */
+export async function localQuery<T extends pg.QueryResultRow = pg.QueryResultRow>(sql: string, params: unknown[] = []): Promise<T[]> {
+  const client = new pg.Client({ connectionString: localUrl("localQuery") });
+  await client.connect();
+  try {
+    return (await client.query<T>(sql, params)).rows;
+  } finally {
+    await client.end();
+  }
+}

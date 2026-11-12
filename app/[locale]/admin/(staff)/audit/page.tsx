@@ -101,7 +101,7 @@ export default async function AdminAudit({ params, searchParams }: { params: Pro
         {t("count", { count: result.total })}
       </p>
 
-      <div className="overflow-x-auto rounded-lg border bg-card">
+      <div role="region" aria-label={t("intro")} tabIndex={0} className="overflow-x-auto rounded-lg border bg-card">
         <table className="w-full min-w-[48rem] text-left text-sm">
           <caption className="sr-only">{t("intro")}</caption>
           <thead className="border-b bg-secondary/50">

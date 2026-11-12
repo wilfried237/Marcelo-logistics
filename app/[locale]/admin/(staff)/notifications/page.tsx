@@ -2,7 +2,8 @@ import { getFormatter, getTranslations, setRequestLocale } from "next-intl/serve
 import { Link } from "@/i18n/navigation";
 import { getDb } from "@/lib/db/client";
 import { pageStaff } from "@/lib/auth/page-user";
-import { getNotificationOverview } from "@/lib/services/cases";
+import { getJobHealth } from "@/lib/services/jobs";
+import { NO_SUCCESS_WARNING_HOURS, SCHEDULED_JOBS, STUCK_AFTER_MINUTES } from "@/lib/domain/job-health";
 import { EMAIL_AUDIENCES, EMAIL_STATUSES, PROBLEM_STATUSES, listNotifications, type NotificationFilter } from "@/lib/services/notifications";
 import { Alert } from "@/components/app/alert";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ export default async function AdminNotifications({ params, searchParams }: { par
   const t = await getTranslations("admin.notifications");
   const format = await getFormatter();
   const db = getDb();
-  const [list, { jobs }] = await Promise.all([listNotifications(db, user, filter), getNotificationOverview(db, user)]);
+  const [list, health] = await Promise.all([listNotifications(db, user, filter), getJobHealth(db, user)]);
   const when = (d: Date | null) => (d ? format.dateTime(d, { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Dublin" }) : "–");
   const query = (page: number) => {
     const p = new URLSearchParams();
@@ -39,6 +40,14 @@ export default async function AdminNotifications({ params, searchParams }: { par
   return (
     <div className="space-y-8">
       <PageHeader title={(await getTranslations("admin"))("nav.notifications")} description={t("intro")} />
+      {health.state !== "ok" && (
+        <Alert variant={health.state === "failed" ? "danger" : "warning"}>
+          {t(health.state === "failed" ? "health.bannerFailed" : "health.bannerWarning", { hours: NO_SUCCESS_WARNING_HOURS, minutes: STUCK_AFTER_MINUTES })}{" "}
+          <a href="#jobs-heading" className="font-medium underline-offset-4 hover:underline">
+            {t("health.seeDetails")}
+          </a>
+        </Alert>
+      )}
       {list.problems > 0 && (
         <Alert variant="warning">
           {t("problems", { count: list.problems })}{" "}
@@ -93,7 +102,7 @@ export default async function AdminNotifications({ params, searchParams }: { par
         <p className="text-sm text-muted-foreground" aria-live="polite">
           {t("count", { count: list.total })}
         </p>
-        <div className="overflow-x-auto border bg-card">
+        <div role="region" aria-label={t("emails")} tabIndex={0} className="overflow-x-auto border bg-card">
           <table className="w-full min-w-[56rem] text-left text-sm">
             <caption className="sr-only">{t("emails")}</caption>
             <thead className="border-b bg-secondary/50">
@@ -154,9 +163,41 @@ export default async function AdminNotifications({ params, searchParams }: { par
         <h2 id="jobs-heading" className="text-xl font-semibold">
           {t("jobs")}
         </h2>
+        {health.state === "ok" && <p className="text-sm text-muted-foreground">{t("health.allOk", { hours: NO_SUCCESS_WARNING_HOURS })}</p>}
+        <div role="region" aria-label={t("health.title")} tabIndex={0} className="overflow-x-auto border bg-card">
+          <table className="w-full min-w-[40rem] text-left text-sm">
+            <caption className="sr-only">{t("health.title")}</caption>
+            <thead className="border-b bg-secondary/50">
+              <tr>
+                <th scope="col" className="px-3 py-2 font-medium">{t("health.job")}</th>
+                <th scope="col" className="px-3 py-2 font-medium">{t("health.lastSuccess")}</th>
+                <th scope="col" className="px-3 py-2 font-medium">{t("health.lastRun")}</th>
+                <th scope="col" className="px-3 py-2 font-medium">{t("health.state")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {health.jobs.map((j) => (
+                <tr key={j.job} className="border-b last:border-0">
+                  <td className="px-3 py-2 font-medium">{(SCHEDULED_JOBS as readonly string[]).includes(j.job) ? t(`health.jobNames.${j.job as "process-emails"}`) : j.job}</td>
+                  <td className="whitespace-nowrap px-3 py-2">{j.lastSuccess ? when(j.lastSuccess) : t("health.never")}</td>
+                  <td className="whitespace-nowrap px-3 py-2">{j.lastRun ? when(j.lastRun.startedAt) : t("health.never")}</td>
+                  <td className="px-3 py-2">
+                    <span className={j.state === "failed" ? "font-semibold text-destructive" : j.state === "warning" ? "font-semibold text-warning" : ""}>{t(`health.states.${j.state}`)}</span>
+                    <ul className="text-xs text-muted-foreground">
+                      {j.stuckRuns > 0 && <li>{t("health.stuck", { count: j.stuckRuns, minutes: STUCK_AFTER_MINUTES })}</li>}
+                      {j.lastRunFailed && <li>{t("health.lastRunFailed")}</li>}
+                      {j.noRecentSuccess && <li>{t("health.noRecentSuccess", { hours: NO_SUCCESS_WARNING_HOURS })}</li>}
+                    </ul>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <h3 className="pt-2 text-base font-semibold">{t("health.recent")}</h3>
         <ul className="divide-y border bg-card text-sm">
-          {jobs.length === 0 && <li className="p-3 text-muted-foreground">{t("noJobs")}</li>}
-          {jobs.map((j) => (
+          {health.recent.length === 0 && <li className="p-3 text-muted-foreground">{t("noJobs")}</li>}
+          {health.recent.map((j) => (
             <li key={j.id} className="flex flex-wrap justify-between gap-2 p-3">
               <span className="font-medium">{j.job}</span>
               <span className="text-muted-foreground">{when(j.startedAt)}</span>

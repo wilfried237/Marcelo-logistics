@@ -808,6 +808,31 @@
       "audiences": {
         "customer": "Customer",
         "staff": "Staff"
+      },
+      "health": {
+        "bannerFailed": "A scheduled job failed or did not finish within {minutes} minutes.",
+        "bannerWarning": "A scheduled job has not completed successfully in the last {hours} hours.",
+        "seeDetails": "See the job details",
+        "allOk": "All scheduled jobs completed successfully in the last {hours} hours.",
+        "title": "Scheduled job health",
+        "job": "Job",
+        "lastSuccess": "Last success",
+        "lastRun": "Last run",
+        "state": "State",
+        "never": "Never",
+        "recent": "Recent runs",
+        "stuck": "{count, plural, one {# run} other {# runs}} unfinished after {minutes} minutes",
+        "lastRunFailed": "The last run failed",
+        "noRecentSuccess": "No success in the last {hours} hours",
+        "states": {
+          "ok": "Healthy",
+          "warning": "Warning",
+          "failed": "Problem"
+        },
+        "jobNames": {
+          "expire-quotes": "Expire quotations (daily)",
+          "process-emails": "Send queued emails (daily)"
+        }
       }
     }
   },

@@ -169,3 +169,33 @@ describe("authentication attempt limits", () => {
     expect(await authAttemptAllowed(broken, "login", "10.0.0.99", "x@example.test")).toBe(false);
   });
 });
+
+describe("job health for staff (Stage 6)", () => {
+  it("reads the runs through RLS, flags stuck and stale jobs, and changes nothing", async () => {
+    const { getJobHealth } = await import("@/lib/services/jobs");
+    const { createUser } = await import("../db/harness");
+    const { loadAppUser } = await import("@/lib/services/users");
+    const db = t.db as unknown as Parameters<typeof getJobHealth>[0];
+    const s = await createUser(t.client, `health.staff.${Date.now()}@example.test`, "staff", "Health Staff");
+    const c = await createUser(t.client, `health.customer.${Date.now()}@example.test`, "customer", "Health Customer");
+    const staffUser = (await loadAppUser(db, s.id, null))!;
+    const customerUser = (await loadAppUser(db, c.id, null))!;
+    await expect(getJobHealth(db, customerUser)).rejects.toThrow();
+
+    await t.client.query("delete from public.job_runs");
+    await t.client.query(
+      `insert into public.job_runs (job, started_at, finished_at, ok) values
+         ('expire-quotes', now() - interval '2 hours', now() - interval '119 minutes', true),
+         ('process-emails', now() - interval '40 hours', now() - interval '40 hours', true),
+         ('process-emails', now() - interval '20 minutes', null, null)`,
+    );
+    const before = (await t.client.query("select count(*)::int n from public.job_runs")).rows[0];
+    const health = await getJobHealth(db, staffUser);
+    expect(health.state).toBe("failed");
+    expect(health.jobs.find((j) => j.job === "expire-quotes")).toMatchObject({ state: "ok" });
+    expect(health.jobs.find((j) => j.job === "process-emails")).toMatchObject({ state: "failed", stuckRuns: 1, noRecentSuccess: true });
+    expect(health.recent).toHaveLength(3);
+    expect((await t.client.query("select count(*)::int n from public.job_runs")).rows[0]).toEqual(before);
+    expect((await t.client.query<{ n: number }>("select count(*)::int n from public.job_runs where finished_at is null")).rows[0].n).toBe(1); // not "repaired"
+  });
+});
