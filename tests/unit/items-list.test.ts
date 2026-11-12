@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { createElement } from "react";
+import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it, vi } from "vitest";
@@ -11,7 +11,12 @@ vi.mock("@/i18n/navigation", () => ({ Link: () => null }));
 const messages = { en: JSON.parse(readFileSync("messages/en.json", "utf8")), fr: JSON.parse(readFileSync("messages/fr.json", "utf8")) };
 const render = (locale: "en" | "fr", items: unknown, showCurrentGuidePrice?: boolean) =>
   renderToStaticMarkup(
-    createElement(NextIntlClientProvider, { locale, messages: messages[locale], timeZone: "Europe/Dublin", children: createElement(ItemsList, { items, showCurrentGuidePrice }) }),
+    createElement(
+      NextIntlClientProvider,
+      // children go in the third argument (react/no-children-prop); the props type requires them, hence the assertion.
+      { locale, messages: messages[locale], timeZone: "Europe/Dublin" } as ComponentProps<typeof NextIntlClientProvider>,
+      createElement(ItemsList, { items, showCurrentGuidePrice }),
+    ),
   );
 
 const stored = [
