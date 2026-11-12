@@ -8,6 +8,7 @@ import { AddEventForm, EventVisibilityToggle, NoteForm, StaffUploadForm, UpdateS
 import { documentUploadsAvailable } from "@/lib/config/env";
 import { listShipmentMessages } from "@/lib/services/cases";
 import { listRecordDocumentsForStaff } from "@/lib/services/documents";
+import { listEmailsForShipment } from "@/lib/services/notifications";
 import { DocumentList } from "@/components/app/document-list";
 import { PageHeader } from "@/components/app/page-header";
 import { ShipmentStatusBadge } from "@/components/app/status-badge";
@@ -38,6 +39,8 @@ export default async function AdminShipmentDetail({ params }: { params: Promise<
   const tsh = await getTranslations("status.shipment");
   const tdoc = await getTranslations("documents");
   const tpd = await getTranslations("portal.documents");
+  const tsh2 = await getTranslations("admin.shipment");
+  const emails = await listEmailsForShipment(getDb(), user, shipment.id);
   const documents = await listRecordDocumentsForStaff(getDb(), user, "shipment", shipment.id);
   const dateTime = (d: Date | string) => format.dateTime(new Date(d), { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Dublin" });
   const statusLabel = (s: ShipmentStatus | null) => (s ? tsh(s) : "—");
@@ -176,6 +179,29 @@ export default async function AdminShipmentDetail({ params }: { params: Promise<
           </ol>
         ) : (
           <p className="text-sm text-muted-foreground">{t("historyEmpty")}</p>
+        )}
+      </section>
+      <section aria-labelledby="shipment-emails" className="rounded-xl border bg-card p-5 md:p-6">
+        <h2 id="shipment-emails" className="mb-4 text-lg font-semibold">
+          {tcase("emails")}
+        </h2>
+        {emails.length ? (
+          <ul className="space-y-2 text-sm">
+            {emails.map((e) => (
+              <li key={e.id} className="flex flex-wrap justify-between gap-2 border-b pb-2">
+                <span>
+                  {e.template} <span className="text-muted-foreground">({e.audience})</span>
+                  <span className="ml-2 text-xs text-muted-foreground">{dateTime(e.createdAt)}</span>
+                </span>
+                <span className={e.status === "DEAD" || e.status === "BOUNCED" || e.status === "FAILED" || e.status === "COMPLAINED" ? "font-semibold text-destructive" : "text-muted-foreground"}>
+                  {e.status}
+                  {e.attempts > 1 ? ` · ${e.attempts}×` : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground">{tsh2("noEmails")}</p>
         )}
       </section>
       <section aria-labelledby="documents" className="rounded-xl border bg-card p-5 md:p-6">

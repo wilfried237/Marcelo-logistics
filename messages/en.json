@@ -603,7 +603,8 @@
       "savedWithMilestone": "Changes saved and milestone recorded.",
       "savedMilestoneExists": "Changes saved. This milestone was already recorded, so it was not added again.",
       "deliveredMilestoneExists": "This shipment already has a Delivered milestone. To show it to the customer, use “Show to customer” on it.",
-      "savedMilestonePublished": "Changes saved. The existing Delivered milestone is now visible to the customer."
+      "savedMilestonePublished": "Changes saved. The existing Delivered milestone is now visible to the customer.",
+      "noEmails": "No emails for this shipment yet."
     },
     "users": {
       "intro": "Only administrators can change roles. Every change is recorded in the audit log.",
@@ -779,7 +780,34 @@
         "status": "Status",
         "attempts": "Attempts",
         "sent": "Sent",
-        "event": "Last provider event"
+        "event": "Last provider event",
+        "record": "About"
+      },
+      "filters": "Filter emails",
+      "all": "All",
+      "apply": "Apply filters",
+      "clear": "Clear filters",
+      "count": "{count, plural, =0 {No emails} one {# email} other {# emails}}",
+      "none": "No emails match these filters.",
+      "showDead": "Show emails that were given up on",
+      "pagination": "Email pages",
+      "previous": "Previous page",
+      "next": "Next page",
+      "page": "Page {page} of {pages}",
+      "statuses": {
+        "PENDING": "Queued",
+        "SENDING": "Sending",
+        "SENT": "Sent",
+        "DELIVERED": "Delivered",
+        "FAILED": "Failed, will retry",
+        "DEAD": "Given up",
+        "BOUNCED": "Bounced",
+        "COMPLAINED": "Marked as spam",
+        "SKIPPED": "Not sent"
+      },
+      "audiences": {
+        "customer": "Customer",
+        "staff": "Staff"
       }
     }
   },

@@ -603,7 +603,8 @@
       "savedWithMilestone": "Modifications enregistrées et étape enregistrée.",
       "savedMilestoneExists": "Modifications enregistrées. Cette étape était déjà enregistrée ; elle n’a pas été ajoutée une seconde fois.",
       "deliveredMilestoneExists": "Cet envoi a déjà une étape « Livré ». Pour l’afficher au client, utilisez « Montrer au client » sur cette étape.",
-      "savedMilestonePublished": "Modifications enregistrées. L’étape « Livré » existante est maintenant visible par le client."
+      "savedMilestonePublished": "Modifications enregistrées. L’étape « Livré » existante est maintenant visible par le client.",
+      "noEmails": "Aucun e-mail pour cet envoi pour le moment."
     },
     "users": {
       "intro": "Seuls les administrateurs peuvent modifier les rôles. Chaque modification est enregistrée dans le journal d’audit.",
@@ -779,7 +780,34 @@
         "status": "Statut",
         "attempts": "Tentatives",
         "sent": "Envoyé",
-        "event": "Dernier événement du fournisseur"
+        "event": "Dernier événement du fournisseur",
+        "record": "Concerne"
+      },
+      "filters": "Filtrer les e-mails",
+      "all": "Tous",
+      "apply": "Appliquer les filtres",
+      "clear": "Effacer les filtres",
+      "count": "{count, plural, =0 {Aucun e-mail} one {# e-mail} other {# e-mails}}",
+      "none": "Aucun e-mail ne correspond à ces filtres.",
+      "showDead": "Voir les e-mails abandonnés",
+      "pagination": "Pages des e-mails",
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "page": "Page {page} sur {pages}",
+      "statuses": {
+        "PENDING": "En file d’attente",
+        "SENDING": "En cours d’envoi",
+        "SENT": "Envoyé",
+        "DELIVERED": "Distribué",
+        "FAILED": "Échec, nouvel essai prévu",
+        "DEAD": "Abandonné",
+        "BOUNCED": "Rejeté",
+        "COMPLAINED": "Signalé comme indésirable",
+        "SKIPPED": "Non envoyé"
+      },
+      "audiences": {
+        "customer": "Client",
+        "staff": "Équipe"
       }
     }
   },

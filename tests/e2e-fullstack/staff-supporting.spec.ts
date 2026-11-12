@@ -81,6 +81,30 @@ test.describe.serial("Stage 6 staff supporting pages", () => {
     await expect(page.getByRole("button", { name: "Appliquer les filtres" })).toBeVisible();
   });
 
+  test("notifications: filters, links to the record, shipment email history, no re-send controls", async ({ page }) => {
+    await signIn(page, STAFF, STAFF_PASSWORD);
+    await page.goto("/en/admin/notifications");
+    await page.locator("select[name=template]").selectOption("shipment_confirmed");
+    await page.locator("select[name=audience]").selectOption("customer");
+    await page.getByRole("button", { name: "Apply filters" }).click();
+    await expect(page).toHaveURL(/template=shipment_confirmed/);
+    const rows = page.locator("main tbody tr");
+    for (const row of await rows.all()) await expect(row.getByText("shipment_confirmed")).toBeVisible();
+    await page.locator("main tbody").getByRole("link", { name: fixture.shipmentRef }).click();
+    await expect(page).toHaveURL(new RegExp(`/en/admin/shipments/${fixture.shipmentRef}$`));
+    const history = page.locator("section", { has: page.getByRole("heading", { name: "Emails" }) });
+    await expect(history.getByText("shipment_confirmed")).toBeVisible();
+    await expect(history.getByText("shipment_update").first()).toBeVisible(); // the fixture's public milestone
+
+    // D4: nothing on these pages can re-send an email.
+    for (const path of ["/en/admin/notifications", "/en/admin/notifications?status=DEAD", `/en/admin/shipments/${fixture.shipmentRef}`]) {
+      await page.goto(path);
+      await expect(page.getByRole("button", { name: /retry|resend|re-send|send again|renvoyer/i }), path).toHaveCount(0);
+    }
+    await page.goto("/fr/admin/notifications");
+    await expect(page.getByRole("button", { name: "Appliquer les filtres" })).toBeVisible();
+  });
+
   test("audit is staff-only", async ({ page }) => {
     await signIn(page, customer.email, customer.password);
     expect((await page.goto("/en/admin/audit"))?.status()).toBe(404);
@@ -94,7 +118,7 @@ test.describe.serial("Stage 6 staff supporting pages", () => {
     await page.getByLabel(/password/i).fill(STAFF_PASSWORD);
     await page.getByRole("button", { name: /sign in|log in/i }).click();
     await page.waitForURL(/\/en\/admin/);
-    for (const path of ["/en/admin/audit", `/en/admin/audit?q=${fixture.shipmentRef}`, "/fr/admin/audit"]) {
+    for (const path of ["/en/admin/audit", `/en/admin/audit?q=${fixture.shipmentRef}`, "/fr/admin/audit", "/en/admin/notifications", `/en/admin/shipments/${fixture.shipmentRef}`]) {
       await page.goto(path);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, path).toBeLessThanOrEqual(0);
