@@ -1,6 +1,6 @@
 # Decisions Required from the Owner
 
-_Last updated: 2026-11-11 (Stage 5 shipment decisions SH-01 to SH-04: see [section 4](#4-delivery-estimates-and-shipment-tracking); Stage 3 price list and customer information: see [section 9](#9-stage-3-client-information-2026-11-10); legal drafts: [docs/legal/](./legal/README.md); completion audit: [PROJECT-COMPLETION-AUDIT.md](./PROJECT-COMPLETION-AUDIT.md)) · This is the single consolidated list of open **business** decisions._
+_Last updated: 2026-11-12 (Stage 5: implementation recommendations approved for T-01, T-02 and SH-01 to SH-04, business and legal confirmation still open: see [section 4](#4-delivery-estimates-and-shipment-tracking); Stage 3 price list and customer information: see [section 9](#9-stage-3-client-information-2026-11-10); legal drafts: [docs/legal/](./legal/README.md); completion audit: [PROJECT-COMPLETION-AUDIT.md](./PROJECT-COMPLETION-AUDIT.md)) · This is the single consolidated list of open **business** decisions._
 
 **How to answer:** write your answer on the `Answer:` line under each decision (or reply by email quoting the ID). Answers already recorded here are preserved. Development continues on everything that does not depend on an answer.
 
@@ -22,12 +22,12 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 | P-02 | Information required per service | Quote form fields |
 | P-03 | Currencies, VAT presentation, quote validity | Staff quote form defaults |
 | P-04 ✓ | Customs duties: included or not | **Answered 2026-11-10** (included for parcels and personal effects; vehicles quoted separately; see L-11) |
-| T-01 | Tracking milestones shown to customers | Tracking page labels |
-| T-02 | Delivery-estimate policy | Whether ETAs are shown |
-| SH-01 | One shipment per accepted request, or split consignments | Shipment creation |
-| SH-02 | Operational fields to record per shipment (carrier, container, vessel, booking numbers) | Shipment details, customer view |
-| SH-03 | Customer emails for status changes, especially cancellation | Shipment notifications |
-| SH-04 | Who may cancel a booked shipment, and what the customer is told | Shipment cancellation |
+| T-01 | Tracking milestones shown to customers (**implementation recommendation approved 2026-11-12**: keep the 12 codes; wording to confirm) | Tracking page labels |
+| T-02 | Delivery-estimate policy (**implementation recommendation approved 2026-11-12**: optional, hidden unless shared; policy and disclaimer open) | Whether ETAs are shown |
+| SH-01 | One shipment per accepted request, or split consignments (**implementation recommendation approved 2026-11-12**: one per accepted quote) | Shipment creation |
+| SH-02 | Operational fields to record per shipment (**implementation recommendation approved 2026-11-12**: none until confirmed) | Shipment details, customer view |
+| SH-03 | Customer emails for status changes (**implementation recommendation approved 2026-11-12**: none; public milestones instead; cancellation message open) | Shipment notifications |
+| SH-04 | Who may cancel a booked shipment, and what the customer is told (**implementation recommendation approved 2026-11-12**: staff only; refund terms open, P-06, L-06, L-10) | Shipment cancellation |
 | C-01 ✓ | Verify contact details | **Answered 2026-11-06; WhatsApp and opening hours answered 2026-11-09** |
 | C-02 ◆ | Sender email domain and staff notification inbox | Enabling email |
 | C-03 | Customer account onboarding: open registration or invitation only | **Answered 2026-11-04: open registration** |
@@ -166,41 +166,55 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 
 ## 4. Delivery estimates and shipment tracking
 
+> **How to read the Stage 5 entries below (T-01, T-02, SH-01 to SH-04).** On 2026-11-12 the owner approved an **implementation recommendation** for each: the behaviour the website follows for now. This is **not** the final business or legal confirmation. The `Answer:` line stays open until the business (and, where marked, legal review) confirms or changes it. Nothing here sets a refund, compensation, delivery-time or liability policy.
+
 ### T-01 Tracking milestones shown to customers
 - **Decision needed:** confirm or adjust the default stages: Booked → Received at depot → Departed origin → In transit → Arrived at destination port → In customs → Customs cleared → Ready for collection → Out for delivery → Delivered (plus "Delayed" and "On hold").
 - **If delayed:** the defaults are used; staff choose which events are public.
 - **Affected:** `MILESTONE_CODES` in `lib/domain/enums.ts` (the database enum must match), translations.
 - **Development can continue:** yes.
+- **Approved implementation recommendation (2026-11-12):** keep the existing 12 milestone codes and their current EN/FR wording. No code is added (for example, there is no "Cancelled" milestone).
+- **Still unresolved (business):** confirmation of the wording customers see. Adding or removing a milestone needs a database migration.
 - **Answer:**
 
 ### T-02 Delivery-estimate policy
 - **Decision needed:** may staff show an estimated arrival range to customers? Should a disclaimer accompany it?
 - **If delayed:** ETAs can be recorded by staff but are **only** shown when staff tick "show to customer"; no default estimates exist.
 - **Development can continue:** yes.
+- **Approved implementation recommendation (2026-11-12):** the ETA stays optional and hidden unless staff explicitly share it for that shipment. When it is not shared, customers see "No estimated arrival date has been shared yet."
+- **Still unresolved (business and legal):** whether ETAs may be shown at all, and any disclaimer wording. No disclaimer has been written, and no delivery time is promised anywhere.
 - **Answer:**
 
 ### SH-01 One shipment per accepted request (Stage 5, 2026-11-11)
 - **Today:** an accepted quotation becomes exactly one shipment. The database enforces it (one shipment per quote), and the staff screen refuses a second attempt with a clear message.
 - **Decision needed:** must one request ever become several shipments (for example, goods split across two departures or two containers), or several requests be grouped into one shipment?
 - **If delayed:** one shipment per request. Splitting or grouping would need a schema change and new rules for references, status and notifications.
+- **Approved implementation recommendation (2026-11-12):** one shipment per accepted quote, as built and enforced by the database.
+- **Still unresolved (business):** whether splitting or grouping consignments will ever be needed.
 - **Answer:**
 
 ### SH-02 Operational shipment fields (Stage 5, 2026-11-11)
 - **Today:** a shipment records its ML reference, customer, original request, service, status, an optional estimated arrival range (shown only when staff tick it; see T-02), milestones with location and EN/FR notes, and the dates it was created and last updated.
 - **Decision needed:** which other details the business wants to record, and which customers may see. For example: carrier or shipping line, container number, seal number, vessel or flight, bill of lading or air waybill number, departure and arrival ports, weight and volume, collection and delivery addresses.
 - **If delayed:** none of these are recorded. Staff can put them in internal notes or, for customers, in milestone notes. No carrier tracking integration exists, and the site claims none.
+- **Approved implementation recommendation (2026-11-12):** no additional shipment fields until the business confirms which ones it needs.
+- **Still unresolved (business):** the list of fields, and which of them customers may see (some, such as addresses, are personal data and would need a retention rule under L-03).
 - **Answer:**
 
 ### SH-03 Customer emails for status changes (Stage 5, 2026-11-11)
-- **Today:** the customer receives an email when the shipment is created (`shipment_confirmed`) and whenever staff record a milestone that is visible to the customer (`shipment_update`; `shipment_delivered` for the Delivered milestone). Changing the status itself (In transit, At destination, On hold, Delivered, **Cancelled**) sends the customer nothing; On hold alerts staff only.
+- **Today:** the customer receives an email when the shipment is created (`shipment_confirmed`) and whenever staff record a milestone that is visible to the customer (`shipment_update`; `shipment_delivered` for the Delivered milestone). Changing the status itself (In transit, At destination, On hold, Delivered, **Cancelled**) sends the customer nothing; On hold alerts staff only. Since 2026-11-12 the status form offers the matching milestone (Delivered ticked and visible by default; In transit and On hold unticked; nothing for Cancelled), saved in the same transaction. See [STAGE-5-SHIPMENT-MANAGEMENT.md](./STAGE-5-SHIPMENT-MANAGEMENT.md).
 - **Decision needed:** should a status change, and in particular a cancellation, email the customer automatically, or do staff record a visible milestone or contact the customer themselves?
 - **If delayed:** unchanged. A cancelled shipment shows Cancelled in the portal and on the tracking page, without an email.
+- **Approved implementation recommendation (2026-11-12):** no automatic emails for ordinary status changes; customers are updated through public milestones.
+- **Still unresolved (business):** how customers are told about a cancellation. Today there is no cancellation email; staff contact the customer themselves. A cancellation email would need wording approved by the business.
 - **Answer:**
 
 ### SH-04 Cancelling a booked shipment (Stage 5, 2026-11-11)
 - **Today:** staff can cancel a shipment that is Booked or On hold. A shipment that is in transit or at its destination must first be put on hold. Delivered and Cancelled are final. Customers cannot cancel a shipment online. They can report a problem from the shipment page, which reaches staff as a message.
 - **Decision needed:** confirm these rules, and say what the customer must be told when a shipment is cancelled (refund conditions are still open under P-06 and L-10).
 - **If delayed:** unchanged.
+- **Approved implementation recommendation (2026-11-12):** cancellation stays staff-controlled (the rules above); the website makes no new refund or compensation promises.
+- **Still unresolved (business and legal):** what customers are told when a shipment is cancelled; refund conditions, calculation, method and timeline (P-06); voucher and compensation limits (L-10); cancellation rights for distance contracts (L-06). None of these is approved.
 - **Answer:**
 
 ## 5. Contact information and customer communication
