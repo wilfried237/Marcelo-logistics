@@ -4,7 +4,8 @@ import { Link } from "@/i18n/navigation";
 import { getDb } from "@/lib/db/client";
 import { pageStaff } from "@/lib/auth/page-user";
 import { getShipmentForStaff } from "@/lib/services/shipments";
-import { AddEventForm, EventVisibilityToggle, NoteForm, StaffUploadForm, UpdateShipmentForm } from "@/components/admin/admin-forms";
+import { AddEventForm, EventVisibilityToggle, NoteForm, UpdateShipmentForm } from "@/components/admin/admin-forms";
+import { DocumentUploadForm } from "@/components/app/document-upload-form";
 import { documentUploadsAvailable } from "@/lib/config/env";
 import { listShipmentMessages } from "@/lib/services/cases";
 import { listRecordDocumentsForStaff } from "@/lib/services/documents";
@@ -210,7 +211,7 @@ export default async function AdminShipmentDetail({ params }: { params: Promise<
         </h2>
         <DocumentList documents={documents} audience="staff" />
         {documentUploadsAvailable() ? (
-          <StaffUploadForm locale={locale} ownerType="shipment" ownerId={shipment.id} />
+          <DocumentUploadForm owner={{ type: "shipment", id: shipment.id }} className="mt-4 space-y-3" />
         ) : (
           <p className="mt-3 text-xs text-muted-foreground">{tpd("unavailable")}</p>
         )}

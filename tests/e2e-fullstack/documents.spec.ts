@@ -2,7 +2,7 @@ import { expect, test, type Page, type Request } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 import { createLocalShipment, localQuery, resetLocalLoginLimits } from "./local-db";
-import { MAX_DOCUMENT_BYTES, SERVER_ACTION_BODY_LIMIT_BYTES, VERCEL_REQUEST_BODY_LIMIT_BYTES } from "../../lib/config/upload-limits";
+import { MAX_DOCUMENT_BYTES, UPLOAD_REQUEST_MAX_BYTES, VERCEL_REQUEST_BODY_LIMIT_BYTES } from "../../lib/config/upload-limits";
 
 /*
  * Stage 6: document uploads through a real browser, against the production build
@@ -43,8 +43,8 @@ async function signIn(page: Page, email: string, password: string) {
   await page.waitForURL(/\/en\/(portal|admin)/);
 }
 
-/** Server Action POSTs (the upload) seen by the browser. */
-const isActionPost = (r: Request) => r.method() === "POST" && /\/portal\/documents/.test(r.url());
+/** Upload requests (POST /api/documents) seen by the browser. */
+const isUploadPost = (r: Request) => r.method() === "POST" && new URL(r.url()).pathname === "/api/documents";
 
 test.describe.serial("Stage 6 documents", () => {
   test.beforeEach(async () => resetLocalLoginLimits());
@@ -61,14 +61,14 @@ test.describe.serial("Stage 6 documents", () => {
     for (const person of [owner, other]) if (person.id) await admin.auth.admin.deleteUser(person.id).catch(() => undefined);
   });
 
-  test("a customer uploads a 4 MB PDF through the browser; the request fits the Server Action and Vercel limits", async ({ page }) => {
+  test("a customer uploads a 4 MB PDF through the browser; the request fits the upload route and Vercel limits", async ({ page }) => {
     await signIn(page, owner.email, owner.password);
     await page.goto("/en/portal/documents");
     await expect(page.getByLabel("File (PDF, JPG or PNG, up to 4 MB)")).toBeVisible();
     await page.getByLabel("Attach to").selectOption({ label: fixture.requestRef });
     const posts: Request[] = [];
     page.on("request", (r) => {
-      if (isActionPost(r)) posts.push(r);
+      if (isUploadPost(r)) posts.push(r);
     });
     await page.getByLabel("File (PDF, JPG or PNG, up to 4 MB)").setInputFiles({ name: "exactly-4mb.pdf", mimeType: "application/pdf", buffer: pdf(MAX_DOCUMENT_BYTES) });
     await page.getByRole("button", { name: "Upload a document" }).click();
@@ -82,7 +82,7 @@ test.describe.serial("Stage 6 documents", () => {
     measured.bytes = body;
     test.info().annotations.push({ type: "upload request body", description: `${body} bytes for a ${MAX_DOCUMENT_BYTES}-byte file (overhead ${body! - MAX_DOCUMENT_BYTES} bytes)` });
     console.log(`[documents] upload request body: ${body} bytes for a ${MAX_DOCUMENT_BYTES}-byte file (overhead ${body! - MAX_DOCUMENT_BYTES} bytes)`);
-    expect(body!).toBeLessThanOrEqual(SERVER_ACTION_BODY_LIMIT_BYTES);
+    expect(body!).toBeLessThanOrEqual(UPLOAD_REQUEST_MAX_BYTES);
     expect(body!).toBeLessThan(VERCEL_REQUEST_BODY_LIMIT_BYTES);
 
     // The stored file is complete: download it through the private, signed route.
@@ -113,19 +113,18 @@ test.describe.serial("Stage 6 documents", () => {
 
     const posts: Request[] = [];
     page.on("request", (r) => {
-      if (isActionPost(r)) posts.push(r);
+      if (isUploadPost(r)) posts.push(r);
     });
     await input.setInputFiles({ name: "too-big.pdf", mimeType: "application/pdf", buffer: pdf(MAX_DOCUMENT_BYTES + 1) });
     await expect(page.getByText("The file is larger than 4 MB.")).toBeVisible();
     expect(await input.evaluate((el: HTMLInputElement) => el.files?.length ?? 0)).toBe(0);
-    // Submitting now sends an empty form (the large file was removed) and gets a clear answer.
+    // Submitting now (the large file was removed) asks for a file and sends nothing.
     await page.getByRole("button", { name: "Upload a document" }).click();
     await expect(page.getByText("Choose a file to upload.")).toBeVisible();
-    const sent = await Promise.all(posts.map(async (r) => Number((await r.allHeaders())["content-length"] ?? 0)));
-    expect(sent.every((n) => n < 64 * 1024), `request bodies: ${sent.join(", ")}`).toBe(true);
+    expect(posts).toHaveLength(0);
   });
 
-  test("bypassing the browser check: the server refuses a file over 4 MB, and Next.js refuses a body over its limit", async ({ page }) => {
+  test("bypassing the browser check: the route refuses a file over 4 MB and an oversized request body with 413", async ({ page }) => {
     await signIn(page, owner.email, owner.password);
     await page.goto("/en/portal/documents");
     await page.getByLabel("Attach to").selectOption({ label: fixture.requestRef });
@@ -145,16 +144,16 @@ test.describe.serial("Stage 6 documents", () => {
 
     const responses: number[] = [];
     page.on("response", (r) => {
-      if (isActionPost(r.request())) responses.push(r.status());
+      if (isUploadPost(r.request())) responses.push(r.status());
     });
     await page.goto("/en/portal/documents");
     await page.getByLabel("Attach to").selectOption({ label: fixture.requestRef });
     await place(5 * 1024 * 1024);
     await page.getByRole("button", { name: "Upload a document" }).click();
     await expect.poll(() => responses.length, { timeout: 30_000 }).toBeGreaterThan(0);
-    // Next.js 16 refuses the over-limit Server Action body ("Body exceeded 4456448 limit" in the server log)
-    // and answers 500 rather than 413. On Vercel, bodies over 4.5 MB are refused before the function runs.
-    expect([413, 500]).toContain(responses[0]);
+    // The 5 MB body declares its Content-Length, so the route answers 413 before reading it.
+    expect(responses[0]).toBe(413);
+    await expect(page.getByText("The file is larger than 4 MB.")).toBeVisible();
     await page.goto("/en/portal/documents");
     await expect(page.locator("main").getByText("bypass.pdf")).toHaveCount(0);
   });
@@ -171,6 +170,39 @@ test.describe.serial("Stage 6 documents", () => {
     const anonymous = await browser.newContext();
     expect((await anonymous.request.get(href, { maxRedirects: 0 })).status()).toBe(401);
     await anonymous.close();
+  });
+
+  test("direct requests to the upload route: unauthenticated, cross-site, malformed, wrong type, foreign record, oversized", async ({ page, browser, baseURL }) => {
+    const [request] = await localQuery<{ id: string }>("select id::text from public.quote_requests where reference = $1", [fixture.requestRef]);
+    const file = (size: number, name = "direct.pdf") => ({ name, mimeType: "application/pdf", buffer: pdf(size) });
+    const post = (api: typeof page.request, multipart: Record<string, string | { name: string; mimeType: string; buffer: Buffer }>, headers: Record<string, string> = { origin: baseURL! }) =>
+      api.post("/api/documents", { multipart, headers });
+
+    const anonymous = await browser.newContext();
+    const signedOut = await post(anonymous.request, { ownerType: "quote_request", ownerId: request.id, file: file(1000) });
+    expect([signedOut.status(), (await signedOut.json()).code]).toEqual([401, "UNAUTHENTICATED"]);
+    await anonymous.close();
+
+    await signIn(page, other.email, other.password);
+    const foreign = await post(page.request, { ownerType: "quote_request", ownerId: request.id, file: file(1000) });
+    expect([foreign.status(), (await foreign.json()).code]).toEqual([404, "NOT_FOUND"]);
+    const crossSite = await post(page.request, { ownerType: "quote_request", ownerId: request.id, file: file(1000) }, { origin: "https://evil.example" });
+    expect(crossSite.status()).toBe(403);
+
+    await page.context().clearCookies();
+    await signIn(page, owner.email, owner.password);
+    const malformed = await post(page.request, { ownerType: "invoice", ownerId: "x", file: file(10) });
+    expect([malformed.status(), (await malformed.json()).code]).toEqual([400, "MALFORMED"]);
+    const exe = await post(page.request, { ownerType: "quote_request", ownerId: request.id, file: { name: "invoice.pdf", mimeType: "application/pdf", buffer: Buffer.from([0x4d, 0x5a, 0x90, 0x00]) } });
+    expect([exe.status(), (await exe.json()).code]).toEqual([415, "TYPE"]);
+    const exact = await post(page.request, { ownerType: "quote_request", ownerId: request.id, file: file(MAX_DOCUMENT_BYTES, "direct-exact.pdf") });
+    expect(exact.status()).toBe(201);
+    const over = await post(page.request, { ownerType: "quote_request", ownerId: request.id, file: file(MAX_DOCUMENT_BYTES + 1) });
+    expect([over.status(), (await over.json()).code]).toEqual([413, "TOO_LARGE"]);
+    const huge = await post(page.request, { ownerType: "quote_request", ownerId: request.id, file: file(6 * 1024 * 1024) });
+    expect([huge.status(), (await huge.json()).code]).toEqual([413, "TOO_LARGE"]);
+    const stored = await localQuery<{ n: number }>("select count(*)::int n from public.documents where owner_id = $1::uuid and original_name like 'direct%'", [request.id]);
+    expect(stored[0].n).toBe(1); // only the exact 4 MiB file
   });
 
   test("the customer sees each record's documents on its own page; another customer sees none of them", async ({ page }) => {
@@ -237,17 +269,19 @@ test.describe.serial("Stage 6 documents", () => {
       [owner.id],
     );
     const byName = Object.fromEntries(rows.map((r) => [r.original_name, r]));
-    for (const name of ["exactly-4mb.pdf", "photo.jpg", "scan.png"]) expect(byName[name]?.alerts, name).toBe(1);
+    for (const name of ["exactly-4mb.pdf", "photo.jpg", "scan.png", "direct-exact.pdf"]) expect(byName[name]?.alerts, name).toBe(1);
+    const customerUploads = rows.filter((r) => r.uploaded_by === owner.id).length;
+    expect(customerUploads).toBe(4);
     expect(byName["delivery-note.pdf"]?.alerts).toBe(0);
     // Sent through the (local mock) provider. The immediate send after an upload takes the 10 oldest due emails,
     // and earlier local suites leave unsent rows behind, so the authenticated email job drains the queue here.
     const sent = async () =>
       (await localQuery<{ n: number }>("select count(*)::int n from public.email_deliveries e join public.documents d on d.id::text = e.entity_id join public.customers c on c.id = d.customer_id where e.template = 'staff_document_uploaded' and c.user_id = $1 and e.status = 'SENT'", [owner.id]))[0].n;
-    for (let i = 0; i < 10 && (await sent()) < 3; i++) {
+    for (let i = 0; i < 10 && (await sent()) < customerUploads; i++) {
       const run = await request.get("/api/cron/process-emails", { headers: { authorization: "Bearer journeys-local-cron-secret-0123456789abcdef" /* local test secret, as in journeys.spec.ts */ } });
       expect(run.status()).toBe(200);
     }
-    expect(await sent()).toBe(3);
+    expect(await sent()).toBe(customerUploads);
     // The alert never carries the file name.
     const subjects = await localQuery<{ n: number }>("select count(*)::int n from public.email_deliveries where template = 'staff_document_uploaded' and payload::text like '%.pdf%'");
     expect(subjects[0].n).toBe(0);

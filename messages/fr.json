@@ -491,7 +491,8 @@
         "type": "Seuls les fichiers PDF, JPG et PNG sont acceptés.",
         "not_found": "Choisissez l’une de vos demandes ou l’un de vos envois.",
         "generic": "Le document n’a pas pu être ajouté.",
-        "empty": "Choisissez un fichier à envoyer."
+        "empty": "Choisissez un fichier à envoyer.",
+        "rate_limited": "Trop d’envois. Veuillez patienter et réessayer plus tard."
       }
     },
     "profile": {

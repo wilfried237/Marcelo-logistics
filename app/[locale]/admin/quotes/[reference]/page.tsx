@@ -5,7 +5,8 @@ import { getDb } from "@/lib/db/client";
 import { pageStaff } from "@/lib/auth/page-user";
 import { formatMoney } from "@/lib/domain/money";
 import { getQuoteRequestForStaff } from "@/lib/services/quote-requests";
-import { CreateShipmentForm, QuoteCalculatorForm, NoteForm, RequestInfoForm, AssignForm, TransitionForm, StaffUploadForm } from "@/components/admin/admin-forms";
+import { CreateShipmentForm, QuoteCalculatorForm, NoteForm, RequestInfoForm, AssignForm, TransitionForm } from "@/components/admin/admin-forms";
+import { DocumentUploadForm } from "@/components/app/document-upload-form";
 import { documentUploadsAvailable } from "@/lib/config/env";
 import { Alert } from "@/components/app/alert";
 import { PageHeader } from "@/components/app/page-header";
@@ -175,7 +176,7 @@ export default async function AdminQuoteDetail({ params }: { params: Promise<{ l
           <Section id="documents" title={tdoc("title")}>
             <DocumentList documents={documents} audience="staff" />
             {documentUploadsAvailable() ? (
-              <StaffUploadForm locale={locale} ownerType="quote_request" ownerId={request.id} />
+              <DocumentUploadForm owner={{ type: "quote_request", id: request.id }} className="mt-4 space-y-3" />
             ) : (
               <p className="mt-3 text-xs text-muted-foreground">{tpd("unavailable")}</p>
             )}

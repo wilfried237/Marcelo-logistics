@@ -4,8 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
-import { documentUploadsAvailable, getSiteUrl, isStorageConfigured } from "@/lib/config/env";
-import { MAX_DOCUMENT_BYTES, MAX_DOCUMENT_MEGABYTES } from "@/lib/config/upload-limits";
+import { getSiteUrl, isStorageConfigured } from "@/lib/config/env";
 import { getDb } from "@/lib/db/client";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isAdmin, isStaff, type AppUser } from "@/lib/auth/types";
@@ -17,8 +16,6 @@ import { issueQuote, transitionQuoteRequest, type StaffActionResult } from "@/li
 import { addInternalNote, assignRequest, requestInformation, setContactStatus } from "@/lib/services/cases";
 import { addShipmentEvent, createShipmentForRequest, setShipmentEventVisibility, updateShipment } from "@/lib/services/shipments";
 import { setUserRole } from "@/lib/services/users";
-import { uploadDocument } from "@/lib/services/documents";
-import { supabaseDocumentStorage } from "@/lib/storage/supabase-storage";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 const localeOf = (fd: FormData) => z.enum(routing.locales).catch("en").parse(fd.get("locale"));
@@ -229,28 +226,4 @@ export async function inviteUserAction(_prev: ActionState, fd: FormData): Promis
   }
   revalidatePath(`/${locale}/admin/users`);
   return { status: "ok", message: t("invited") };
-}
-
-/**
- * Staff document upload (Stage 6, D2). Behind the same switch as customer
- * uploads (ENABLE_DOCUMENT_UPLOADS, off in production until L-03): the server
- * refuses it when uploads are unavailable, whatever the form shows. The
- * document service re-checks type, size and that the record exists.
- */
-export async function staffUploadDocumentAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
-  const { locale, user } = await context(fd);
-  if (!user) return denied(locale);
-  const t = await getTranslations({ locale, namespace: "portal.documents" });
-  if (!documentUploadsAvailable()) return { status: "error", message: t("unavailable") };
-  const ownerType = fd.get("ownerType");
-  const ownerId = String(fd.get("ownerId") ?? "");
-  const file = fd.get("file");
-  if ((ownerType !== "quote_request" && ownerType !== "shipment") || !(file instanceof File)) return { status: "error", message: t("errors.generic") };
-  const max = { max: MAX_DOCUMENT_MEGABYTES };
-  if (file.size === 0) return { status: "error", message: t("errors.empty") };
-  if (file.size > MAX_DOCUMENT_BYTES) return { status: "error", message: t("errors.too_large", max) };
-  const result = await uploadDocument(getDb(), supabaseDocumentStorage(), user, { ownerType, ownerId, fileName: file.name, bytes: new Uint8Array(await file.arrayBuffer()) });
-  if (!result.ok) return { status: "error", message: t(`errors.${result.code === "not_found" ? "generic" : result.code}`, max) };
-  revalidatePath(`/${locale}/admin`, "layout");
-  return { status: "ok", message: t("uploaded") };
 }

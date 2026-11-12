@@ -9,7 +9,7 @@ import { listCustomerShipments } from "@/lib/services/shipments";
 import { Alert } from "@/components/app/alert";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
-import { UploadDocumentForm } from "./upload-form";
+import { DocumentUploadForm } from "@/components/app/document-upload-form";
 
 export default async function PortalDocuments({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -57,7 +57,7 @@ export default async function PortalDocuments({ params }: { params: Promise<{ lo
         <h2 id="upload" className="text-xl font-semibold">
           {t("upload")}
         </h2>
-        {uploads && owners.length ? <UploadDocumentForm locale={locale} owners={owners} /> : <Alert className="mt-4">{t("unavailable")}</Alert>}
+        {uploads && owners.length ? <DocumentUploadForm owners={owners} /> : <Alert className="mt-4">{t("unavailable")}</Alert>}
       </section>
     </div>
   );

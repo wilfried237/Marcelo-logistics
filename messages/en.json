@@ -491,7 +491,8 @@
         "type": "Only PDF, JPG and PNG files are accepted.",
         "not_found": "Choose one of your requests or shipments.",
         "generic": "The document could not be uploaded.",
-        "empty": "Choose a file to upload."
+        "empty": "Choose a file to upload.",
+        "rate_limited": "Too many uploads. Please wait and try again later."
       }
     },
     "profile": {

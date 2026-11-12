@@ -4,8 +4,6 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
-import { documentUploadsAvailable } from "@/lib/config/env";
-import { MAX_DOCUMENT_BYTES, MAX_DOCUMENT_MEGABYTES } from "@/lib/config/upload-limits";
 import { getDb } from "@/lib/db/client";
 import { getCurrentUser } from "@/lib/auth/session";
 import type { ActionState } from "@/components/app/action-form";
@@ -13,8 +11,6 @@ import { respondToQuote } from "@/lib/services/quote-requests";
 import { addCustomerReply, reportShipmentIssue } from "@/lib/services/cases";
 import { deliverQueuedEmailsSoon } from "@/lib/email/dispatch";
 import { updateOwnCustomerProfile } from "@/lib/services/users";
-import { uploadDocument } from "@/lib/services/documents";
-import { supabaseDocumentStorage } from "@/lib/storage/supabase-storage";
 
 const locale = (formData: FormData) => z.enum(routing.locales).catch("en").parse(formData.get("locale"));
 
@@ -57,28 +53,6 @@ export async function updateProfileAction(_prev: ActionState, formData: FormData
   if (!result.ok) return { status: "error", message: tc("genericError") };
   revalidatePath(`/${l}/portal/profile`);
   return { status: "ok", message: tc("saved") };
-}
-
-export async function uploadDocumentAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const l = locale(formData);
-  const t = await getTranslations({ locale: l, namespace: "portal.documents" });
-  const user = await getCurrentUser();
-  if (!user || !documentUploadsAvailable()) return { status: "error", message: t("unavailable") };
-  const target = String(formData.get("owner") ?? "");
-  const [ownerType, ownerId] = target.split(":");
-  const file = formData.get("file");
-  if ((ownerType !== "quote_request" && ownerType !== "shipment") || !ownerId || !(file instanceof File)) {
-    return { status: "error", message: t("errors.not_found") };
-  }
-  const max = { max: MAX_DOCUMENT_MEGABYTES };
-  if (file.size === 0) return { status: "error", message: t("errors.empty") };
-  if (file.size > MAX_DOCUMENT_BYTES) return { status: "error", message: t("errors.too_large", max) };
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  const result = await uploadDocument(getDb(), supabaseDocumentStorage(), user, { ownerType, ownerId, fileName: file.name, bytes });
-  if (!result.ok) return { status: "error", message: t(`errors.${result.code}`, max) };
-  deliverQueuedEmailsSoon(); // the staff upload alert (Stage 6)
-  revalidatePath(`/${l}/portal/documents`);
-  return { status: "ok", message: t("uploaded") };
 }
 
 async function messageResult(l: "en" | "fr", result: { ok: boolean; code?: string; fieldErrors?: Record<string, string> }, okKey: "replySent" | "issueSent"): Promise<ActionState> {
