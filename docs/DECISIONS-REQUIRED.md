@@ -1,6 +1,6 @@
 # Decisions Required from the Owner
 
-_Last updated: 2026-11-12 (Stage 5: implementation recommendations approved for T-01, T-02 and SH-01 to SH-04, business and legal confirmation still open: see [section 4](#4-delivery-estimates-and-shipment-tracking); Stage 3 price list and customer information: see [section 9](#9-stage-3-client-information-2026-11-10); legal drafts: [docs/legal/](./legal/README.md); completion audit: [PROJECT-COMPLETION-AUDIT.md](./PROJECT-COMPLETION-AUDIT.md)) · This is the single consolidated list of open **business** decisions._
+_Last updated: 2026-11-13 (Stage 6 decisions D1 to D4 answered and remaining open items: see [section 10](#10-stage-6-supporting-features-2026-11-13); Stage 5: implementation recommendations approved for T-01, T-02 and SH-01 to SH-04, business and legal confirmation still open: see [section 4](#4-delivery-estimates-and-shipment-tracking); Stage 3 price list and customer information: see [section 9](#9-stage-3-client-information-2026-11-10); legal drafts: [docs/legal/](./legal/README.md); completion audit: [PROJECT-COMPLETION-AUDIT.md](./PROJECT-COMPLETION-AUDIT.md)) · This is the single consolidated list of open **business** decisions._
 
 **How to answer:** write your answer on the `Answer:` line under each decision (or reply by email quoting the ID). Answers already recorded here are preserved. Development continues on everything that does not depend on an answer.
 
@@ -57,6 +57,10 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 | R-01 ◆ | Vercel and Supabase account ownership and EU region | Preview deployment, database |
 | R-02 ✓ | Migrations applied automatically on production deployments (approved 2026-11-03) | — |
 | R-03 ★ | Launch approval and relationship to the live WordPress site | Production launch |
+| D1 ✓ | Document upload size | **Answered 2026-11-13: 4 MB per file** (Stage 6) |
+| D2 ✓ | Staff upload form | **Answered 2026-11-13: yes, behind `ENABLE_DOCUMENT_UPLOADS`** (Stage 6) |
+| D3 ✓ | Audit detail shown to staff | **Answered 2026-11-13: changed field names only, never values** (Stage 6) |
+| D4 ✓ | Manual retry of DEAD emails | **Answered 2026-11-13: no** (Stage 6) |
 
 ---
 
@@ -268,6 +272,7 @@ Technical decisions (stack, database, auth, hosting, email provider, testing) ar
 - **Why it matters:** GDPR requires retention limits, while tax and customs rules may require minimum periods.
 - **If delayed:** **nothing is deleted automatically** (`retention_until` stays empty); document uploads stay disabled.
 - **Development can continue:** yes.
+- **Stage 6 note (2026-11-13):** uploads now work end to end (4 MB limit, staff and customer views, staff upload, staff alert), tested locally only. They stay **switched off in production** until this decision is answered and enabling them is approved separately. Deleting documents (by customers, staff or the retention job) is not implemented and also waits for this answer.
 - **Answer:**
 
 ### L-04 ★ Cookie policy
@@ -409,3 +414,28 @@ The client supplied an official price list and customer information, confirmed b
 - **Issue:** customers can change their name, phone, language and password, and sign out on all devices. Changing the sign-in email, deleting the account and exporting their data are not self-service: they go through the business by email.
 - **Decision needed:** keep these as requests handled by the business, or build self-service versions (email change needs a confirmation email to both addresses; deletion and export need the retention rules in L-03).
 - **Answer:**
+
+## 10. Stage 6 supporting features (2026-11-13)
+
+Implementation record: [STAGE-6-SUPPORTING-FEATURES.md](./STAGE-6-SUPPORTING-FEATURES.md). The four implementation decisions below were answered by the owner; they are technical choices, not business or legal policy.
+
+### D1 ✓ Document upload size
+- **Answer (owner, 2026-11-13):** maximum 4 MB per file (PDF, JPEG, PNG). Implemented; a 4 MB file was uploaded and downloaded intact through a real browser on the local stack.
+
+### D2 ✓ Staff upload form
+- **Answer (owner, 2026-11-13):** yes, behind the existing `ENABLE_DOCUMENT_UPLOADS` switch, which stays off in production.
+
+### D3 ✓ Audit detail
+- **Answer (owner, 2026-11-13):** staff see which fields changed, never the old or new values.
+
+### D4 ✓ Manual retry of DEAD emails
+- **Answer (owner, 2026-11-13):** no. A DEAD email stays visible on the notifications page with its error; staff contact the person by other means if needed.
+
+### Still open after Stage 6 (not approved; nothing implemented)
+- **L-03:** retention periods; enabling uploads in production; any deletion of documents.
+- Whether customers may remove documents they uploaded by mistake (depends on L-03).
+- Which documents customers are asked to provide (no document types are defined).
+- Audit export, and recording who downloaded a document (the latter would need a database migration).
+- Customer notification preferences or opt-outs (transactional emails only today).
+- N-01 quotation expiry reminders (built, off).
+- SH-03 cancellation message to customers.
