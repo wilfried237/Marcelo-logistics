@@ -27,6 +27,8 @@ export const JOURNEY_ENV = {
   // Registration is closed until the official launch (owner, 2026-11-08). JOURNEY_REGISTRATION_OPEN=1
   // runs the open-registration journey instead (needs [auth] enable_signup = true locally).
   ENABLE_CUSTOMER_REGISTRATION: process.env.JOURNEY_REGISTRATION_OPEN === "1" ? "true" : "false",
+  // Local test stack only (Stage 6 document journeys). Production keeps uploads off until L-03.
+  ENABLE_DOCUMENT_UPLOADS: "true",
   ENABLE_TRANSACTIONAL_EMAIL: "true",
   RESEND_API_KEY: "re_mock_local_only",
   RESEND_BASE_URL: `http://127.0.0.1:${MOCK}`,

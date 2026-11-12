@@ -4,6 +4,7 @@ import { insertRequest } from "../db/fixtures";
 import type { Database } from "@/lib/db/types";
 import type { AppUser } from "@/lib/auth/types";
 import { loadAppUser } from "@/lib/services/users";
+import { MAX_DOCUMENT_BYTES } from "@/lib/config/upload-limits";
 import { documentDownloadUrl, listDocuments, safeFileName, sniffMime, uploadDocument, type DocumentStorage } from "@/lib/services/documents";
 
 const PDF = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37, 0x0a]);
@@ -76,7 +77,7 @@ describe("private documents", () => {
   it("rejects disallowed types, empty and oversize files", async () => {
     expect(await uploadDocument(db, storage, a, { ownerType: "quote_request", ownerId: requestA, fileName: "x.pdf", bytes: EXE })).toEqual({ ok: false, code: "type" });
     expect(await uploadDocument(db, storage, a, { ownerType: "quote_request", ownerId: requestA, fileName: "x.pdf", bytes: new Uint8Array() })).toEqual({ ok: false, code: "too_large" });
-    const big = new Uint8Array(10 * 1024 * 1024 + 1);
+    const big = new Uint8Array(MAX_DOCUMENT_BYTES + 1);
     big.set(PDF);
     expect(await uploadDocument(db, storage, a, { ownerType: "quote_request", ownerId: requestA, fileName: "x.pdf", bytes: big })).toEqual({ ok: false, code: "too_large" });
   });
@@ -94,5 +95,27 @@ describe("private documents", () => {
     expect(await documentDownloadUrl(db, storage, a, "not-a-uuid")).toBeNull();
     expect(await documentDownloadUrl(db, storage, a, docA)).toMatch(/^https:\/\/storage\.example\.test\/signed\//);
     expect(await documentDownloadUrl(db, storage, staff, docA)).not.toBeNull();
+  });
+});
+
+describe("4 MB limit (D1, Stage 6)", () => {
+  const sized = (header: Uint8Array, size: number) => {
+    const bytes = new Uint8Array(size);
+    bytes.set(header);
+    return bytes;
+  };
+  const JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
+
+  it("accepts PDF, JPEG and PNG files of exactly 4 MB", async () => {
+    for (const [name, header] of [["at-limit.pdf", PDF], ["at-limit.jpg", JPEG], ["at-limit.png", PNG]] as const) {
+      const result = await uploadDocument(db, storage, b, { ownerType: "quote_request", ownerId: requestB, fileName: name, bytes: sized(header, MAX_DOCUMENT_BYTES) });
+      expect(result.ok, name).toBe(true);
+    }
+  });
+
+  it("rejects one byte over 4 MB without storing anything", async () => {
+    const before = storage.files.size;
+    expect(await uploadDocument(db, storage, b, { ownerType: "quote_request", ownerId: requestB, fileName: "over.pdf", bytes: sized(PDF, MAX_DOCUMENT_BYTES + 1) })).toEqual({ ok: false, code: "too_large" });
+    expect(storage.files.size).toBe(before);
   });
 });

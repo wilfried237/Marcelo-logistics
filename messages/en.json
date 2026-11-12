@@ -481,16 +481,17 @@
       "empty": "No documents yet",
       "upload": "Upload a document",
       "uploadFor": "Attach to",
-      "file": "File (PDF, JPG or PNG, up to 10 MB)",
+      "file": "File (PDF, JPG or PNG, up to {max} MB)",
       "uploading": "Uploading…",
       "uploaded": "Document uploaded.",
       "download": "Download",
       "unavailable": "Document uploads are not available yet.",
       "errors": {
-        "too_large": "The file is larger than 10 MB.",
+        "too_large": "The file is larger than {max} MB.",
         "type": "Only PDF, JPG and PNG files are accepted.",
         "not_found": "Choose one of your requests or shipments.",
-        "generic": "The document could not be uploaded."
+        "generic": "The document could not be uploaded.",
+        "empty": "Choose a file to upload."
       }
     },
     "profile": {

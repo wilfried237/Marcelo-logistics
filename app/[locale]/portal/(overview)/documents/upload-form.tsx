@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { ActionForm } from "@/components/app/action-form";
 import { FormField, selectClassName } from "@/components/app/form-field";
 import { SubmitButton } from "@/components/app/submit-button";
+import { DocumentFileInput } from "@/components/app/document-file-input";
 import { uploadDocumentAction } from "../../actions";
 
 export function UploadDocumentForm({ locale, owners }: { locale: string; owners: { value: string; label: string }[] }) {
@@ -24,9 +25,7 @@ export function UploadDocumentForm({ locale, owners }: { locale: string; owners:
               </select>
             )}
           </FormField>
-          <FormField id="file" label={t("file")}>
-            {(p) => <input {...p} type="file" name="file" accept="application/pdf,image/jpeg,image/png" required className="block w-full text-sm file:mr-3 file:rounded-md file:border file:bg-secondary file:px-3 file:py-2" />}
-          </FormField>
+          <DocumentFileInput />
           <SubmitButton pendingLabel={t("uploading")}>{t("upload")}</SubmitButton>
         </>
       )}

@@ -481,16 +481,17 @@
       "empty": "Aucun document",
       "upload": "Ajouter un document",
       "uploadFor": "Joindre à",
-      "file": "Fichier (PDF, JPG ou PNG, 10 Mo maximum)",
+      "file": "Fichier (PDF, JPG ou PNG, {max} Mo maximum)",
       "uploading": "Envoi…",
       "uploaded": "Document ajouté.",
       "download": "Télécharger",
       "unavailable": "L’ajout de documents n’est pas encore disponible.",
       "errors": {
-        "too_large": "Le fichier dépasse 10 Mo.",
+        "too_large": "Le fichier dépasse {max} Mo.",
         "type": "Seuls les fichiers PDF, JPG et PNG sont acceptés.",
         "not_found": "Choisissez l’une de vos demandes ou l’un de vos envois.",
-        "generic": "Le document n’a pas pu être ajouté."
+        "generic": "Le document n’a pas pu être ajouté.",
+        "empty": "Choisissez un fichier à envoyer."
       }
     },
     "profile": {

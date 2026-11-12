@@ -58,4 +58,5 @@ export const CURRENCY_EXPONENT: Record<Currency, number> = { EUR: 2, XAF: 0 };
 
 export const DOCUMENT_MIME_TYPES = ["application/pdf", "image/jpeg", "image/png"] as const;
 export type DocumentMimeType = (typeof DOCUMENT_MIME_TYPES)[number];
-export const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
+/** 4 MB per file (owner decision D1); see lib/config/upload-limits.ts for how the request limits fit around it. */
+export { MAX_DOCUMENT_BYTES } from "@/lib/config/upload-limits";

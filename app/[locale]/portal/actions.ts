@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { documentUploadsAvailable } from "@/lib/config/env";
+import { MAX_DOCUMENT_BYTES, MAX_DOCUMENT_MEGABYTES } from "@/lib/config/upload-limits";
 import { getDb } from "@/lib/db/client";
 import { getCurrentUser } from "@/lib/auth/session";
 import type { ActionState } from "@/components/app/action-form";
@@ -69,10 +70,12 @@ export async function uploadDocumentAction(_prev: ActionState, formData: FormDat
   if ((ownerType !== "quote_request" && ownerType !== "shipment") || !ownerId || !(file instanceof File)) {
     return { status: "error", message: t("errors.not_found") };
   }
-  if (file.size > 10 * 1024 * 1024) return { status: "error", message: t("errors.too_large") };
+  const max = { max: MAX_DOCUMENT_MEGABYTES };
+  if (file.size === 0) return { status: "error", message: t("errors.empty") };
+  if (file.size > MAX_DOCUMENT_BYTES) return { status: "error", message: t("errors.too_large", max) };
   const bytes = new Uint8Array(await file.arrayBuffer());
   const result = await uploadDocument(getDb(), supabaseDocumentStorage(), user, { ownerType, ownerId, fileName: file.name, bytes });
-  if (!result.ok) return { status: "error", message: t(`errors.${result.code}`) };
+  if (!result.ok) return { status: "error", message: t(`errors.${result.code}`, max) };
   revalidatePath(`/${l}/portal/documents`);
   return { status: "ok", message: t("uploaded") };
 }
