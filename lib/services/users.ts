@@ -70,12 +70,3 @@ export async function setUserRole(db: Database, user: AppUser, targetUserId: str
     return { ok: false, code: domainErrorCode(error) };
   }
 }
-
-/** Most recent audit entries (staff and admin; RLS also restricts this table). */
-export async function listAuditEntries(db: Database, user: AppUser, limit = 200) {
-  assertStaff(user);
-  const rows = await withUser(db, user.id, (tx) =>
-    tx.auditLog.findMany({ select: { id: true, actor: true, action: true, entity: true, entityId: true, at: true }, orderBy: { at: "desc" }, take: limit }),
-  );
-  return rows.map((r) => ({ ...r, id: Number(r.id) }));
-}

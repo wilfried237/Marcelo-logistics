@@ -110,3 +110,21 @@ export async function localShipmentEmails(shipmentRef: string): Promise<string[]
     await client.end();
   }
 }
+
+/** Runs a statement as the given local user through RLS (local database only). Used to create audited changes. */
+export async function asLocalUser(userId: string, sql: string, params: unknown[] = []): Promise<void> {
+  const client = new pg.Client({ connectionString: localUrl("asLocalUser") });
+  await client.connect();
+  try {
+    await client.query("begin");
+    await client.query("select set_config('request.jwt.claims', $1, true)", [JSON.stringify({ sub: userId, role: "authenticated" })]);
+    await client.query("set local role authenticated");
+    await client.query(sql, params);
+    await client.query("commit");
+  } catch (error) {
+    await client.query("rollback").catch(() => undefined);
+    throw error;
+  } finally {
+    await client.end();
+  }
+}
