@@ -600,7 +600,9 @@
       "milestonePublic": "Visible to the customer",
       "recordMilestoneHint": "A visible milestone is shown to the customer and sends them an update email. The status and the milestone are saved together, or not at all.",
       "savedWithMilestone": "Changes saved and milestone recorded.",
-      "savedMilestoneExists": "Changes saved. This milestone was already recorded, so it was not added again."
+      "savedMilestoneExists": "Changes saved. This milestone was already recorded, so it was not added again.",
+      "deliveredMilestoneExists": "This shipment already has a Delivered milestone. To show it to the customer, use “Show to customer” on it.",
+      "savedMilestonePublished": "Changes saved. The existing Delivered milestone is now visible to the customer."
     },
     "users": {
       "intro": "Only administrators can change roles. Every change is recorded in the audit log.",

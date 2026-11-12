@@ -42,6 +42,7 @@ async function toState(locale: string, result: StaffActionResult<unknown>, okMes
     invalid_quote_transition: tc("notAllowed"),
     invalid_shipment_transition: tsh("invalidTransition"),
     shipment_exists: tsh("alreadyExists"),
+    delivered_milestone_exists: tsh("deliveredMilestoneExists"),
     quote_not_accepted: tsh("notAccepted"),
     quote_total_mismatch: tc("genericError"),
     assignee_not_staff: tc("notAllowed"),
@@ -152,7 +153,14 @@ export async function updateShipmentAction(_prev: ActionState, fd: FormData): Pr
   revalidatePath(`/${locale}/admin`, "layout");
   const tsh = await getTranslations({ locale, namespace: "admin.shipment" });
   const milestone = result.ok ? result.data?.milestone : undefined;
-  const message = milestone === "recorded" ? tsh("savedWithMilestone") : milestone === "skipped" ? tsh("savedMilestoneExists") : tc("saved");
+  const message =
+    milestone === "recorded"
+      ? tsh("savedWithMilestone")
+      : milestone === "published"
+        ? tsh("savedMilestonePublished")
+        : milestone === "skipped"
+          ? tsh("savedMilestoneExists")
+          : tc("saved");
   return toState(locale, result, message);
 }
 

@@ -70,7 +70,21 @@ When staff choose a new status in the form, the matching milestone is offered:
 - **Emails, unchanged:** a public milestone queues `shipment_update`, or `shipment_delivered` for Delivered, once (keyed by the milestone id). Status changes alone still send customers nothing (SH-03); On hold still alerts staff only.
 - **No migration:** staff already may insert milestones (RLS and column grants); the existing triggers do the rest.
 
-**Rule for staff:** to mark a shipment delivered, keep the Delivered box ticked. If the Delivered milestone was already recorded by hand, it is not added again.
+**Rule for staff:** to mark a shipment delivered, keep the Delivered box ticked. If the Delivered milestone was already recorded by hand, it is not added again; if that milestone was internal and the box asks for a visible one, the existing milestone is made visible instead (one delivery email).
+
+**One Delivered milestone per shipment (release review, 2026-11-13):** the manual milestone form also refuses a second Delivered milestone ("This shipment already has a Delivered milestone…"). Both forms take the shipment's row lock before checking (the status form by updating the row, the manual form with `SELECT … FOR UPDATE`), so parallel requests cannot both add one. Verified with five parallel requests on the real local Postgres (`tests/supabase/delivery-concurrency.test.ts`): without the lock they produced three Delivered milestones and three delivery emails; with it, one and one. Other milestones (Delayed, On hold…) may still be recorded more than once by hand. No migration.
+
+## Delivery email reliability
+
+| Stage | What happens | Guarantee |
+|---|---|---|
+| Outbox row | A public Delivered milestone (inserted, or made visible) queues `shipment_delivered` in the same transaction, keyed `shipment_event:<milestone id>`; the unique index on `idempotency_key` ignores any re-queue | One row per milestone, and one Delivered milestone per shipment, so **one row per shipment**. If the business change rolls back, the row does too |
+| Attempt | `processOutbox` claims due rows with `FOR UPDATE SKIP LOCKED` (no two workers take the same row), right after the request (`after()`) and in the daily cron | A row is sent by one worker at a time; a row stuck in SENDING is reclaimed after 10 minutes |
+| Provider acceptance | Resend receives the row's idempotency key; status SENT records acceptance | A retry of the same row reuses the same key |
+| Failure | FAILED with backoff (1, 5, 30, 120, 720 minutes), then DEAD after 5 attempts with one staff alert | The row is never lost or duplicated; it stays visible on the staff notifications page |
+| Mailbox | Delivered, bounced or complained events arrive through the signed webhook | Not guaranteed by any sender |
+
+**Not exactly-once delivery.** One queued email per shipment is guaranteed. The send itself is at-least-once with provider deduplication: if a provider call succeeds but the response is lost (timeout or crash), the retry carries the same idempotency key. Resend keeps those keys for 24 hours, so a retry more than 24 hours later could deliver a second copy. Within the window, Resend refuses a reused key whose payload differs (HTTP 409). The email is re-rendered for each attempt, so if staff edit the milestone between a failed attempt and its retry, the retry is refused, retried and finally marked DEAD with a staff alert: not lost silently, but not delivered automatically. On the Vercel Hobby plan retries run only after the next staff or customer action or at the daily cron, so a late retry is possible (Stage 8: more frequent retries). Inbox delivery depends on the recipient's provider and is only reported, never guaranteed.
 
 ## Permissions
 

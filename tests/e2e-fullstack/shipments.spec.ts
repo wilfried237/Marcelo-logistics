@@ -174,6 +174,11 @@ test.describe.serial("Stage 5 shipment management", () => {
     await expect(page.locator("#status option")).toHaveCount(1);
     await expect(group).toHaveCount(0);
     expect((await localShipmentEmails(fixture.shipmentRef)).filter((x) => x === "shipment_delivered")).toHaveLength(1);
+    // A second Delivered milestone by hand is refused, so no second delivery email can follow.
+    await page.locator("#milestone").selectOption("DELIVERED");
+    await page.getByRole("button", { name: "Record milestone" }).click();
+    await expect(page.getByText("This shipment already has a Delivered milestone.", { exact: false })).toBeVisible();
+    expect((await localShipmentEmails(fixture.shipmentRef)).filter((x) => x === "shipment_delivered")).toHaveLength(1);
 
     // The customer sees the status, the Delivered milestone, and the delivery date on public tracking.
     await page.context().clearCookies();

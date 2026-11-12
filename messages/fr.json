@@ -600,7 +600,9 @@
       "milestonePublic": "Visible par le client",
       "recordMilestoneHint": "Une étape visible est affichée au client et lui envoie un e-mail de mise à jour. Le statut et l’étape sont enregistrés ensemble, ou pas du tout.",
       "savedWithMilestone": "Modifications enregistrées et étape enregistrée.",
-      "savedMilestoneExists": "Modifications enregistrées. Cette étape était déjà enregistrée ; elle n’a pas été ajoutée une seconde fois."
+      "savedMilestoneExists": "Modifications enregistrées. Cette étape était déjà enregistrée ; elle n’a pas été ajoutée une seconde fois.",
+      "deliveredMilestoneExists": "Cet envoi a déjà une étape « Livré ». Pour l’afficher au client, utilisez « Montrer au client » sur cette étape.",
+      "savedMilestonePublished": "Modifications enregistrées. L’étape « Livré » existante est maintenant visible par le client."
     },
     "users": {
       "intro": "Seuls les administrateurs peuvent modifier les rôles. Chaque modification est enregistrée dans le journal d’audit.",

@@ -1,6 +1,6 @@
 import { withUser } from "@/lib/db/context";
 import { domainErrorCode, isUniqueViolation } from "@/lib/db/errors";
-import type { Database } from "@/lib/db/types";
+import type { Database, Tx } from "@/lib/db/types";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import { assertStaff, type AppUser } from "@/lib/auth/types";
 import { fieldErrors, shipmentEventInputSchema, shipmentUpdateInputSchema } from "@/lib/domain/quote-schema";
@@ -197,8 +197,14 @@ export async function addShipmentEvent(db: Database, user: AppUser, raw: unknown
   if (!parsed.success) return { ok: false, code: "invalid", fieldErrors: fieldErrors(parsed.error) };
   const input = parsed.data;
   try {
-    await withUser(db, user.id, (tx) =>
-      tx.shipmentEvent.create({
+    const outcome = await withUser(db, user.id, async (tx) => {
+      if (input.milestone === "DELIVERED") {
+        // One Delivered milestone per shipment, hence one delivery email. The row lock serialises
+        // this check with the status form (which locks the same row by updating it).
+        if (!(await lockShipment(tx, input.shipmentId))) return "not_found" as const;
+        if (await tx.shipmentEvent.count({ where: { shipmentId: input.shipmentId, milestoneCode: "DELIVERED" } })) return "delivered_milestone_exists" as const;
+      }
+      await tx.shipmentEvent.create({
         data: {
           shipmentId: input.shipmentId,
           milestoneCode: input.milestone,
@@ -210,12 +216,19 @@ export async function addShipmentEvent(db: Database, user: AppUser, raw: unknown
           createdBy: user.id,
         },
         select: { id: true },
-      }),
-    );
-    return { ok: true };
+      });
+      return "ok" as const;
+    });
+    return outcome === "ok" ? { ok: true } : { ok: false, code: outcome };
   } catch (error) {
     return { ok: false, code: domainErrorCode(error) };
   }
+}
+
+/** Takes the shipment's row lock for the rest of the transaction (staff only: RLS and the update grant apply). */
+async function lockShipment(tx: Tx, shipmentId: string): Promise<boolean> {
+  const rows = await tx.$queryRaw<{ id: string }[]>`select id from public.shipments where id = ${shipmentId}::uuid for update`;
+  return rows.length === 1;
 }
 
 export async function setShipmentEventVisibility(db: Database, user: AppUser, eventId: string, visible: boolean): Promise<StaffActionResult> {
@@ -229,7 +242,7 @@ export async function setShipmentEventVisibility(db: Database, user: AppUser, ev
   }
 }
 
-export type MilestoneOutcome = "recorded" | "skipped" | "none";
+export type MilestoneOutcome = "recorded" | "published" | "skipped" | "none";
 
 /**
  * Updates status and ETA and, when asked, records the milestone matching the
@@ -254,12 +267,22 @@ export async function updateShipment(db: Database, user: AppUser, raw: unknown):
       });
       const mapping = STATUS_MILESTONES[input.status];
       if (!input.recordMilestone || !mapping || current.status === input.status) return "none";
+      // The status update above holds the shipment's row lock, so this check cannot race with another one.
       const existing = await tx.shipmentEvent.findMany({
         where: { shipmentId: input.shipmentId },
-        select: { milestoneCode: true },
+        select: { id: true, milestoneCode: true, public: true },
         orderBy: [{ occurredAt: "desc" }, { createdAt: "desc" }],
       });
-      if (isDuplicateMilestone(mapping.milestone, existing.map((e) => e.milestoneCode))) return "skipped";
+      if (isDuplicateMilestone(mapping.milestone, existing.map((e) => e.milestoneCode))) {
+        // An internal Delivered milestone already exists and staff ask for a visible one: show the
+        // existing milestone (its visibility trigger queues the one delivery email) instead of skipping.
+        const same = existing.filter((e) => e.milestoneCode === mapping.milestone);
+        if (input.milestonePublic && mapping.milestone === "DELIVERED" && !same.some((e) => e.public)) {
+          await tx.shipmentEvent.update({ where: { id: same[0].id }, data: { public: true }, select: { id: true } });
+          return "published";
+        }
+        return "skipped";
+      }
       await tx.shipmentEvent.create({
         data: { shipmentId: input.shipmentId, milestoneCode: mapping.milestone, occurredAt: new Date(), public: input.milestonePublic, createdBy: user.id },
         select: { id: true },
