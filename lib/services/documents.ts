@@ -103,7 +103,9 @@ async function queueStaffUploadAlert(db: Database, actor: string, documentId: st
       tx.$executeRaw`select public.app_enqueue_email('staff_document_uploaded', 'staff', 'documents', ${documentId}, ${`staff_document_uploaded:${documentId}`}, null, 'en'::public.app_locale, '{}'::jsonb)`,
     );
   } catch (error) {
-    console.error("[documents] staff upload alert not queued", domainErrorCode(error));
+    // The document stays stored. The id lets staff find it (runbook: docs/runbooks/find-customer-uploads.md);
+    // no file name, content or customer details are logged.
+    console.error(`[documents] staff upload alert not queued for document ${documentId}`, domainErrorCode(error));
   }
 }
 

@@ -8,8 +8,8 @@ Scope: document handling, notifications, audit logs and scheduled jobs, as appro
 
 | ID | Decision | Implementation |
 |---|---|---|
-| D1 | Maximum 4 MB per file | `lib/config/upload-limits.ts`; Server Action body limit raised to fit; form, action and service all enforce it |
-| D2 | Staff upload form, behind the existing switch | `staffUploadDocumentAction` and `StaffUploadForm`; refused on the server while `ENABLE_DOCUMENT_UPLOADS` is off |
+| D1 | Maximum 4 MB per file | `lib/config/upload-limits.ts`; uploads go to the route handler `POST /api/documents` (the Server Action limit stays at the 1 MB default); form, route and service all enforce it |
+| D2 | Staff upload form, behind the existing switch | The shared `DocumentUploadForm` on the staff quote and shipment pages, posting to `POST /api/documents`; refused on the server while `ENABLE_DOCUMENT_UPLOADS` is off, for staff and customers alike |
 | D3 | Audit shows changed field names only | Values are dropped in `lib/services/audit.ts` and never reach the page or its HTML |
 | D4 | No manual retry of DEAD emails | The notification views are read-only; a test checks the code holds no write or send path |
 
@@ -17,9 +17,9 @@ Scope: document handling, notifications, audit logs and scheduled jobs, as appro
 
 | Step | Commit subject | What it does |
 |---|---|---|
-| 1 | `fix(documents): enforce supported upload size` | Uploads used a Server Action whose body limit is 1 MB by default, so files over about 1 MB failed despite the advertised 10 MB. The limit is now **4 MiB (4,194,304 bytes)** per file; `experimental.serverActions.bodySizeLimit` is **4,456,448 bytes** (file plus 256 KiB for multipart framing), below Vercel's 4.5 MB request limit even read as 4,500,000 bytes. The form clears an oversized file before sending it; an empty submission now says "Choose a file to upload." The private bucket's own limit (10 MB) is a production storage setting and was not changed |
+| 1 | `fix(documents): enforce supported upload size` (then `fix(documents): move uploads to a dedicated route handler (S7)`) | The limit is **4 MiB (4,194,304 bytes)** per file. Uploads first went through a Server Action, whose 1 MB default body limit broke any file over about 1 MB; raising that limit project-wide (S7 in the release audit) would also have let every other action accept 4.25 MB bodies, so uploads now use the route handler `POST /api/documents` and the Server Action limit is back to the 1 MB default (`next.config.ts` is identical to production). The form clears an oversized file before sending it; an empty submission says "Choose a file to upload." The private bucket's own limit (10 MB) is a production storage setting and was not changed |
 | 2 | `feat(documents): add staff and customer views` | Documents section on the customer quote and shipment pages (own documents only, "added by you / by Marchelo Logistics") and on the staff quote and shipment pages (with the uploader: the customer, or the staff member's name). Downloads only through `/api/documents/[id]` (access re-checked, 60-second signed URL). The uploader column is not granted to API roles; it is read with the server connection only for documents the access rules already returned |
-| 3 | `feat(documents): add staff upload` | Staff upload on the staff quote and shipment pages, shown only while uploads are available. The action re-checks the role and the switch, then uses the existing document service (content type check, record must exist, private server-generated key, uploader recorded and audited) |
+| 3 | `feat(documents): add staff upload` | Staff upload on the staff quote and shipment pages, shown only while uploads are available. The upload route (since S7) re-checks sign-in and the switch, then uses the existing document service (content type check, record must exist, private server-generated key, uploader recorded and audited) |
 | 4 | `feat(audit): improve staff audit search and filtering` | Filters (record type, action, staff member or "System", Irish-time date range), search by QR / ML / CE reference (the record and its dependants), 50 per page, staff names, links to the record (user management for admins only), changed field names only. Append-only design, triggers and staff-only RLS unchanged |
 | 5 | `feat(notifications): improve notification history` | Filters (status, template, audience), "About" links to the quote request, shipment or enquiry, pagination, readable EN/FR status labels, a shortcut to DEAD emails, and email history on the staff shipment page. Recipients, content and payloads are never selected |
 | 6 | `feat(jobs): add job health visibility` | From existing `job_runs` records when the page loads: a run unfinished after 15 minutes is flagged; no success in 36 hours gives a warning; a failed last run is a problem; red or amber banner; per-job table; recent runs. No new cron, no `pg_cron`, no paid service, no write. Also: notification reads moved under RLS, and the scrolling tables became focusable regions (accessibility) |
@@ -28,25 +28,25 @@ Scope: document handling, notifications, audit logs and scheduled jobs, as appro
 
 ## Measured upload size (real browser, local stack)
 
-| File | Request body | Overhead | Server Action limit | Vercel limit |
+| File | Request body | Overhead | Upload route limit | Vercel limit |
 |---|---|---|---|---|
-| 4,194,304 bytes (exactly 4 MiB, PDF) | **4,195,380 bytes** | 1,076 bytes | 4,456,448 bytes | 4,500,000 bytes (conservative) |
+| 4,194,304 bytes (exactly 4 MiB, PDF) | **4,194,737 bytes** | 433 bytes | 4,259,840 bytes | 4,500,000 bytes (conservative) |
 
-The file was stored and downloaded intact. A file one byte over 4 MiB is cleared by the form; placed without the form's check, it is refused by the server ("The file is larger than 4 MB."). A 5 MB body is refused by Next.js itself ("Body exceeded 4456448 limit"); Next.js 16 answers **500**, not 413, for an over-limit Server Action. On Vercel, bodies over 4.5 MB are refused by the platform before the function runs. The Vercel limit itself cannot be exercised locally; the margin is 43,552 bytes under the stricter reading.
+The file was stored and downloaded intact (byte count compared). A file one byte over 4 MiB is cleared by the form; sent anyway, the route answers 413 `TOO_LARGE`. A 5 MB or 6 MB request is refused with 413 from its declared `Content-Length` before any byte is read, and a body without a declared length is read only until it passes 4,259,840 bytes, then the stream is cancelled. **Vercel compatibility is not proven** by these local tests: Vercel's own 4.5 MB request limit and the hosted storage round trip still need the protected Preview test described in the release audit.
 
 ## Tests
 
 | Suite | Stage 5 baseline | Stage 6 |
 |---|---|---|
-| Unit and integration (Vitest, PGlite) | 286 passed | **320 passed** |
+| Unit and integration (Vitest, PGlite) | 286 passed | **330 passed** |
 | Browser (public site) | 178 passed, 4 skipped | 178 passed, 4 skipped |
 | Local Supabase | 25 passed, 3 skipped | 25 passed, 3 skipped |
-| Full stack (production build, local Supabase) | 23 passed, 1 skipped | **36 passed**, 1 skipped |
-| Typecheck, full lint, EN/FR parity, security scan, `npm run build` | pass | pass (1,396 keys each; 192 files scanned) |
+| Full stack (production build, local Supabase) | 23 passed, 1 skipped | **37 passed**, 1 skipped |
+| Typecheck, full lint, EN/FR parity, security scan, `npm run build` | pass | pass (1,397 keys each; 194 files scanned) |
 
 Skipped tests are variants for the other device (browser) and for open registration (registration is closed). No pre-existing failures occurred in these runs. The tracking rate-limit test that failed once under load in Stage 5 (a fixed one-minute window) passed.
 
-New tests: `tests/unit/upload-limits.test.ts`, `tests/unit/staff-upload-action.test.ts`, `tests/unit/job-health.test.ts`, `tests/integration/audit.test.ts`, `tests/integration/notifications.test.ts`, additions to `tests/integration/documents.test.ts`, `jobs.test.ts` and `email-previews.test.ts`, `tests/e2e-fullstack/documents.spec.ts` and `tests/e2e-fullstack/staff-supporting.spec.ts`. Uploads are switched on only in the local full-stack test environment (`playwright.fullstack.config.ts`).
+New tests: `tests/unit/upload-limits.test.ts`, `tests/unit/job-health.test.ts`, `tests/integration/upload-route.test.ts`, `tests/integration/audit.test.ts`, `tests/integration/notifications.test.ts`, additions to `tests/integration/documents.test.ts`, `jobs.test.ts` and `email-previews.test.ts`, `tests/e2e-fullstack/documents.spec.ts` and `tests/e2e-fullstack/staff-supporting.spec.ts`. Uploads are switched on only in the local full-stack test environment (`playwright.fullstack.config.ts`).
 
 ## Limitations and deferred work
 
@@ -54,10 +54,10 @@ New tests: `tests/unit/upload-limits.test.ts`, `tests/unit/staff-upload-action.t
 - **No deletion** of documents by customers or staff, no retention periods, no automatic deletion (L-03); the retention job remains a dry run.
 - **No audit export, no auditing of downloads** (a download audit would need a migration).
 - **No manual retry** of DEAD emails (D4). A DEAD email stays visible with its error.
-- **The upload alert is queued just after the upload commits**, not in the same transaction (the insert runs under the customer's RLS; the outbox function needs the server connection). If queueing fails, the document is kept and the failure is logged; the staff still see the document on the record.
+- **The upload alert is queued just after the upload commits**, not in the same transaction (the insert runs under the customer's RLS; the outbox function needs the server connection). If queueing fails, the document is kept and the server log says `[documents] staff upload alert not queued for document <id>` (no file name, content or customer details). Staff find such uploads through the audit log: [runbooks/find-customer-uploads.md](./runbooks/find-customer-uploads.md) (Record type: Document, Action: Created).
 - **Immediate email sending takes the 10 oldest due emails.** If a backlog of unsent emails exists, a new alert waits for the next action or the daily job (existing outbox behaviour; on the Hobby plan the job is daily).
 - **Job health is shown, not pushed:** it is calculated when a staff member opens the notifications page. Nobody is emailed if the cron stops entirely (that needs a scheduler outside the app; not in scope).
-- Next.js answers 500 rather than 413 for an over-limit Server Action body; only reachable by bypassing the form's size check.
+- **Upload route protections:** same-origin check (route handlers have no built-in CSRF check), sign-in, the upload switch, multipart only, declared length checked before reading, a capped read, 30 uploads per user per hour (existing `rate_limits` table, fails closed). Uploads accept PDF, JPEG and PNG identified by their first bytes; there is no virus scanning.
 
 ## Production release (separate approval)
 

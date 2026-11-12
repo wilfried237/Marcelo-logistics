@@ -184,3 +184,30 @@ describe("staff alert on customer uploads (Stage 6)", () => {
     expect((await alerts()).length).toBe(before);
   });
 });
+
+describe("upload alert queueing failure (Stage 6 observability)", () => {
+  it("keeps the document and logs its id, without the file name, when the alert cannot be queued", async () => {
+    const signature = "public.app_enqueue_email(text, text, text, text, text, text, public.app_locale, jsonb)";
+    const logged: unknown[][] = [];
+    const original = console.error;
+    console.error = (...args: unknown[]) => void logged.push(args);
+    await t.client.exec(`alter function ${signature} rename to app_enqueue_email_unavailable`);
+    try {
+      const result = await uploadDocument(db, storage, a, { ownerType: "quote_request", ownerId: requestA, fileName: "Ngozi-passport.pdf", bytes: PDF });
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      // The document is stored and listed; only the alert is missing.
+      expect((await listRecordDocuments(db, a, "quote_request", requestA)).some((d) => d.id === result.id)).toBe(true);
+      expect((await t.client.query("select 1 from public.email_deliveries where entity_id = $1", [result.id])).rows).toHaveLength(0);
+      const line = logged.map((args) => args.map(String).join(" ")).find((l) => l.includes("staff upload alert not queued"));
+      expect(line).toContain(`for document ${result.id}`);
+      expect(line).not.toMatch(/Ngozi|passport|\.pdf|@/);
+      // Recovery path for staff: the audit log lists the upload (Document / Created).
+      const audit = (await t.client.query<{ actor: string }>("select actor from public.audit_log where entity = 'documents' and action = 'documents.insert' and entity_id = $1", [result.id])).rows;
+      expect(audit).toEqual([{ actor: a.id }]);
+    } finally {
+      await t.client.exec("alter function public.app_enqueue_email_unavailable(text, text, text, text, text, text, public.app_locale, jsonb) rename to app_enqueue_email");
+      console.error = original;
+    }
+  });
+});
