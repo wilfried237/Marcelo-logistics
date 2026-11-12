@@ -16,6 +16,7 @@ export default async function PortalDocuments({ params }: { params: Promise<{ lo
   setRequestLocale(locale);
   const user = await pageUser(locale, "/portal/documents");
   const t = await getTranslations("portal.documents");
+  const tdoc = await getTranslations("documents");
   const format = await getFormatter();
   const db = getDb();
   const uploads = documentUploadsAvailable();
@@ -39,7 +40,7 @@ export default async function PortalDocuments({ params }: { params: Promise<{ lo
               <div className="min-w-0">
                 <p className="truncate font-medium">{doc.originalName}</p>
                 <p className="text-sm text-muted-foreground">
-                  {format.dateTime(new Date(doc.createdAt), { dateStyle: "medium" })} · {Math.ceil(doc.sizeBytes / 1024)} KB
+                  {format.dateTime(new Date(doc.createdAt), { dateStyle: "medium" })} · {tdoc("size", { kb: Math.max(1, Math.ceil(doc.sizeBytes / 1024)) })}
                 </p>
               </div>
               <a href={`/api/documents/${doc.id}`} className="text-sm font-medium text-primary underline-offset-4 hover:underline">

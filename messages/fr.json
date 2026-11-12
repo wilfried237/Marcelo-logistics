@@ -1793,5 +1793,17 @@
     "item11": "Déchets industriels, matières infectieuses et produits toxiques",
     "item12": "Toute autre marchandise interdite par la réglementation camerounaise ou européenne",
     "disclaimer": "Cette liste n’est pas exhaustive et ne remplace pas la réglementation douanière et de transport en vigueur. Demandez-nous avant d’emballer un article en cas de doute."
+  },
+  "documents": {
+    "title": "Documents",
+    "none": "Aucun document pour le moment.",
+    "size": "{kb} Ko",
+    "download": "Télécharger",
+    "addedByYou": "Ajouté par vous",
+    "addedByUs": "Ajouté par Marchelo Logistics",
+    "uploadedByCustomer": "Envoyé par le client",
+    "uploadedByStaff": "Envoyé par l’équipe",
+    "uploadedByStaffName": "Envoyé par {name}",
+    "allDocuments": "Tous vos documents"
   }
 }

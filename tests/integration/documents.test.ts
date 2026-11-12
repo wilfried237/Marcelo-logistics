@@ -5,7 +5,8 @@ import type { Database } from "@/lib/db/types";
 import type { AppUser } from "@/lib/auth/types";
 import { loadAppUser } from "@/lib/services/users";
 import { MAX_DOCUMENT_BYTES } from "@/lib/config/upload-limits";
-import { documentDownloadUrl, listDocuments, safeFileName, sniffMime, uploadDocument, type DocumentStorage } from "@/lib/services/documents";
+import { AuthorizationError } from "@/lib/auth/types";
+import { documentDownloadUrl, listDocuments, listRecordDocuments, listRecordDocumentsForStaff, safeFileName, sniffMime, uploadDocument, type DocumentStorage } from "@/lib/services/documents";
 
 const PDF = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37, 0x0a]);
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
@@ -117,5 +118,32 @@ describe("4 MB limit (D1, Stage 6)", () => {
     const before = storage.files.size;
     expect(await uploadDocument(db, storage, b, { ownerType: "quote_request", ownerId: requestB, fileName: "over.pdf", bytes: sized(PDF, MAX_DOCUMENT_BYTES + 1) })).toEqual({ ok: false, code: "too_large" });
     expect(storage.files.size).toBe(before);
+  });
+});
+
+describe("documents on a quote request or shipment page (Stage 6)", () => {
+  it("customers see only their own record's documents, marked as theirs; other ids give nothing", async () => {
+    const own = await listRecordDocuments(db, a, "quote_request", requestA);
+    expect(own.length).toBeGreaterThan(0);
+    expect(own.every((d) => d.addedByYou === true)).toBe(true);
+    expect(own[0]).not.toHaveProperty("storageKey");
+    expect(await listRecordDocuments(db, b, "quote_request", requestA)).toEqual([]);
+    expect(await listRecordDocuments(db, a, "quote_request", "not-a-uuid")).toEqual([]);
+    expect(await listRecordDocuments(db, a, "shipment", requestA)).toEqual([]);
+  });
+
+  it("staff see every document with who uploaded it; a staff upload shows as 'added by us' to the customer", async () => {
+    const before = await listRecordDocumentsForStaff(db, staff, "quote_request", requestA);
+    expect(before.every((d) => d.uploader?.kind === "customer" && d.uploader.name === null)).toBe(true);
+    const staffUpload = await uploadDocument(db, storage, staff, { ownerType: "quote_request", ownerId: requestA, fileName: "quotation-annex.pdf", bytes: PDF });
+    expect(staffUpload.ok).toBe(true);
+    const after = await listRecordDocumentsForStaff(db, staff, "quote_request", requestA);
+    expect(after.find((d) => d.originalName === "quotation-annex.pdf")?.uploader).toEqual({ kind: "staff", name: "Test User" });
+    const customerView = await listRecordDocuments(db, a, "quote_request", requestA);
+    expect(customerView.find((d) => d.originalName === "quotation-annex.pdf")?.addedByYou).toBe(false);
+  });
+
+  it("the staff view is staff-only", async () => {
+    await expect(listRecordDocumentsForStaff(db, a, "quote_request", requestA)).rejects.toBeInstanceOf(AuthorizationError);
   });
 });

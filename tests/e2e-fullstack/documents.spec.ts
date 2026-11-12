@@ -172,4 +172,38 @@ test.describe.serial("Stage 6 documents", () => {
     expect((await anonymous.request.get(href, { maxRedirects: 0 })).status()).toBe(401);
     await anonymous.close();
   });
+
+  test("the customer sees each record's documents on its own page; another customer sees none of them", async ({ page }) => {
+    await signIn(page, owner.email, owner.password);
+    await page.goto(`/en/portal/quotes/${fixture.requestRef}`);
+    const quoteDocs = page.locator("section", { has: page.getByRole("heading", { name: "Documents" }) });
+    await expect(quoteDocs.getByText("exactly-4mb.pdf", { exact: true })).toBeVisible();
+    await expect(quoteDocs.getByText("Added by you").first()).toBeVisible();
+    await expect(quoteDocs.getByText("photo.jpg", { exact: true })).toHaveCount(0); // attached to the shipment, not the request
+    await page.goto(`/fr/portal/shipments/${fixture.shipmentRef}`);
+    const shipmentDocs = page.locator("section", { has: page.getByRole("heading", { name: "Documents" }) });
+    await expect(shipmentDocs.getByText("photo.jpg", { exact: true })).toBeVisible();
+    await expect(shipmentDocs.getByText("Ajouté par vous").first()).toBeVisible();
+
+    await page.context().clearCookies();
+    await signIn(page, other.email, other.password);
+    expect((await page.goto(`/en/portal/quotes/${fixture.requestRef}`))?.status()).toBe(404);
+    expect((await page.goto(`/en/portal/shipments/${fixture.shipmentRef}`))?.status()).toBe(404);
+  });
+
+  test("staff see the customer's documents on the quote and shipment pages and can download them", async ({ page }) => {
+    await signIn(page, STAFF, process.env.SEED_USER_PASSWORD ?? "local-only-demo-password");
+    await page.goto(`/en/admin/quotes/${fixture.requestRef}`);
+    const quoteDocs = page.locator("section", { has: page.getByRole("heading", { name: "Documents" }) });
+    await expect(quoteDocs.getByText("exactly-4mb.pdf", { exact: true })).toBeVisible();
+    await expect(quoteDocs.getByText("Uploaded by the customer").first()).toBeVisible();
+    const href = (await quoteDocs.getByRole("link", { name: /Download.*exactly-4mb\.pdf/ }).first().getAttribute("href"))!;
+    const download = await page.request.get(href);
+    expect(download.ok()).toBe(true);
+    expect((await download.body()).byteLength).toBe(MAX_DOCUMENT_BYTES);
+    await page.goto(`/en/admin/shipments/${fixture.shipmentRef}`);
+    const shipmentDocs = page.locator("section", { has: page.getByRole("heading", { name: "Documents" }) });
+    await expect(shipmentDocs.getByText("photo.jpg", { exact: true })).toBeVisible();
+    await expect(shipmentDocs.getByText("scan.png", { exact: true })).toBeVisible();
+  });
 });

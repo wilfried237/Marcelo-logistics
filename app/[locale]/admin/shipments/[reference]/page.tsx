@@ -6,6 +6,8 @@ import { pageStaff } from "@/lib/auth/page-user";
 import { getShipmentForStaff } from "@/lib/services/shipments";
 import { AddEventForm, EventVisibilityToggle, NoteForm, UpdateShipmentForm } from "@/components/admin/admin-forms";
 import { listShipmentMessages } from "@/lib/services/cases";
+import { listRecordDocumentsForStaff } from "@/lib/services/documents";
+import { DocumentList } from "@/components/app/document-list";
 import { PageHeader } from "@/components/app/page-header";
 import { ShipmentStatusBadge } from "@/components/app/status-badge";
 import type { ShipmentStatus } from "@/lib/domain/enums";
@@ -33,6 +35,8 @@ export default async function AdminShipmentDetail({ params }: { params: Promise<
   const tcase = await getTranslations("admin.case");
   const messages = await listShipmentMessages(getDb(), user, shipment.id);
   const tsh = await getTranslations("status.shipment");
+  const tdoc = await getTranslations("documents");
+  const documents = await listRecordDocumentsForStaff(getDb(), user, "shipment", shipment.id);
   const dateTime = (d: Date | string) => format.dateTime(new Date(d), { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Dublin" });
   const statusLabel = (s: ShipmentStatus | null) => (s ? tsh(s) : "—");
   const actorLabel = (actor: string | null) =>
@@ -171,6 +175,12 @@ export default async function AdminShipmentDetail({ params }: { params: Promise<
         ) : (
           <p className="text-sm text-muted-foreground">{t("historyEmpty")}</p>
         )}
+      </section>
+      <section aria-labelledby="documents" className="rounded-xl border bg-card p-5 md:p-6">
+        <h2 id="documents" className="mb-4 text-lg font-semibold">
+          {tdoc("title")}
+        </h2>
+        <DocumentList documents={documents} audience="staff" />
       </section>
       <section aria-labelledby="case" className="rounded-xl border bg-card p-5 md:p-6">
         <h2 id="case" className="mb-4 text-lg font-semibold">

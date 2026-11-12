@@ -4,6 +4,8 @@ import { Link } from "@/i18n/navigation";
 import { getDb } from "@/lib/db/client";
 import { pageUser } from "@/lib/auth/page-user";
 import { getCustomerShipment } from "@/lib/services/shipments";
+import { listRecordDocuments } from "@/lib/services/documents";
+import { DocumentList } from "@/components/app/document-list";
 import { MilestoneTimeline } from "@/components/app/milestone-timeline";
 import { PageHeader } from "@/components/app/page-header";
 import { ShipmentStatusBadge } from "@/components/app/status-badge";
@@ -21,6 +23,8 @@ export default async function PortalShipmentDetail({ params }: { params: Promise
   const tp = await getTranslations("portal");
   const ts = await getTranslations("services");
   const tsh = await getTranslations("status.shipment");
+  const tdoc = await getTranslations("documents");
+  const documents = await listRecordDocuments(getDb(), user, "shipment", shipment.id);
   const format = await getFormatter();
   return (
     <div className="space-y-8">
@@ -68,6 +72,17 @@ export default async function PortalShipmentDetail({ params }: { params: Promise
           {tp("shipmentDetail.publicNote")} {t("timezoneNote")}
         </p>
         {shipment.events.length ? <MilestoneTimeline events={shipment.events} /> : <p className="text-muted-foreground">{t("noEvents")}</p>}
+      </section>
+      <section aria-labelledby="documents" className="space-y-3">
+        <h2 id="documents" className="text-xl font-semibold">
+          {tdoc("title")}
+        </h2>
+        <DocumentList documents={documents} audience="customer" />
+        <p className="text-sm">
+          <Link href="/portal/documents" className="font-medium text-primary underline-offset-4 hover:underline">
+            {tdoc("allDocuments")}
+          </Link>
+        </p>
       </section>
       <section aria-labelledby="issue" className="space-y-3 border-t pt-6">
         <h2 id="issue" className="text-xl font-semibold">

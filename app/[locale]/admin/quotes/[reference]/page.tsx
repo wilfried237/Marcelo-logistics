@@ -14,6 +14,8 @@ import { suggestedValidUntil } from "@/lib/domain/time";
 import { ownerConfig } from "@/config/owner";
 import { formatMinor } from "@/lib/domain/pricing";
 import { listAssignableStaff, listEmailsForRequest } from "@/lib/services/cases";
+import { listRecordDocumentsForStaff } from "@/lib/services/documents";
+import { DocumentList } from "@/components/app/document-list";
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
@@ -43,6 +45,8 @@ export default async function AdminQuoteDetail({ params }: { params: Promise<{ l
   const tcalc = await getTranslations("admin.calc");
   const staff = await listAssignableStaff(getDb(), user);
   const emails = await listEmailsForRequest(getDb(), user, request.id);
+  const tdoc = await getTranslations("documents");
+  const documents = await listRecordDocumentsForStaff(getDb(), user, "quote_request", request.id);
 
   return (
     <div className="space-y-6">
@@ -165,6 +169,9 @@ export default async function AdminQuoteDetail({ params }: { params: Promise<{ l
                 {request.customerHasAccount ? t("hasAccount") : t("noAccount")} · {request.customerLocale.toUpperCase()}
               </dd>
             </dl>
+          </Section>
+          <Section id="documents" title={tdoc("title")}>
+            <DocumentList documents={documents} audience="staff" />
           </Section>
           <Section id="workflow" title={t("workflow")}>
             <TransitionForm locale={locale} requestId={request.id} status={request.status} />

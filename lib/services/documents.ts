@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { withSystem, withUser } from "@/lib/db/context";
 import { domainErrorCode } from "@/lib/db/errors";
 import type { Database } from "@/lib/db/types";
-import type { AppUser } from "@/lib/auth/types";
+import { assertStaff, type AppUser } from "@/lib/auth/types";
 import { MAX_DOCUMENT_BYTES, type DocumentMimeType, type DocumentOwnerType } from "@/lib/domain/enums";
 
 /** Storage adapter (Supabase Storage in production, in-memory in tests). */
@@ -96,6 +96,67 @@ export async function listDocuments(db: Database, user: AppUser) {
       take: 200,
     }),
   );
+}
+
+export interface RecordDocument {
+  id: string;
+  originalName: string;
+  mime: string;
+  sizeBytes: number;
+  createdAt: Date;
+  /** Customer views: whether this customer uploaded it (otherwise the business did). */
+  addedByYou?: boolean;
+  /** Staff views: who uploaded it. */
+  uploader?: { kind: "customer" | "staff"; name: string | null };
+}
+
+const recordDocumentSelect = { id: true, originalName: true, mime: true, sizeBytes: true, createdAt: true } as const;
+
+/** Uploader ids for documents the caller has ALREADY been shown through RLS (uploaded_by is not granted to API roles). */
+async function uploadersOf(db: Database, actor: string, ids: string[]) {
+  if (!ids.length) return new Map<string, string>();
+  const rows = await withSystem(db, actor, (tx) => tx.document.findMany({ where: { id: { in: ids } }, select: { id: true, uploadedBy: true } }));
+  return new Map(rows.map((r) => [r.id, r.uploadedBy]));
+}
+
+/**
+ * Documents attached to one quote request or shipment, as the signed-in user may
+ * see them: RLS returns a customer's own documents only (staff see all). A
+ * foreign or malformed owner id simply returns an empty list.
+ */
+export async function listRecordDocuments(db: Database, user: AppUser, ownerType: DocumentOwnerType, ownerId: string): Promise<RecordDocument[]> {
+  if (!UUID.test(ownerId)) return [];
+  const docs = await withUser(db, user.id, (tx) =>
+    tx.document.findMany({ where: { ownerType, ownerId }, select: recordDocumentSelect, orderBy: { createdAt: "desc" }, take: 100 }),
+  );
+  const uploaders = await uploadersOf(db, user.id, docs.map((d) => d.id));
+  return docs.map((d) => ({ ...d, addedByYou: uploaders.get(d.id) === user.id }));
+}
+
+/** Staff view of a record's documents, with who uploaded each one (customer, or the staff member's name). */
+export async function listRecordDocumentsForStaff(db: Database, user: AppUser, ownerType: DocumentOwnerType, ownerId: string): Promise<RecordDocument[]> {
+  assertStaff(user);
+  if (!UUID.test(ownerId)) return [];
+  const docs = await withUser(db, user.id, (tx) =>
+    tx.document.findMany({ where: { ownerType, ownerId }, select: recordDocumentSelect, orderBy: { createdAt: "desc" }, take: 100 }),
+  );
+  const uploaders = await uploadersOf(db, user.id, docs.map((d) => d.id));
+  const userIds = [...new Set(uploaders.values())];
+  const [profiles, names] = userIds.length
+    ? await withUser(db, user.id, (tx) =>
+        Promise.all([
+          tx.profile.findMany({ where: { id: { in: userIds } }, select: { id: true, role: true } }),
+          tx.customer.findMany({ where: { userId: { in: userIds } }, select: { userId: true, name: true } }),
+        ]),
+      )
+    : [[], []];
+  const roleOf = new Map(profiles.map((p) => [p.id, p.role]));
+  const nameOf = new Map(names.map((n) => [n.userId, n.name]));
+  return docs.map((d) => {
+    const by = uploaders.get(d.id);
+    const staffUpload = by ? roleOf.get(by) === "staff" || roleOf.get(by) === "admin" : false;
+    return { ...d, uploader: { kind: staffUpload ? "staff" : "customer", name: staffUpload && by ? (nameOf.get(by) ?? null) : null } };
+  });
 }
 
 /**

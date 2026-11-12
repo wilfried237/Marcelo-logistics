@@ -1793,5 +1793,17 @@
     "item11": "Industrial waste, infectious materials and toxic products",
     "item12": "Any other goods prohibited by Cameroonian or EU regulations",
     "disclaimer": "This list is not exhaustive and does not replace current customs and transport regulations. Ask us before packing anything you are unsure about."
+  },
+  "documents": {
+    "title": "Documents",
+    "none": "No documents yet.",
+    "size": "{kb} KB",
+    "download": "Download",
+    "addedByYou": "Added by you",
+    "addedByUs": "Added by Marchelo Logistics",
+    "uploadedByCustomer": "Uploaded by the customer",
+    "uploadedByStaff": "Uploaded by staff",
+    "uploadedByStaffName": "Uploaded by {name}",
+    "allDocuments": "All your documents"
   }
 }

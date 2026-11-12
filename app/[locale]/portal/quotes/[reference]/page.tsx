@@ -5,6 +5,8 @@ import { getDb } from "@/lib/db/client";
 import { pageUser } from "@/lib/auth/page-user";
 import { formatMoney } from "@/lib/domain/money";
 import { getCustomerQuoteRequest } from "@/lib/services/quote-requests";
+import { listRecordDocuments } from "@/lib/services/documents";
+import { DocumentList } from "@/components/app/document-list";
 import { Alert } from "@/components/app/alert";
 import { PageHeader } from "@/components/app/page-header";
 import { ItemsList } from "@/components/app/record-lists";
@@ -27,6 +29,8 @@ export default async function PortalQuoteDetail({ params }: { params: Promise<{ 
   const tc = await getTranslations("common");
   const format = await getFormatter();
   const tv = await getTranslations("quoteView");
+  const tdoc = await getTranslations("documents");
+  const documents = await listRecordDocuments(getDb(), user, "quote_request", request.id);
   const current = request.quotes[0];
   const stillValid = current && new Date(current.validUntil) > new Date();
 
@@ -108,6 +112,18 @@ export default async function PortalQuoteDetail({ params }: { params: Promise<{ 
         )}
         <p className="text-xs text-muted-foreground">
           {tc("created")}: {format.dateTime(new Date(request.createdAt), { dateStyle: "medium", timeStyle: "short" })}
+        </p>
+      </section>
+
+      <section aria-labelledby="documents" className="space-y-3">
+        <h2 id="documents" className="text-xl font-semibold">
+          {tdoc("title")}
+        </h2>
+        <DocumentList documents={documents} audience="customer" />
+        <p className="text-sm">
+          <Link href="/portal/documents" className="font-medium text-primary underline-offset-4 hover:underline">
+            {tdoc("allDocuments")}
+          </Link>
         </p>
       </section>
     </div>
