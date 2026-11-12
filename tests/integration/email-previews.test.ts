@@ -27,7 +27,7 @@ const CUSTOMER_TEMPLATES = [
 ];
 const STAFF_TEMPLATES = [
   "staff_new_request", "staff_customer_message", "staff_quote_accepted", "staff_quote_declined", "staff_shipment_exception",
-  "staff_contact", "staff_role_changed", "staff_email_failure", "staff_job_failure",
+  "staff_contact", "staff_role_changed", "staff_email_failure", "staff_job_failure", "staff_document_uploaded",
 ];
 
 let t: TestDb;
@@ -103,6 +103,9 @@ beforeAll(async () => {
   await submitContactEnquiry(db, { name: longName, email: "contact.preview@example.test", topic: "shipment", relatedReference: sh.data!.reference, message: "When will my barrels arrive in Yaoundé?", locale: "fr", idempotencyKey: randomUUID(), privacyAccepted: true }, randomUUID());
   await setUserRole(db, admin, s.id, "admin");
   await t.client.query(`select public.app_enqueue_email('staff_email_failure', 'staff', 'email_deliveries', 'x', 'preview-failure', null, 'en', '{"template":"quote_issued","status":"BOUNCED","reference":"QRABCDEF"}'::jsonb)`);
+  // Stage 6: a customer document on the shipment (inserted directly; the upload service is tested in documents.test.ts).
+  const [doc] = (await t.client.query<{ id: string }>("insert into public.documents (owner_type, owner_id, storage_key, original_name, mime, size_bytes, uploaded_by) values ('shipment', $1, 'preview/key.pdf', 'private-name.pdf', 'application/pdf', 245760, $2) returning id", [shipmentId, s.id])).rows;
+  await t.client.query("select public.app_enqueue_email('staff_document_uploaded', 'staff', 'documents', $1, $2, null, 'en', '{}')", [doc.id, `staff_document_uploaded:${doc.id}`]);
   await runJob(db, "preview-job", async () => Promise.reject(new Error("database timeout"))).catch(() => undefined);
 }, 120_000);
 afterAll(async () => {

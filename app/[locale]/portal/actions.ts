@@ -76,6 +76,7 @@ export async function uploadDocumentAction(_prev: ActionState, formData: FormDat
   const bytes = new Uint8Array(await file.arrayBuffer());
   const result = await uploadDocument(getDb(), supabaseDocumentStorage(), user, { ownerType, ownerId, fileName: file.name, bytes });
   if (!result.ok) return { status: "error", message: t(`errors.${result.code}`, max) };
+  deliverQueuedEmailsSoon(); // the staff upload alert (Stage 6)
   revalidatePath(`/${l}/portal/documents`);
   return { status: "ok", message: t("uploaded") };
 }

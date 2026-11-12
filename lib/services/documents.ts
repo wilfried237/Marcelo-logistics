@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { withSystem, withUser } from "@/lib/db/context";
 import { domainErrorCode } from "@/lib/db/errors";
 import type { Database } from "@/lib/db/types";
-import { assertStaff, type AppUser } from "@/lib/auth/types";
+import { assertStaff, isStaff, type AppUser } from "@/lib/auth/types";
 import { MAX_DOCUMENT_BYTES, type DocumentMimeType, type DocumentOwnerType } from "@/lib/domain/enums";
 
 /** Storage adapter (Supabase Storage in production, in-memory in tests). */
@@ -79,12 +79,31 @@ export async function uploadDocument(
         select: { id: true },
       }),
     );
+    if (!isStaff(user)) await queueStaffUploadAlert(db, user.id, row.id);
     return { ok: true, id: row.id };
   } catch (error) {
     // Never leave an orphaned private file behind.
     await storage.remove(key).catch(() => undefined);
     console.error("document metadata insert failed", domainErrorCode(error));
     return { ok: false, code: "generic" };
+  }
+}
+
+/**
+ * Stage 6: one staff alert per customer upload (outbox key per document, so a
+ * repeat can never queue a second one). Uploads only happen while
+ * ENABLE_DOCUMENT_UPLOADS is on, so the alert is behind the same switch. The
+ * alert carries no file name or content (rendered from the document record:
+ * reference, type and size only). It is queued right after the upload commits;
+ * if queueing fails the document is kept and the failure is logged.
+ */
+async function queueStaffUploadAlert(db: Database, actor: string, documentId: string) {
+  try {
+    await withSystem(db, actor, (tx) =>
+      tx.$executeRaw`select public.app_enqueue_email('staff_document_uploaded', 'staff', 'documents', ${documentId}, ${`staff_document_uploaded:${documentId}`}, null, 'en'::public.app_locale, '{}'::jsonb)`,
+    );
+  } catch (error) {
+    console.error("[documents] staff upload alert not queued", domainErrorCode(error));
   }
 }
 

@@ -1130,6 +1130,12 @@
         "heading": "A scheduled job failed",
         "body": "The job \"{job}\" failed: {error}",
         "action": "Check the job runs and the server logs."
+      },
+      "staff_document_uploaded": {
+        "subject": "Nouveau document sur {reference}",
+        "heading": "Un client a envoyé un document",
+        "body": "Le client a joint un fichier {type} ({size}) à {reference}.",
+        "action": "Ouvrez le dossier pour consulter le document."
       }
     }
   },

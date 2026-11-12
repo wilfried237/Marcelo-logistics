@@ -1,7 +1,7 @@
 import { expect, test, type Page, type Request } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
-import { createLocalShipment, resetLocalLoginLimits } from "./local-db";
+import { createLocalShipment, localQuery, resetLocalLoginLimits } from "./local-db";
 import { MAX_DOCUMENT_BYTES, SERVER_ACTION_BODY_LIMIT_BYTES, VERCEL_REQUEST_BODY_LIMIT_BYTES } from "../../lib/config/upload-limits";
 
 /*
@@ -224,5 +224,32 @@ test.describe.serial("Stage 6 documents", () => {
     const mine = page.locator("section", { has: page.getByRole("heading", { name: "Documents" }) });
     await expect(mine.getByText("delivery-note.pdf", { exact: true })).toBeVisible();
     await expect(mine.getByText("Added by Marchelo Logistics")).toBeVisible();
+  });
+
+  test("each customer upload queued exactly one staff alert, sent through the email provider; the staff upload queued none", async ({ request }) => {
+    type Row = { original_name: string; uploaded_by: string; alerts: number; statuses: string[] };
+    const rows = await localQuery<Row>(
+      `select d.original_name, d.uploaded_by::text,
+              (select count(*)::int from public.email_deliveries e where e.template = 'staff_document_uploaded' and e.entity_id = d.id::text) as alerts,
+              (select array_agg(e.status::text) from public.email_deliveries e where e.template = 'staff_document_uploaded' and e.entity_id = d.id::text) as statuses
+         from public.documents d join public.customers c on c.id = d.customer_id
+        where c.user_id = $1`,
+      [owner.id],
+    );
+    const byName = Object.fromEntries(rows.map((r) => [r.original_name, r]));
+    for (const name of ["exactly-4mb.pdf", "photo.jpg", "scan.png"]) expect(byName[name]?.alerts, name).toBe(1);
+    expect(byName["delivery-note.pdf"]?.alerts).toBe(0);
+    // Sent through the (local mock) provider. The immediate send after an upload takes the 10 oldest due emails,
+    // and earlier local suites leave unsent rows behind, so the authenticated email job drains the queue here.
+    const sent = async () =>
+      (await localQuery<{ n: number }>("select count(*)::int n from public.email_deliveries e join public.documents d on d.id::text = e.entity_id join public.customers c on c.id = d.customer_id where e.template = 'staff_document_uploaded' and c.user_id = $1 and e.status = 'SENT'", [owner.id]))[0].n;
+    for (let i = 0; i < 10 && (await sent()) < 3; i++) {
+      const run = await request.get("/api/cron/process-emails", { headers: { authorization: "Bearer journeys-local-cron-secret-0123456789abcdef" /* local test secret, as in journeys.spec.ts */ } });
+      expect(run.status()).toBe(200);
+    }
+    expect(await sent()).toBe(3);
+    // The alert never carries the file name.
+    const subjects = await localQuery<{ n: number }>("select count(*)::int n from public.email_deliveries where template = 'staff_document_uploaded' and payload::text like '%.pdf%'");
+    expect(subjects[0].n).toBe(0);
   });
 });

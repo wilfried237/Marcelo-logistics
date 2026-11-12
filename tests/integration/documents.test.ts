@@ -5,6 +5,7 @@ import type { Database } from "@/lib/db/types";
 import type { AppUser } from "@/lib/auth/types";
 import { loadAppUser } from "@/lib/services/users";
 import { MAX_DOCUMENT_BYTES } from "@/lib/config/upload-limits";
+import { renderOutboxEmail } from "@/lib/email/render";
 import { AuthorizationError } from "@/lib/auth/types";
 import { documentDownloadUrl, listDocuments, listRecordDocuments, listRecordDocumentsForStaff, safeFileName, sniffMime, uploadDocument, type DocumentStorage } from "@/lib/services/documents";
 
@@ -145,5 +146,41 @@ describe("documents on a quote request or shipment page (Stage 6)", () => {
 
   it("the staff view is staff-only", async () => {
     await expect(listRecordDocumentsForStaff(db, a, "quote_request", requestA)).rejects.toBeInstanceOf(AuthorizationError);
+  });
+});
+
+describe("staff alert on customer uploads (Stage 6)", () => {
+  const alerts = async (documentId?: string) =>
+    (
+      await t.client.query<{ entity_id: string; audience: string; recipient: string | null; locale: string; payload: unknown }>(
+        `select entity_id, audience, recipient, locale::text, payload from public.email_deliveries where template = 'staff_document_uploaded'${documentId ? " and entity_id = $1" : ""}`,
+        documentId ? [documentId] : [],
+      )
+    ).rows;
+
+  it("a customer upload queues exactly one staff-only alert, without the file name", async () => {
+    const result = await uploadDocument(db, storage, a, { ownerType: "quote_request", ownerId: requestA, fileName: "passport-scan-Ngozi.pdf", bytes: PDF });
+    if (!result.ok) throw new Error(result.code);
+    expect(await alerts(result.id)).toEqual([{ entity_id: result.id, audience: "staff", recipient: null, locale: "en", payload: {} }]);
+    // Queueing it again is ignored (one outbox key per document).
+    await t.client.query("select public.app_enqueue_email('staff_document_uploaded', 'staff', 'documents', $1, $2, null, 'en', '{}')", [result.id, `staff_document_uploaded:${result.id}`]);
+    expect(await alerts(result.id)).toHaveLength(1);
+    const [row] = (await t.client.query<{ id: string; template: string; audience: "staff"; recipient: null; locale: "en"; entity: string; entity_id: string; payload: Record<string, unknown> }>(
+      "select id, template, audience, recipient, locale::text as locale, entity, entity_id, payload from public.email_deliveries where template = 'staff_document_uploaded' and entity_id = $1",
+      [result.id],
+    )).rows;
+    const rendered = await renderOutboxEmail(db, { id: row.id, template: row.template, audience: "staff", recipient: null, locale: "en", entity: row.entity, entityId: row.entity_id, payload: row.payload });
+    if ("skip" in rendered) throw new Error(rendered.skip);
+    expect(rendered.subject).toBe("New document on QRDOCAAA");
+    expect(JSON.stringify(rendered.props)).toContain("PDF file (1 KB)");
+    expect(JSON.stringify(rendered.props)).not.toContain("passport-scan");
+  });
+
+  it("staff uploads and refused uploads queue no alert", async () => {
+    const before = (await alerts()).length;
+    expect((await uploadDocument(db, storage, staff, { ownerType: "quote_request", ownerId: requestA, fileName: "staff.pdf", bytes: PDF })).ok).toBe(true);
+    expect((await uploadDocument(db, storage, a, { ownerType: "quote_request", ownerId: requestA, fileName: "x.exe", bytes: EXE })).ok).toBe(false);
+    expect((await uploadDocument(db, storage, a, { ownerType: "quote_request", ownerId: requestB, fileName: "x.pdf", bytes: PDF })).ok).toBe(false);
+    expect((await alerts()).length).toBe(before);
   });
 });

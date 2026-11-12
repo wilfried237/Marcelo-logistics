@@ -291,6 +291,23 @@ export async function renderOutboxEmail(db: Database, row: OutboxRow): Promise<R
         [when(new Date())],
         `${site}/en/admin/notifications`,
       );
+    case "staff_document_uploaded": {
+      // Reference, file type and size only: never the file name or its content.
+      const doc = await db.document.findUnique({ where: { id: row.entityId }, select: { ownerType: true, ownerId: true, mime: true, sizeBytes: true, createdAt: true } });
+      if (!doc) return { skip: "document not found" };
+      const owner =
+        doc.ownerType === "quote_request"
+          ? await db.quoteRequest.findUnique({ where: { id: doc.ownerId }, select: { reference: true, customer: { select: { name: true } } } })
+          : await db.shipment.findUnique({ where: { id: doc.ownerId }, select: { reference: true, customer: { select: { name: true } } } });
+      if (!owner) return { skip: "document owner not found" };
+      const type = ({ "application/pdf": "PDF", "image/jpeg": "JPEG", "image/png": "PNG" } as Record<string, string>)[doc.mime] ?? doc.mime;
+      const size = `${Math.max(1, Math.ceil(doc.sizeBytes / 1024))} KB`;
+      return staff(
+        { reference: owner.reference, type, size },
+        [{ label: ts("emails.staff.common.reference"), value: owner.reference }, { label: ts("emails.staff.common.customer"), value: owner.customer.name }, when(doc.createdAt)],
+        doc.ownerType === "quote_request" ? `${site}/en/admin/quotes/${owner.reference}` : `${site}/en/admin/shipments/${owner.reference}`,
+      );
+    }
     case "staff_job_failure":
       return staff({ job: String(row.payload.job ?? "?"), error: String(row.payload.error ?? "unknown").slice(0, 300) }, [when(new Date())], `${site}/en/admin/notifications`);
     default:
